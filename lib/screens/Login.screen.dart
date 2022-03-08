@@ -47,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   onPressed: () {
                     Get.off(
-                      MyHomePage(title: "Setelah Login"),
+                      MyHomePage(title: "Asset Control"),
                     );
                   },
                   child: Text(
