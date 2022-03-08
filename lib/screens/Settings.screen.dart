@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:myasset/widgets/NavDrawer.widget.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -13,9 +12,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Screen Settings'),
+        title: const Text('Settings'),
       ),
-      drawer: NavDrawerWidget(),
       body: Column(),
     );
   }

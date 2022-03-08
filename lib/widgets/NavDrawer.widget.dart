@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class NavDrawerWidget extends StatelessWidget {
   @override
@@ -19,42 +20,42 @@ class NavDrawerWidget extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.shopping_bag),
             title: Text('Stock Opname'),
-            onTap: () => {},
+            onTap: () => {Get.toNamed('/stockopname')},
           ),
           ListTile(
             leading: Icon(Icons.inbox),
             title: Text('Transfer In'),
-            onTap: () => {Navigator.of(context).pop()},
+            onTap: () => {Get.toNamed('/transferin')},
           ),
           ListTile(
             leading: Icon(Icons.outbox),
             title: Text('Transfer Out'),
-            onTap: () => {Navigator.of(context).pop()},
+            onTap: () => {Get.toNamed('/transferout')},
           ),
           ListTile(
             leading: Icon(Icons.download),
             title: Text('Download'),
-            onTap: () => {Navigator.of(context).pop()},
+            onTap: () => {Get.toNamed('/download')},
           ),
           ListTile(
             leading: Icon(Icons.file_upload_outlined),
             title: Text('Upload'),
-            onTap: () => {Navigator.of(context).pop()},
+            onTap: () => {Get.toNamed('/upload')},
           ),
           ListTile(
             leading: Icon(Icons.delete),
             title: Text('Clear Data'),
-            onTap: () => {Navigator.of(context).pop()},
+            onTap: () => {Get.toNamed('/clear')},
           ),
           ListTile(
             leading: Icon(Icons.settings),
             title: Text('Settings'),
-            onTap: () => {Navigator.of(context).pop()},
+            onTap: () => {Get.toNamed('/settings')},
           ),
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
-            onTap: () => {Navigator.of(context).pop()},
+            onTap: () => {Get.offAllNamed('/login')},
           ),
         ],
       ),
