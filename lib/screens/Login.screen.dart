@@ -69,7 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 62, vertical: 10),
               child: const TextField(
@@ -87,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
               
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 62, vertical: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 62, vertical: 10),
               child: Container(
                 height: 60,
                 width: 600,
