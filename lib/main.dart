@@ -7,6 +7,7 @@ import 'package:myasset/screens/MyApp.screen.dart';
 import 'package:myasset/screens/Scan.screen.dart';
 import 'package:myasset/screens/Settings.screen.dart';
 import 'package:myasset/screens/StockOpname.screen.dart';
+import 'package:myasset/screens/Table.screen.dart';
 import 'package:myasset/screens/TransferIn.screen.dart';
 import 'package:myasset/screens/TransferOut.screen.dart';
 import 'package:myasset/screens/Upload.screen.dart';
@@ -24,6 +25,10 @@ void main() {
         GetPage(
           name: '/login',
           page: () => LoginScreen(),
+        ),
+        GetPage(
+          name: '/table',
+          page: () => DataPage(),
         ),
         GetPage(
           name: '/stockopname',
