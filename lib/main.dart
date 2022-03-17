@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myasset/screens/Clear.screen.dart';
 import 'package:myasset/screens/Download.screen.dart';
+import 'package:myasset/screens/HomePage.screen.dart';
 import 'package:myasset/screens/Login.screen.dart';
 import 'package:myasset/screens/MyApp.screen.dart';
 import 'package:myasset/screens/Settings.screen.dart';
@@ -19,6 +20,10 @@ void main() async {
         GetPage(
           name: '/',
           page: () => MyApp(),
+        ),
+        GetPage(
+          name: '/home',
+          page: () => MyHomePage(title: "Asset Control"),
         ),
         GetPage(
           name: '/login',

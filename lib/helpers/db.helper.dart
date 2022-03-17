@@ -1,21 +1,12 @@
 import 'dart:io';
 
 import 'package:myasset/models/contact.model.dart';
+import 'package:myasset/models/user.model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DbHelper {
-  late DbHelper _dbHelper;
   late Database _database;
-
-  DbHelper._createObject();
-
-  DbHelper() {
-    if (_dbHelper == null) {
-      _dbHelper = DbHelper._createObject();
-    }
-    // return _dbHelper;
-  }
 
   Future<Database> initDb() async {
     //untuk menentukan nama database dan lokasi yg dibuat
@@ -203,48 +194,53 @@ class DbHelper {
     ''');
   }
 
-  Future<Database> get database async {
-    if (_database == null) {
-      _database = await initDb();
-    }
-    return _database;
+  Future<void> initUser(User user) async {
+    Database db = await initDb();
+    await db.insert(
+      'users',
+      user.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
-  Future<List<Map<String, dynamic>>> select() async {
-    Database db = await this.database;
-    var mapList = await db.query('contact', orderBy: 'name');
-    return mapList;
+  Future<List<User>> selectUser() async {
+    Database db = await initDb();
+    final List<Map<String, dynamic>> maps =
+        await db.query('users', orderBy: 'realName');
+    return List.generate(maps.length, (i) {
+      return User.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<Contact>> select() async {
+    Database db = await initDb();
+    final List<Map<String, dynamic>> maps =
+        await db.query('contact', orderBy: 'name');
+    print(maps);
+    return List.generate(maps.length, (index) {
+      return Contact(maps[index]['name'], maps[index]['phone']);
+    });
   }
 
 //create databases
   Future<int> insert(Contact object) async {
-    Database db = await this.database;
+    Database db = await initDb();
     int count = await db.insert('contact', object.toMap());
     return count;
   }
 
 //update databases
   Future<int> update(Contact object) async {
-    Database db = await this.database;
+    Database db = await initDb();
     int count = await db.update('contact', object.toMap(),
         where: 'id=?', whereArgs: [object.id]);
     return count;
   }
 
 //delete databases
-  Future<int> delete(int id) async {
-    Database db = await this.database;
-    int count = await db.delete('contact', where: 'id=?', whereArgs: [id]);
+  Future<int> delete(String tableName, int id) async {
+    Database db = await initDb();
+    int count = await db.delete(tableName, where: 'id=?', whereArgs: [id]);
     return count;
-  }
-
-  Future<List<Contact>> getContactList() async {
-    var contactMapList = await select();
-    int count = contactMapList.length;
-    List<Contact> contactList = <Contact>[];
-    for (int i = 0; i < count; i++) {
-      contactList.add(Contact.fromMap(contactMapList[i]));
-    }
-    return contactList;
   }
 }

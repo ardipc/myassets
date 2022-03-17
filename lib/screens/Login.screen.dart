@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myasset/controllers/Login.controller.dart';
+import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/HomePage.screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -10,6 +12,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  LoginController loginController = Get.put(LoginController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,71 +23,71 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
-                child: Image(
-                  image: AssetImage("assets/images/sariroti.png"),
-                  fit: BoxFit.fill,
-                  width: 280,
-                  height: 300,
-                ),
+              child: Image(
+                image: AssetImage("assets/images/sariroti.png"),
+                fit: BoxFit.fill,
+                width: 280,
+                height: 300,
+              ),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 27), //apply padding horizontal or vertical only
-              child: Text("Fixed Assets Control System\nLogin Form", 
-              textAlign: TextAlign.center,
+              padding: EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 27), //apply padding horizontal or vertical only
+              child: Text(
+                "Fixed Assets Control System\nLogin Form",
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Color.fromRGBO(255, 234, 169, 1),
                   fontSize: 30,
                   shadows: [
-                        Shadow( // bottomLeft
-                    offset: Offset(-1.2, -1.2),
-                    color: Color.fromRGBO(242, 159, 5, 1)
-                        ),
-                        Shadow( // bottomRight
-                    offset: Offset(1.2, -1.2),
-                    color: Color.fromRGBO(242, 159, 5, 1)
-                        ),
-                        Shadow( // topRight
-                    offset: Offset(1.2, 1.2),
-                    color: Color.fromRGBO(242, 159, 5, 1)
-                        ),
-                        Shadow( // topLeft
-                    offset: Offset(-1.2, 1.2),
-                    color: Color.fromRGBO(242, 159, 5, 1)
-                        ),
-                    ],
+                    Shadow(
+                        // bottomLeft
+                        offset: Offset(-1.2, -1.2),
+                        color: Color.fromRGBO(242, 159, 5, 1)),
+                    Shadow(
+                        // bottomRight
+                        offset: Offset(1.2, -1.2),
+                        color: Color.fromRGBO(242, 159, 5, 1)),
+                    Shadow(
+                        // topRight
+                        offset: Offset(1.2, 1.2),
+                        color: Color.fromRGBO(242, 159, 5, 1)),
+                    Shadow(
+                        // topLeft
+                        offset: Offset(-1.2, 1.2),
+                        color: Color.fromRGBO(242, 159, 5, 1)),
+                  ],
                 ),
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 62),
-              child: const TextField(
+              child: TextField(
+                controller: loginController.username,
                 decoration: InputDecoration(
                   fillColor: Colors.white,
                   filled: true,
                   border: OutlineInputBorder(),
-                  labelText: 'Username', 
-                  labelStyle: TextStyle(
-                      color: Colors.black 
-                    ),
+                  labelText: 'Username',
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 62, vertical: 10),
-              child: const TextField(
+              child: TextField(
+                controller: loginController.password,
                 obscureText: true,
                 decoration: InputDecoration(
                   fillColor: Colors.white,
                   filled: true,
                   border: OutlineInputBorder(),
                   labelText: 'Password',
-                  labelStyle: TextStyle(
-                    color: Colors.black
-                  ),
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
               ),
-              
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 62, vertical: 10),
@@ -95,9 +99,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     backgroundColor: Color.fromARGB(255, 62, 81, 255),
                   ),
                   onPressed: () {
-                    Get.off(
-                      MyHomePage(title: "Asset Control"),
-                    );
+                    // Get.off(
+                    //   MyHomePage(title: "Asset Control"),
+                    // );
+                    loginController.actionLogin();
                   },
                   child: Text(
                     "LOGIN",
