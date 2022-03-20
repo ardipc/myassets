@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:myasset/helpers/db.helper.dart';
+import 'package:myasset/models/user.model.dart';
 
 class LoginController extends GetxController {
   DbHelper dbHelper = DbHelper();
@@ -26,9 +27,15 @@ class LoginController extends GetxController {
 
   void actionLogin() async {
     if (username.text == "admin" && password.text == "123") {
-      Get.toNamed('/settings');
+      Get.offNamed('/settings');
     } else {
-      Get.offNamed('/home');
+      List<User> users =
+          await dbHelper.selectUserToLogin(username.text, password.text);
+      if (users.isEmpty) {
+        Get.snackbar("Message", "Username and password not found!");
+      } else {
+        Get.offNamed('/home');
+      }
     }
   }
 }

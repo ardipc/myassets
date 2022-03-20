@@ -5,6 +5,7 @@ import 'package:myasset/screens/Download.screen.dart';
 import 'package:myasset/screens/HomePage.screen.dart';
 import 'package:myasset/screens/Login.screen.dart';
 import 'package:myasset/screens/MyApp.screen.dart';
+import 'package:myasset/screens/Register.screen.dart';
 import 'package:myasset/screens/Settings.screen.dart';
 import 'package:myasset/screens/StockOpname.screen.dart';
 import 'package:myasset/screens/TransferIn.screen.dart';
@@ -28,6 +29,10 @@ void main() async {
         GetPage(
           name: '/login',
           page: () => LoginScreen(),
+        ),
+        GetPage(
+          name: '/register',
+          page: () => RegisterScreen(),
         ),
         GetPage(
           name: '/stockopname',

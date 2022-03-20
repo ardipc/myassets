@@ -26,7 +26,7 @@ class User {
   );
 
   User.fromMap(Map<String, dynamic> map) {
-    userId = map['userId'];
+    this.userId = map['userId'];
     this.username = map['username'];
     this.password = map['password'];
     this.empNo = map['empNo'];

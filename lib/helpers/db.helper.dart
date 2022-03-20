@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:myasset/models/contact.model.dart';
+import 'package:myasset/models/preferences.model.dart';
 import 'package:myasset/models/user.model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -194,6 +195,23 @@ class DbHelper {
     ''');
   }
 
+  Future<List<Preferences>> initApp() async {
+    Database db = await initDb();
+    final List<Map<String, dynamic>> maps = await db.query('preferences');
+    return List.generate(maps.length, (index) {
+      return Preferences.fromMap(maps[index]);
+    });
+  }
+
+  Future<void> initPref(Preferences pref) async {
+    Database db = await initDb();
+    await db.insert(
+      'preferences',
+      pref.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<void> initUser(User user) async {
     Database db = await initDb();
     await db.insert(
@@ -201,6 +219,19 @@ class DbHelper {
       user.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+  }
+
+  Future<List<User>> selectUserToLogin(String username, String password) async {
+    Database db = await initDb();
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: "username = ? AND password = ?",
+      whereArgs: [username, password],
+      orderBy: 'realName',
+    );
+    return List.generate(maps.length, (i) {
+      return User.fromMap(maps[i]);
+    });
   }
 
   Future<List<User>> selectUser() async {
