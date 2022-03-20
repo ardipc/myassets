@@ -14,7 +14,9 @@ class _UploadScreen extends State<UploadScreen> {
       appBar: AppBar(
         title: const Text('Upload'),
       ),
-      body: Column(),
+      body: Center(
+        child: ElevatedButton(onPressed: () {}, child: Text("Start Upload")),
+      ),
     );
   }
 }

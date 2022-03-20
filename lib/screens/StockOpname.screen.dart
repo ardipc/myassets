@@ -20,7 +20,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(14.0),
             child: Row(
               children: [
                 const Text("Period"),
@@ -28,7 +28,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                   width: 40,
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: DropdownButton(
                     isExpanded: true,
                     hint: const Text("Select Period"),

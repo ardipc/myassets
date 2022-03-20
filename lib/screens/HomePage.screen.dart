@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myasset/screens/Clear.screen.dart';
 import 'package:myasset/screens/Login.screen.dart';
 import 'package:myasset/screens/Scan.screen.dart';
 import 'package:myasset/screens/Settings.screen.dart';
@@ -45,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 print('click me');
                 Get.to(
-                  SettingsScreen(),
+                  ClearScreen(),
                 );
               },
               child: Text("Click Me"),

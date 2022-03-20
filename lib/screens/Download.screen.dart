@@ -14,7 +14,9 @@ class _DownloadScreen extends State<DownloadScreen> {
       appBar: AppBar(
         title: const Text('Download'),
       ),
-      body: Column(),
+      body: Center(
+        child: ElevatedButton(onPressed: () {}, child: Text("Start Download")),
+      ),
     );
   }
 }
