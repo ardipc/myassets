@@ -14,7 +14,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: new Card(
+      body: Card(
         elevation: 4,
         margin: EdgeInsets.all(20),
         shape: OutlineInputBorder(
@@ -22,14 +22,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           borderSide: BorderSide(color: Colors.grey, width: 1),
         ),
         color: Colors.white70,
-        child: new Container(
+        child: Container(
           padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
-          child: new Column(
+          child: Column(
             children: <Widget>[
-              new Row(
+              Row(
                 children: <Widget>[
-                  new Text("API Address     :  "),
-                  new Expanded(
+                  Text("API Address     :  "),
+                  Expanded(
                       child: new TextField(
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 10),

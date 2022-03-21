@@ -10,6 +10,7 @@ import 'package:myasset/screens/Otp.screen.dart';
 import 'package:myasset/screens/Register.screen.dart';
 import 'package:myasset/screens/Settings.screen.dart';
 import 'package:myasset/screens/StockOpname.screen.dart';
+import 'package:myasset/screens/Table.screen.dart';
 import 'package:myasset/screens/TransferIn.screen.dart';
 import 'package:myasset/screens/TransferOut.screen.dart';
 import 'package:myasset/screens/Upload.screen.dart';
@@ -48,6 +49,10 @@ void main() async {
         GetPage(
           name: '/otp',
           page: () => OtpScreen(),
+        ),
+        GetPage(
+          name: '/table',
+          page: () => DataPage(),
         ),
         GetPage(
           name: '/stockopname',
