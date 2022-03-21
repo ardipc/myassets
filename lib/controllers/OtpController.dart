@@ -29,7 +29,7 @@ class OtpController extends GetxController {
     Database db = await dbHelper.initDb();
 
     Preferences obj = Preferences(1, "true", args[0], args[1], "-", "-", 0, "-",
-        "-", 0, "-", 0, "-", 0, 0);
+        "-", 0, "-", 0, 0, "-", 0, 0);
 
     // print(obj.toMap());
 

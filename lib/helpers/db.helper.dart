@@ -45,6 +45,7 @@ class DbHelper {
         intransitName TEXT,
         plantId INTEGER,
         plantName TEXT,
+        roleId INTEGER,
         userId INTEGER,
         token TEXT,
         isOnline INTEGER,

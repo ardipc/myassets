@@ -22,11 +22,12 @@ void main() async {
   DbHelper dbHelper = DbHelper();
   Database db = await dbHelper.initDb();
   List<Map<String, dynamic>> maps = await db.query("preferences");
+  print(maps.toList());
 
   runApp(
     GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: maps.length == 1
+      home: maps.length == 1 && maps[0]['userId'] != 0
           ? const MyHomePage(title: "Asset Control")
           : const MyApp(),
       getPages: [

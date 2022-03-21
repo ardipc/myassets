@@ -12,6 +12,7 @@ class Preferences {
   late String intransitName;
   late int plantId;
   late String plantName;
+  late int roleId;
   late int userId;
   late String token;
   late int isOnline;
@@ -29,6 +30,7 @@ class Preferences {
     this.intransitName,
     this.plantId,
     this.plantName,
+    this.roleId,
     this.userId,
     this.token,
     this.isOnline,
@@ -48,6 +50,7 @@ class Preferences {
       'intransitName': intransitName,
       'plantId': plantId,
       'plantName': plantName,
+      'roleId': roleId,
       'userId': userId,
       'token': token,
       'isOnline': isOnline,
@@ -67,6 +70,7 @@ class Preferences {
     intransitName = map['intransitName'];
     plantId = map['plantId'];
     plantName = map['plantName'];
+    roleId = map['roleId'];
     userId = map['userId'];
     token = map['token'];
     isOnline = map['isOnline'];

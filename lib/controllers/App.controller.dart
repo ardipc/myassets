@@ -1,10 +1,11 @@
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/models/preferences.model.dart';
 
-class AppController extends GetxController with StateMixin {
+class AppController extends GetxController {
   DbHelper dbHelper = DbHelper();
+
+  late List<Preferences> prefs = <Preferences>[];
 
   @override
   void onInit() {
@@ -20,15 +21,6 @@ class AppController extends GetxController with StateMixin {
   }
 
   void checkLogin() async {
-    final List<Preferences> pref = await dbHelper.initApp();
-    if (pref[0].registered == "false") {
-      Get.offNamed('/register');
-    } else {
-      if (pref[0].locationId != 0) {
-        Get.offNamed('/home');
-      } else {
-        Get.offNamed('/login');
-      }
-    }
+    prefs = await dbHelper.initApp();
   }
 }

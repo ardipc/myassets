@@ -14,12 +14,15 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   AppController appController = Get.put(AppController());
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return appController.obx(
-      (state) => RegisterScreen(),
-      onLoading: CircularProgressIndicator(),
-    );
+    print('MyApp');
+    print(appController.prefs[0].toMap());
+
+    if (appController.prefs.length == 0) {
+      return RegisterScreen();
+    } else {
+      return LoginScreen();
+    }
   }
 }

@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myasset/controllers/Home.controller.dart';
 
 class NavDrawerWidget extends StatelessWidget {
+  HomeController homeController = Get.put(HomeController());
+
   @override
   Widget build(BuildContext context) {
+    print("Drawer");
+    print(homeController.prefs[0].toMap());
+    print(homeController.user!.realName);
+    print("Drawer");
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          const UserAccountsDrawerHeader(
+          UserAccountsDrawerHeader(
             currentAccountPicture: ClipOval(
               child: Image(
                   image: AssetImage('assets/images/orang.png'),
                   fit: BoxFit.cover),
             ),
-            accountName: Text('Ahmad Ardiansyah'),
-            accountEmail: Text('Administrator'),
+            accountName: Text(homeController.user!.realName),
+            accountEmail: Text(homeController.user!.roleName),
           ),
           ListTile(
             leading: Icon(Icons.shopping_bag),
@@ -42,11 +50,13 @@ class NavDrawerWidget extends StatelessWidget {
             title: Text('Upload'),
             onTap: () => {Get.toNamed('/upload')},
           ),
-          ListTile(
-            leading: Icon(Icons.delete),
-            title: Text('Clear Data'),
-            onTap: () => {Get.toNamed('/clear')},
-          ),
+          if (homeController.prefs[0].roleId == 0) ...[
+            ListTile(
+              leading: const Icon(Icons.delete),
+              title: Text('Clear Data'),
+              onTap: () => {Get.toNamed('/clear')},
+            )
+          ],
           ListTile(
             leading: Icon(Icons.settings),
             title: Text('Settings'),
@@ -55,7 +65,7 @@ class NavDrawerWidget extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
-            onTap: () => {Get.offAllNamed('/login')},
+            onTap: () => {homeController.actionLogout()},
           ),
         ],
       ),

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:myasset/screens/Clear.screen.dart';
 import 'package:myasset/screens/Login.screen.dart';
 import 'package:myasset/screens/Scan.screen.dart';
-import 'package:myasset/screens/Settings.screen.dart';
 import 'package:myasset/widgets/NavDrawer.widget.dart';
 
 class MyHomePage extends StatefulWidget {
