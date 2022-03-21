@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/models/preferences.model.dart';
 
-class AppController extends GetxController {
+class AppController extends GetxController with StateMixin {
   DbHelper dbHelper = DbHelper();
 
   @override
@@ -21,19 +21,13 @@ class AppController extends GetxController {
 
   void checkLogin() async {
     final List<Preferences> pref = await dbHelper.initApp();
-    if (pref.isEmpty) {
-      await dbHelper.initPref(Preferences(
-          1, "false", "", 0, "", "", 0, "", "", 0, "", 0, "", 0, 0));
+    if (pref[0].registered == "false") {
       Get.offNamed('/register');
     } else {
-      if (pref[0].registered == "false") {
-        Get.offNamed('/register');
+      if (pref[0].locationId != 0) {
+        Get.offNamed('/home');
       } else {
-        if (pref[0].locationId != 0) {
-          Get.offNamed('/home');
-        } else {
-          Get.offNamed('/login');
-        }
+        Get.offNamed('/login');
       }
     }
   }

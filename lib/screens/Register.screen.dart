@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:myasset/controllers/Login.controller.dart';
-import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/screens/HomePage.screen.dart';
+import 'package:myasset/controllers/Register.controller.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -12,7 +10,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  LoginController loginController = Get.put(LoginController());
+  RegisterController registerController = Get.put(RegisterController());
 
   @override
   Widget build(BuildContext context) {
@@ -20,75 +18,95 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         title: const Text('Register'),
       ),
-      body: new Card(
-        elevation: 4,
-        margin: EdgeInsets.all(20),
-        shape: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(3),
-          borderSide: BorderSide(color: Colors.grey, width: 1),
-        ),
-        color: Colors.white70,
-        child: new Container(
-          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
-          child: new Column(
-            children: <Widget>[
-              new Row(
-                children: <Widget>[
-                  new Text("API Address     :  "),
-                  new Expanded(
-                      child: new TextField(
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blueAccent)),
-                    ),
-                  )),
-                ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: registerController.apiAddress,
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                border: OutlineInputBorder(),
+                labelText: "API Address",
+                labelStyle: TextStyle(color: Colors.black),
               ),
-              new Row(
-                children: [
-                  new Text(
-                    "\n",
-                    style: TextStyle(fontSize: 2),
-                  ),
-                ],
+            ),
+            SizedBox(
+              height: 16,
+            ),
+            TextField(
+              controller: registerController.locationId,
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                border: OutlineInputBorder(),
+                labelText: "Location ID",
+                labelStyle: TextStyle(color: Colors.black),
               ),
-              new Row(
-                children: <Widget>[
-                  new Text("Location Code :  "),
-                  new Expanded(
-                      child: new TextField(
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blueAccent)),
-                    ),
-                  )),
-                ],
+            ),
+            SizedBox(
+              height: 16,
+            ),
+            TextField(
+              controller: registerController.username,
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                border: OutlineInputBorder(),
+                labelText: "Username",
+                labelStyle: TextStyle(color: Colors.black),
               ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 80, vertical: 10),
-                child: Container(
-                  height: 35,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(44, 116, 180, 1),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      "Save Setting",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
+            ),
+            SizedBox(
+              height: 16,
+            ),
+            TextField(
+              controller: registerController.email,
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                border: OutlineInputBorder(),
+                labelText: "Email",
+                labelStyle: TextStyle(color: Colors.black),
+              ),
+            ),
+            SizedBox(
+              height: 16,
+            ),
+            TextField(
+              controller: registerController.deviceId,
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                border: OutlineInputBorder(),
+                labelText: "Device ID",
+                labelStyle: TextStyle(color: Colors.black),
+              ),
+            ),
+            SizedBox(
+              height: 22,
+            ),
+            Container(
+              height: 60,
+              width: MediaQuery.of(context).size.width,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                ),
+                onPressed: () {
+                  registerController.toOtpScreen();
+                },
+                child: Text(
+                  "Submit Registration",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

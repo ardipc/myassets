@@ -4,7 +4,7 @@ class Preferences {
   late int id;
   late String registered;
   late String apiAddress;
-  late int locationId;
+  late String locationId;
   late String locationCode;
   late String locationName;
   late int intransitId;

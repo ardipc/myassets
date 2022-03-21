@@ -32,7 +32,9 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.6.1
+  otp_text_field: ^1.1.2
   path_provider: ^2.0.9
+  platform_device_id: ^1.0.1
   sqflite: ^2.0.2
 
 dev_dependencies:

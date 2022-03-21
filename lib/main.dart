@@ -1,22 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/Clear.screen.dart';
 import 'package:myasset/screens/Download.screen.dart';
 import 'package:myasset/screens/HomePage.screen.dart';
 import 'package:myasset/screens/Login.screen.dart';
 import 'package:myasset/screens/MyApp.screen.dart';
+import 'package:myasset/screens/Otp.screen.dart';
 import 'package:myasset/screens/Register.screen.dart';
 import 'package:myasset/screens/Settings.screen.dart';
 import 'package:myasset/screens/StockOpname.screen.dart';
 import 'package:myasset/screens/TransferIn.screen.dart';
 import 'package:myasset/screens/TransferOut.screen.dart';
 import 'package:myasset/screens/Upload.screen.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  DbHelper dbHelper = DbHelper();
+  Database db = await dbHelper.initDb();
+  List<Map<String, dynamic>> maps = await db.query("preferences");
+
   runApp(
     GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const MyApp(),
+      home: maps.length == 1
+          ? const MyHomePage(title: "Asset Control")
+          : const MyApp(),
       getPages: [
         GetPage(
           name: '/',
@@ -33,6 +44,10 @@ void main() async {
         GetPage(
           name: '/register',
           page: () => RegisterScreen(),
+        ),
+        GetPage(
+          name: '/otp',
+          page: () => OtpScreen(),
         ),
         GetPage(
           name: '/stockopname',
