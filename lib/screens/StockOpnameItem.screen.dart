@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myasset/screens/Table.screen.dart';
 
-class StockOpnameScreen extends StatefulWidget {
-  StockOpnameScreen({Key? key}) : super(key: key);
+class StockOpnameItemScreen extends StatefulWidget {
+  StockOpnameItemScreen({Key? key}) : super(key: key);
 
   @override
-  State<StockOpnameScreen> createState() => _StockOpnameScreenState();
+  State<StockOpnameItemScreen> createState() => _StockOpnameItemScreenState();
 }
 
-class _StockOpnameScreenState extends State<StockOpnameScreen> {
+class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   String selectedValue = "USA";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Stock Opname'),
+        title: const Text('Stock Opname Item'),
       ),
       body: Stack(
         children: [
@@ -77,9 +77,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor: Color.fromARGB(255, 62, 81, 255),
                     ),
-                    onPressed: () {
-                      Get.toNamed('/stockopnameitem');
-                    },
+                    onPressed: () {},
                     child: Text(
                       "Scan / Entry Asset",
                       style: TextStyle(
