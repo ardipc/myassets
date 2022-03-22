@@ -4,18 +4,13 @@ import 'package:myasset/controllers/Login.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/HomePage.screen.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  LoginController loginController = Get.put(LoginController());
-
-  @override
   Widget build(BuildContext context) {
+    LoginController loginController = Get.put(LoginController());
+
     return Scaffold(
       backgroundColor: Color.fromRGBO(48, 52, 156, 1),
       body: Center(

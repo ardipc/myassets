@@ -7,7 +7,7 @@ class OtpController extends GetxController {
   DbHelper dbHelper = DbHelper();
 
   dynamic args = Get.arguments;
-  RxString pin = "".obs;
+  String pin = "";
 
   @override
   void onInit() {
@@ -22,34 +22,15 @@ class OtpController extends GetxController {
   }
 
   void changePin(String v) {
-    pin.value = v;
+    pin = v;
   }
 
   void actionSubmitOtp() async {
-    Database db = await dbHelper.initDb();
-
-    Preferences obj = Preferences(1, "true", args[0], args[1], "-", "-", 0, "-",
-        "-", 0, "-", 0, 0, "-", 0, 0);
-
-    // print(obj.toMap());
-
-    int count = await db
-        .update("preferences", obj.toMap(), where: "id = ?", whereArgs: [1]);
-
-    // print(count);
-
-    // List<Map<String, dynamic>> maps = await db.query("preferences");
-
-    // print(maps);
-
-    if (count == 1) {
-      Get.offAllNamed('/home');
-    } else {
-      Get.snackbar(
-        "OTP",
-        pin.value,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
+    Get.offAllNamed('/home');
+    Get.snackbar(
+      "OTP",
+      pin,
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
 }

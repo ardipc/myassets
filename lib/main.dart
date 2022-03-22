@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:myasset/helpers/db.helper.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:myasset/screens/Clear.screen.dart';
 import 'package:myasset/screens/Download.screen.dart';
 import 'package:myasset/screens/HomePage.screen.dart';
@@ -14,22 +14,19 @@ import 'package:myasset/screens/Table.screen.dart';
 import 'package:myasset/screens/TransferIn.screen.dart';
 import 'package:myasset/screens/TransferOut.screen.dart';
 import 'package:myasset/screens/Upload.screen.dart';
-import 'package:sqflite/sqlite_api.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
 
-  DbHelper dbHelper = DbHelper();
-  Database db = await dbHelper.initDb();
-  List<Map<String, dynamic>> maps = await db.query("preferences");
-  print(maps.toList());
+  final box = GetStorage();
+  box.write('registered', false);
+  final registered = box.read('registered');
 
   runApp(
     GetMaterialApp(
+      enableLog: true,
       debugShowCheckedModeBanner: false,
-      home: maps.length == 1 && maps[0]['userId'] != 0
-          ? const MyHomePage(title: "Asset Control")
-          : const MyApp(),
+      home: registered ? MyApp() : RegisterScreen(),
       getPages: [
         GetPage(
           name: '/',

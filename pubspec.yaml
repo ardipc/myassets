@@ -33,11 +33,12 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.6.1
+  get_storage: ^2.0.3
   otp_text_field: ^1.1.2
   path_provider: ^2.0.9
   platform_device_id: ^1.0.1
-  sqflite: ^2.0.2
   responsive_table: ^0.2.0+2
+  sqflite: ^2.0.2
 
 dev_dependencies:
   flutter_lints: ^1.0.0

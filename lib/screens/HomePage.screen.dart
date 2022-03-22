@@ -66,6 +66,12 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               child: Text("QRCODE"),
             ),
+            TextButton(
+              onPressed: () {
+                Get.bottomSheet(MyDialog());
+              },
+              child: Text("Dialog"),
+            ),
           ],
         ),
       ),
@@ -73,6 +79,24 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget MyDialog() {
+    return Container(
+      child: Wrap(
+        children: <Widget>[
+          ListTile(
+              leading: Icon(Icons.music_note),
+              title: Text('Music'),
+              onTap: () {}),
+          ListTile(
+            leading: Icon(Icons.videocam),
+            title: Text('Video'),
+            onTap: () {},
+          ),
+        ],
       ),
     );
   }
