@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myasset/screens/Table.screen.dart';
+import 'package:responsive_table/responsive_table.dart';
 
 class StockOpnameScreen extends StatefulWidget {
   StockOpnameScreen({Key? key}) : super(key: key);
@@ -12,13 +15,27 @@ class StockOpnameScreen extends StatefulWidget {
 class _StockOpnameScreenState extends State<StockOpnameScreen> {
   String selectedValue = "USA";
 
+  late List<DatatableHeader> _headers;
+
+  List<Map<String, dynamic>> _sources = [];
+
+  int _currentPage = 1;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Stock Opname'),
       ),
-      body: Stack(
+      body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(14.0),
@@ -29,7 +46,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                   width: 40,
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.62,
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.0),
                     decoration: BoxDecoration(
@@ -61,6 +78,85 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                   icon: Icon(Icons.download),
                   label: Text("Download"),
                 ),
+              ],
+            ),
+          ),
+          SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Container(
+                  constraints: BoxConstraints(
+                    maxHeight: 320,
+                  ),
+                  child: Card(
+                    elevation: 1,
+                    shadowColor: Colors.black,
+                    clipBehavior: Clip.none,
+                    child: DataTable(
+                      columnSpacing:
+                          (MediaQuery.of(context).size.width / 10) * 0.5,
+                      dataRowHeight: 80,
+                      columns: const <DataColumn>[
+                        DataColumn(
+                          label: Text(
+                            'Name',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Age In \nCentury',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Description',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        ),
+                      ],
+                      rows: [
+                        DataRow(
+                          cells: <DataCell>[
+                            DataCell(Container(
+                                width:
+                                    (MediaQuery.of(context).size.width / 10) *
+                                        3,
+                                child: Text(
+                                    'Sarahisbest playerintheworldplayerintheworldplayerintheworld'))),
+                            DataCell(Container(
+                                width:
+                                    (MediaQuery.of(context).size.width / 10) *
+                                        2,
+                                child: Text('19'))),
+                            DataCell(Container(
+                                width:
+                                    (MediaQuery.of(context).size.width / 10) *
+                                        3,
+                                child: Text('Student is so good.'))),
+                          ],
+                        ),
+                        DataRow(
+                          cells: <DataCell>[
+                            DataCell(Text('Janine is really talented player.')),
+                            DataCell(Text('43')),
+                            DataCell(Text('Professor')),
+                          ],
+                        ),
+                        DataRow(
+                          cells: <DataCell>[
+                            DataCell(Text('William')),
+                            DataCell(Text('7')),
+                            DataCell(Text('Associate Professor')),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                )
               ],
             ),
           ),
@@ -142,5 +238,38 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       DropdownMenuItem(child: Text("England"), value: "England"),
     ];
     return menuItems;
+  }
+
+  List<Map<String, dynamic>> generateData({int n: 100}) {
+    final List source = List.filled(n, Random.secure());
+    List<Map<String, dynamic>> temps = [];
+    var i = 1;
+    // ignore: unused_local_variable
+    for (var data in source) {
+      temps.add({
+        "no": i,
+        "tagNo": "$i\000$i",
+        "description": "Product $i",
+        "closingResult": "Category-$i",
+        "stockOpname": i * 10.00,
+      });
+      i++;
+    }
+    return temps;
+  }
+
+  void fetchData() async {
+    setState(() => _isLoading = true);
+    _headers = [
+      DatatableHeader(text: "No.", value: "no", show: true),
+      DatatableHeader(text: "Tag No", value: "tagNo", show: true),
+      DatatableHeader(text: "Description", value: "description", show: true),
+      DatatableHeader(
+          text: "Closing Result", value: "closingResult", show: true),
+      DatatableHeader(text: "Stock Opname", value: "stockOpname", show: true)
+    ];
+    _sources = await generateData(n: 10).toList();
+    print(_sources);
+    setState(() => _isLoading = false);
   }
 }
