@@ -17,6 +17,9 @@ import 'package:myasset/screens/TransferInItem.screen.dart';
 import 'package:myasset/screens/TransferInItemForm.screen.dart';
 import 'package:myasset/screens/TransferInItemList.screen.dart';
 import 'package:myasset/screens/TransferOut.screen.dart';
+import 'package:myasset/screens/TransferOutItem.screen.dart';
+import 'package:myasset/screens/TransferOutItemForm.screen.dart';
+import 'package:myasset/screens/TransferOutItemList.screen.dart';
 import 'package:myasset/screens/Upload.screen.dart';
 
 void main() async {
@@ -83,6 +86,18 @@ void main() async {
         GetPage(
           name: '/transferout',
           page: () => TransferOutScreen(),
+        ),
+        GetPage(
+          name: '/transferoutitem',
+          page: () => TransferOutItemScreen(),
+        ),
+        GetPage(
+          name: '/transferoutitemlist',
+          page: () => TransferOutItemListScreen(),
+        ),
+        GetPage(
+          name: '/transferoutitemform',
+          page: () => TransferOutItemFormScreen(),
         ),
         GetPage(
           name: '/download',

@@ -4,14 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:myasset/screens/Table.screen.dart';
 
-class TransferInItemScreen extends StatefulWidget {
-  TransferInItemScreen({Key? key}) : super(key: key);
+class TransferOutItemFormScreen extends StatefulWidget {
+  TransferOutItemFormScreen({Key? key}) : super(key: key);
 
   @override
-  State<TransferInItemScreen> createState() => _TransferInItemScreenState();
+  State<TransferOutItemFormScreen> createState() =>
+      _TransferOutItemFormScreenState();
 }
 
-class _TransferInItemScreenState extends State<TransferInItemScreen> {
+class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
   String selectedValue = "USA";
   String barcode = "";
 
@@ -19,10 +20,31 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transfer In Form'),
+        title: const Text('Transfer Out Item Form'),
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 12.0, right: 12, left: 12),
+            child: Row(
+              children: [
+                const Text("Trans No"),
+                const SizedBox(
+                  width: 40,
+                ),
+                SizedBox(
+                  width: Get.width * 0.76,
+                  child: TextField(
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(vertical: 10),
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blueAccent)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Card(
             elevation: 4,
             margin: EdgeInsets.all(12.0),
@@ -38,32 +60,11 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                   Row(
                     children: [
                       Container(
-                        child: Text("Trans No : "),
+                        child: Text("Tag No : "),
                         width: Get.width * 0.14,
                       ),
                       Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blueAccent),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 14,
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        child: Text("Date/Time : "),
-                        width: Get.width * 0.14,
-                      ),
-                      Expanded(
-                        child: TextField(
+                        child: new TextField(
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.symmetric(vertical: 10),
                             border: OutlineInputBorder(
@@ -73,7 +74,33 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         ),
                       ),
                       TextButton(
-                          onPressed: () {}, child: Icon(Icons.date_range)),
+                        onPressed: () async {
+                          try {
+                            String barcode = await BarcodeScanner.scan();
+                            print(barcode);
+                            setState(() {
+                              this.barcode = barcode;
+                            });
+                          } on PlatformException catch (error) {
+                            if (error.code ==
+                                BarcodeScanner.CameraAccessDenied) {
+                              setState(() {
+                                this.barcode =
+                                    'Izin kamera tidak diizinkan oleh si pengguna';
+                              });
+                            } else {
+                              setState(() {
+                                this.barcode = 'Error: $error';
+                              });
+                            }
+                          }
+                        },
+                        child: Icon(Icons.qr_code),
+                      ),
+                      TextButton(
+                        onPressed: () {},
+                        child: Icon(Icons.download),
+                      ),
                     ],
                   ),
                   const SizedBox(
@@ -82,7 +109,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                   Row(
                     children: [
                       Container(
-                        child: Text("Manual Ref : "),
+                        child: Text("Description : "),
                         width: Get.width * 0.14,
                       ),
                       Expanded(
@@ -101,16 +128,50 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                   Row(
                     children: [
                       Container(
-                        child: Text("Other Ref : "),
+                        child: Text("FA No : "),
                         width: Get.width * 0.14,
                       ),
                       Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
-                            border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
+                          child: TextField(
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 10),
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blueAccent)),
+                        ),
+                      )),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 14,
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        child: Text("Status : "),
+                        width: Get.width * 0.14,
+                      ),
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4.0),
+                            border: Border.all(
+                              style: BorderStyle.solid,
+                              width: 0.80,
+                            ),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton(
+                              isExpanded: true,
+                              hint: const Text("Select Period"),
+                              items: dropdownItems,
+                              value: selectedValue,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedValue = value.toString();
+                                });
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -122,19 +183,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                   Row(
                     children: [
                       Container(
-                        child: Text("Loc. From : "),
+                        child: Text("Remarks : "),
                         width: Get.width * 0.14,
-                      ),
-                      Container(
-                        width: Get.width * 0.2,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
-                            border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
-                          ),
-                        ),
                       ),
                       Expanded(
                         child: TextField(
@@ -145,39 +195,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                                     BorderSide(color: Colors.blueAccent)),
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 14,
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        child: Text("Loc. To : "),
-                        width: Get.width * 0.14,
                       ),
-                      Container(
-                        width: Get.width * 0.2,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
-                            border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
-                            border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
-                          ),
-                        ),
-                      )
                     ],
                   ),
                 ],
@@ -196,65 +214,11 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor: Color.fromARGB(255, 62, 81, 255),
                     ),
-                    onPressed: () {},
-                    child: Text(
-                      "Save as Draft",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                  height: 50,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 131, 142, 240),
-                    ),
                     onPressed: () {
-                      Get.toNamed('/transferinitemlist');
+                      Get.toNamed('/TransferInItemForm');
                     },
                     child: Text(
-                      "Open Item List",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                  height: 50,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 40, 165, 61),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      "Approve",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                  height: 50,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 116, 54, 173),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      "Upload to Server",
+                      "Save",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,

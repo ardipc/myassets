@@ -4,14 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:myasset/screens/Table.screen.dart';
 
-class TransferInItemScreen extends StatefulWidget {
-  TransferInItemScreen({Key? key}) : super(key: key);
+class TransferOutItemScreen extends StatefulWidget {
+  TransferOutItemScreen({Key? key}) : super(key: key);
 
   @override
-  State<TransferInItemScreen> createState() => _TransferInItemScreenState();
+  State<TransferOutItemScreen> createState() => _TransferOutItemScreenState();
 }
 
-class _TransferInItemScreenState extends State<TransferInItemScreen> {
+class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
   String selectedValue = "USA";
   String barcode = "";
 
@@ -19,7 +19,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transfer In Form'),
+        title: const Text('Transfer Out Form'),
       ),
       body: Column(
         children: [
@@ -122,7 +122,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                   Row(
                     children: [
                       Container(
-                        child: Text("Loc. From : "),
+                        child: Text("Loc. To : "),
                         width: Get.width * 0.14,
                       ),
                       Container(
@@ -154,7 +154,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                   Row(
                     children: [
                       Container(
-                        child: Text("Loc. To : "),
+                        child: Text("Loc. From : "),
                         width: Get.width * 0.14,
                       ),
                       Container(
@@ -215,7 +215,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       backgroundColor: Color.fromARGB(255, 131, 142, 240),
                     ),
                     onPressed: () {
-                      Get.toNamed('/transferinitemlist');
+                      Get.toNamed('/transferoutitemlist');
                     },
                     child: Text(
                       "Open Item List",

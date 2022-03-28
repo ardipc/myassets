@@ -4,14 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:responsive_table/responsive_table.dart';
 
-class TransferInItemListScreen extends StatefulWidget {
-  const TransferInItemListScreen({Key? key}) : super(key: key);
+class TransferOutItemListScreen extends StatefulWidget {
+  const TransferOutItemListScreen({Key? key}) : super(key: key);
 
   @override
-  State<TransferInItemListScreen> createState() => _TransferInItemListScreen();
+  State<TransferOutItemListScreen> createState() =>
+      _TransferOutItemListScreen();
 }
 
-class _TransferInItemListScreen extends State<TransferInItemListScreen> {
+class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
   String selectedValue = "USA";
 
   late List<DatatableHeader> _headers;
@@ -33,7 +34,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transfer In Item List'),
+        title: const Text('Transfer Out Item List'),
       ),
       body: Column(
         children: [
