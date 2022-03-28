@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -21,7 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           borderRadius: BorderRadius.circular(3),
           borderSide: BorderSide(color: Colors.grey, width: 1),
         ),
-        color: Colors.white70,
+        color: Colors.white,
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
           child: Column(
@@ -39,15 +40,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   )),
                 ],
               ),
-              new Row(
-                children: [
-                  new Text(
-                    "\n",
-                    style: TextStyle(fontSize: 2),
-                  ),
-                ],
+              SizedBox(
+                height: 14,
               ),
-              new Row(
+              Row(
                 children: <Widget>[
                   new Text("Location Code :  "),
                   new Expanded(
@@ -60,23 +56,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   )),
                 ],
               ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 80, vertical: 10),
-                child: Container(
-                  height: 35,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(44, 116, 180, 1),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      "Save Setting",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                height: 50,
+                width: Get.width,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: Color.fromRGBO(44, 116, 180, 1),
+                  ),
+                  onPressed: () {},
+                  child: Text(
+                    "Save Setting",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
                     ),
                   ),
                 ),

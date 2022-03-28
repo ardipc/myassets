@@ -50,7 +50,7 @@ class _TransferInScreen extends State<TransferInScreen> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.0),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
+                      borderRadius: BorderRadius.circular(4.0),
                       border: Border.all(
                         style: BorderStyle.solid,
                         width: 0.80,
@@ -242,7 +242,7 @@ class _TransferInScreen extends State<TransferInScreen> {
 
   void fetchData() async {
     setState(() => _isLoading = true);
-    _rows = await genData(n: 30);
+    _rows = await genData(n: 10);
     setState(() => _isLoading = false);
   }
 }

@@ -219,7 +219,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
 
   void fetchData() async {
     setState(() => _isLoading = true);
-    _rows = await genData(n: 30);
+    _rows = await genData(n: 5);
     setState(() => _isLoading = false);
   }
 }

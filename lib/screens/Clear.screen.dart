@@ -41,21 +41,31 @@ class _ClearScreen extends State<ClearScreen> {
                     ),
                   )),
                   Text(" "),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      _selectDate(context);
-                    },
-                    icon: Icon(Icons.date_range),
-                    label: Text("Date"),
+                  TextButton(
+                    onPressed: () {},
+                    child: Icon(Icons.date_range),
                   ),
                 ],
               ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                      child: ElevatedButton(
-                          onPressed: () {}, child: Text("Clear")))
-                ],
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                height: 50,
+                width: Get.width,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: Color.fromRGBO(44, 116, 180, 1),
+                  ),
+                  onPressed: () {},
+                  child: Text(
+                    "Clear",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

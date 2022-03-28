@@ -36,7 +36,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.0),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
+                      borderRadius: BorderRadius.circular(4.0),
                       border: Border.all(
                         style: BorderStyle.solid,
                         width: 0.80,

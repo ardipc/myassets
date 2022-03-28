@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class DownloadScreen extends StatefulWidget {
   const DownloadScreen({Key? key}) : super(key: key);
@@ -15,7 +16,23 @@ class _DownloadScreen extends State<DownloadScreen> {
         title: const Text('Download'),
       ),
       body: Center(
-        child: ElevatedButton(onPressed: () {}, child: Text("Start Download")),
+        child: Container(
+          height: 50,
+          width: Get.width * 0.4,
+          child: TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Color.fromRGBO(44, 116, 180, 1),
+            ),
+            onPressed: () {},
+            child: Text(
+              "Start Download",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
