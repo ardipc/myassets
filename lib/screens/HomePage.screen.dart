@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:myasset/screens/Clear.screen.dart';
 import 'package:myasset/screens/Login.screen.dart';
 import 'package:myasset/screens/Scan.screen.dart';
@@ -15,6 +16,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final box = GetStorage();
+
   int _counter = 0;
 
   void _incrementCounter() {
@@ -33,52 +36,11 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            TextButton(
-              onPressed: () {
-                print('click me');
-                Get.to(
-                  ClearScreen(),
-                );
-              },
-              child: Text("Click Me"),
-            ),
-            TextButton(
-              onPressed: () {
-                Get.to(
-                  LoginScreen(),
-                );
-              },
-              child: Text("LOGIN"),
-            ),
-            TextButton(
-              onPressed: () {
-                Get.to(
-                  ScanScreen(),
-                );
-              },
-              child: Text("QRCODE"),
-            ),
-            TextButton(
-              onPressed: () {
-                Get.bottomSheet(MyDialog());
-              },
-              child: Text("Dialog"),
-            ),
+          children: [
+            Text("Welcome ${box.read('realName')}"),
+            Text("${box.read('roleName')}"),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
