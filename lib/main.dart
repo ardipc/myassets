@@ -26,11 +26,17 @@ void main() async {
   await GetStorage.init();
 
   final box = GetStorage();
-  box.write('registered', false);
+  box.write('registered', true);
   final registered = box.read('registered');
 
   runApp(
     GetMaterialApp(
+      theme: ThemeData(
+        primaryColor: Color.fromRGBO(48, 52, 156, 1),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Color.fromRGBO(48, 52, 156, 1),
+        ),
+      ),
       enableLog: true,
       debugShowCheckedModeBanner: false,
       home: registered ? MyApp() : RegisterScreen(),
