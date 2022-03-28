@@ -13,6 +13,9 @@ import 'package:myasset/screens/StockOpname.screen.dart';
 import 'package:myasset/screens/StockOpnameItem.screen.dart';
 import 'package:myasset/screens/Table.screen.dart';
 import 'package:myasset/screens/TransferIn.screen.dart';
+import 'package:myasset/screens/TransferInItem.screen.dart';
+import 'package:myasset/screens/TransferInItemForm.screen.dart';
+import 'package:myasset/screens/TransferInItemList.screen.dart';
 import 'package:myasset/screens/TransferOut.screen.dart';
 import 'package:myasset/screens/Upload.screen.dart';
 
@@ -64,6 +67,18 @@ void main() async {
         GetPage(
           name: '/transferin',
           page: () => TransferInScreen(),
+        ),
+        GetPage(
+          name: '/transferinitem',
+          page: () => TransferInItemScreen(),
+        ),
+        GetPage(
+          name: '/transferinitemlist',
+          page: () => TransferInItemListScreen(),
+        ),
+        GetPage(
+          name: '/transferinitemform',
+          page: () => TransferInItemFormScreen(),
         ),
         GetPage(
           name: '/transferout',

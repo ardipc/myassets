@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:responsive_table/responsive_table.dart';
 
-class TransferInScreen extends StatefulWidget {
-  const TransferInScreen({Key? key}) : super(key: key);
+class TransferInItemListScreen extends StatefulWidget {
+  const TransferInItemListScreen({Key? key}) : super(key: key);
 
   @override
-  State<TransferInScreen> createState() => _TransferInScreen();
+  State<TransferInItemListScreen> createState() => _TransferInItemListScreen();
 }
 
-class _TransferInScreen extends State<TransferInScreen> {
+class _TransferInItemListScreen extends State<TransferInItemListScreen> {
   String selectedValue = "USA";
 
   late List<DatatableHeader> _headers;
@@ -33,7 +33,7 @@ class _TransferInScreen extends State<TransferInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transfer In List'),
+        title: const Text('Transfer In List Item'),
       ),
       body: Column(
         children: [
@@ -41,42 +41,19 @@ class _TransferInScreen extends State<TransferInScreen> {
             padding: const EdgeInsets.only(top: 12.0, right: 12, left: 12),
             child: Row(
               children: [
-                const Text("Period"),
+                const Text("Trans No"),
                 const SizedBox(
                   width: 40,
                 ),
                 SizedBox(
-                  width: Get.width * 0.6,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      border: Border.all(
-                        style: BorderStyle.solid,
-                        width: 0.80,
-                      ),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton(
-                        isExpanded: true,
-                        hint: const Text("Select Period"),
-                        items: dropdownItems,
-                        value: selectedValue,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedValue = value.toString();
-                          });
-                        },
-                      ),
+                  width: Get.width * 0.76,
+                  child: TextField(
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(vertical: 10),
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blueAccent)),
                     ),
                   ),
-                ),
-                TextButton.icon(
-                  onPressed: () {
-                    Get.toNamed('/table');
-                  },
-                  icon: Icon(Icons.download),
-                  label: Text("Download"),
                 ),
               ],
             ),
@@ -87,7 +64,7 @@ class _TransferInScreen extends State<TransferInScreen> {
               children: [
                 TextButton.icon(
                   onPressed: () {
-                    Get.toNamed('/transferinitem');
+                    Get.toNamed('/transferinitemform');
                   },
                   icon: Icon(Icons.add),
                   label: Text("Add"),
@@ -124,17 +101,17 @@ class _TransferInScreen extends State<TransferInScreen> {
                           ),
                           DataColumn(
                             label: Text(
-                              'Date',
+                              'Tag No',
                             ),
                           ),
                           DataColumn(
                             label: Text(
-                              'Trans No',
+                              'Description',
                             ),
                           ),
                           DataColumn(
                             label: Text(
-                              'Manual Ref',
+                              'Qty',
                             ),
                           ),
                           DataColumn(
@@ -202,26 +179,26 @@ class _TransferInScreen extends State<TransferInScreen> {
         ),
         DataCell(
           Container(
-            width: Get.width * 0.15,
-            child: Text("27-Feb-2022"),
+            width: Get.width * 0.2,
+            child: Text("TN202202-000$i"),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.25,
-            child: Text("800IT202200$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.25,
-            child: Text("SJ/2022/II/00$i"),
+            child: Text("Tablet #$i"),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.1,
-            child: Text("Approved"),
+            child: Text("10$i"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: Text("RUSAK"),
           ),
         ),
         DataCell(
