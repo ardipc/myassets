@@ -18,6 +18,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   late List<DatatableHeader> _headers;
 
   List<Map<String, dynamic>> _sources = [];
+  List<DataRow> _rows = [];
 
   int _currentPage = 1;
   bool _isLoading = true;
@@ -46,7 +47,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                   width: 40,
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.5,
+                  width: Get.width * 0.6,
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.0),
                     decoration: BoxDecoration(
@@ -81,89 +82,78 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
               ],
             ),
           ),
-          SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.max,
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Container(
+                constraints: BoxConstraints(
+                  maxHeight: Get.height * 0.6,
+                ),
+                child: Card(
+                  elevation: 1,
+                  shadowColor: Colors.black,
+                  clipBehavior: Clip.none,
+                  child: ListView(
+                    children: [
+                      DataTable(
+                        columnSpacing: 0.5,
+                        dataRowHeight: 110,
+                        columns: [
+                          DataColumn(
+                            label: Text(
+                              'No.',
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Tag No',
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Description',
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Closing Result',
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Stock Opname',
+                            ),
+                          ),
+                        ],
+                        rows: _rows,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
+          Container(
+            width: Get.width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  constraints: BoxConstraints(
-                    maxHeight: 320,
-                  ),
-                  child: Card(
-                    elevation: 1,
-                    shadowColor: Colors.black,
-                    clipBehavior: Clip.none,
-                    child: DataTable(
-                      columnSpacing:
-                          (MediaQuery.of(context).size.width / 10) * 0.5,
-                      dataRowHeight: 80,
-                      columns: const <DataColumn>[
-                        DataColumn(
-                          label: Text(
-                            'Name',
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Age In \nCentury',
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Description',
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ),
-                      ],
-                      rows: [
-                        DataRow(
-                          cells: <DataCell>[
-                            DataCell(Container(
-                                width:
-                                    (MediaQuery.of(context).size.width / 10) *
-                                        3,
-                                child: Text(
-                                    'Sarahisbest playerintheworldplayerintheworldplayerintheworld'))),
-                            DataCell(Container(
-                                width:
-                                    (MediaQuery.of(context).size.width / 10) *
-                                        2,
-                                child: Text('19'))),
-                            DataCell(Container(
-                                width:
-                                    (MediaQuery.of(context).size.width / 10) *
-                                        3,
-                                child: Text('Student is so good.'))),
-                          ],
-                        ),
-                        DataRow(
-                          cells: <DataCell>[
-                            DataCell(Text('Janine is really talented player.')),
-                            DataCell(Text('43')),
-                            DataCell(Text('Professor')),
-                          ],
-                        ),
-                        DataRow(
-                          cells: <DataCell>[
-                            DataCell(Text('William')),
-                            DataCell(Text('7')),
-                            DataCell(Text('Associate Professor')),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                )
+                TextButton(
+                  onPressed: () {},
+                  child: Icon(Icons.chevron_left),
+                ),
+                Text("1 / 10 pages"),
+                TextButton(
+                  onPressed: () {},
+                  child: Icon(Icons.chevron_right),
+                ),
               ],
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
+          Container(
+            width: Get.width,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
@@ -258,6 +248,50 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     return temps;
   }
 
+  List<DataRow> genData({int n: 10}) {
+    List<DataRow> temps = [];
+    final List source = List.filled(n, Random.secure());
+    var i = 1;
+    for (var data in source) {
+      DataRow row = DataRow(cells: [
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: Text("$i"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.2,
+            child: Text("Name $i"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.2,
+            child: Text("Student $i is so good"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.2,
+            child: Text("qty = 1\ncondition = Baik"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.3,
+            child: Text(
+                "qty = 1\nexistence = ADA\ntagging = Lengkap\nusage = Digunakan\ncondition = Baik\nowner = Permanent"),
+          ),
+        ),
+      ]);
+      temps.add(row);
+      i++;
+    }
+    return temps;
+  }
+
   void fetchData() async {
     setState(() => _isLoading = true);
     _headers = [
@@ -269,7 +303,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       DatatableHeader(text: "Stock Opname", value: "stockOpname", show: true)
     ];
     _sources = await generateData(n: 10).toList();
-    print(_sources);
+    _rows = await genData(n: 30);
     setState(() => _isLoading = false);
   }
 }
