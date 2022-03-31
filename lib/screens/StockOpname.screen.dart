@@ -2,8 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/Table.screen.dart';
 import 'package:responsive_table/responsive_table.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class StockOpnameScreen extends StatefulWidget {
   StockOpnameScreen({Key? key}) : super(key: key);
@@ -13,6 +15,8 @@ class StockOpnameScreen extends StatefulWidget {
 }
 
 class _StockOpnameScreenState extends State<StockOpnameScreen> {
+  DbHelper dbHelper = DbHelper();
+
   String selectedValue = "USA";
 
   late List<DatatableHeader> _headers;
@@ -28,6 +32,23 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     // TODO: implement initState
     super.initState();
     fetchData();
+    print("initState");
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    fetchData();
+    print("didChangeDependencies");
+  }
+
+  @override
+  void didUpdateWidget(covariant StockOpnameScreen oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    fetchData();
+    print("didUpdateWidget");
   }
 
   @override
@@ -35,6 +56,14 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Stock Opname'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              fetchData();
+            },
+            child: Icon(Icons.refresh, color: Colors.white),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -164,7 +193,8 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                       backgroundColor: Color.fromARGB(255, 62, 81, 255),
                     ),
                     onPressed: () {
-                      Get.toNamed('/stockopnameitem');
+                      Get.toNamed('/stockopnameitem')
+                          ?.whenComplete(() => fetchData());
                     },
                     child: Text(
                       "Scan / Entry Asset",
@@ -230,29 +260,13 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     return menuItems;
   }
 
-  List<Map<String, dynamic>> generateData({int n: 100}) {
-    final List source = List.filled(n, Random.secure());
-    List<Map<String, dynamic>> temps = [];
-    var i = 1;
-    // ignore: unused_local_variable
-    for (var data in source) {
-      temps.add({
-        "no": i,
-        "tagNo": "$i\000$i",
-        "description": "Product $i",
-        "closingResult": "Category-$i",
-        "stockOpname": i * 10.00,
-      });
-      i++;
-    }
-    return temps;
-  }
+  Future<List<DataRow>> genData() async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> maps = await db.query("stockopnames");
 
-  List<DataRow> genData({int n: 10}) {
     List<DataRow> temps = [];
-    final List source = List.filled(n, Random.secure());
     var i = 1;
-    for (var data in source) {
+    for (var data in maps) {
       DataRow row = DataRow(cells: [
         DataCell(
           Container(
@@ -263,26 +277,33 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
         DataCell(
           Container(
             width: Get.width * 0.2,
-            child: Text("Name $i"),
+            child: Text(data['faId'].toString()),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.2,
-            child: Text("Student $i is so good"),
+            child: Text(data['locationId'].toString()),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.2,
-            child: Text("qty = 1\ncondition = Baik"),
+            child: Text(
+                "qty = ${data['qty'].toString()}\ncondition = condition = ${data['conStatCode'].toString()}"),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.3,
-            child: Text(
-                "qty = 1\nexistence = ADA\ntagging = Lengkap\nusage = Digunakan\ncondition = Baik\nowner = Permanent"),
+            child: InkWell(
+              onTap: () => Get.toNamed(
+                '/stockopnameitem',
+                arguments: [data['id']],
+              )?.whenComplete(() => fetchData()),
+              child: Text(
+                  "qty = ${data['qty'].toString()}\nexistence = ${data['existStatCode'].toString()}\ntagging = ${data['tagStatCode'].toString()}\nusage = ${data['usageStatCode'].toString()}\ncondition = ${data['conStatCode'].toString()}\nowner = ${data['ownStatCode'].toString()}"),
+            ),
           ),
         ),
       ]);
@@ -302,8 +323,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
           text: "Closing Result", value: "closingResult", show: true),
       DatatableHeader(text: "Stock Opname", value: "stockOpname", show: true)
     ];
-    _sources = await generateData(n: 10).toList();
-    _rows = await genData(n: 30);
+    _rows = await genData();
     setState(() => _isLoading = false);
   }
 }
