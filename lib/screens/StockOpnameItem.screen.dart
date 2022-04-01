@@ -28,6 +28,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   TextEditingController descriptionController = TextEditingController();
   TextEditingController faNoController = TextEditingController();
 
+  int id = 0;
   String selectedOwnership = "Select";
   String selectedCondition = "Select";
   String selectedUsage = "Select";
@@ -55,6 +56,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
 
     if (maps.length == 1) {
       setState(() {
+        id = maps[0]['id'];
         selectedExistence = maps[0]['existStatCode'];
         selectedTagging = maps[0]['tagStatCode'];
         selectedUsage = maps[0]['usageStatCode'];
@@ -433,25 +435,27 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                       ),
                     ),
                   ),
-                  Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                    height: 50,
-                    width: 600,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 228, 11, 29),
-                      ),
-                      onPressed: () {},
-                      child: Text(
-                        "Delete",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
+                  if (Get.arguments != null) ...[
+                    Container(
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      height: 50,
+                      width: 600,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 228, 11, 29),
+                        ),
+                        onPressed: () {},
+                        child: Text(
+                          "Delete",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             )
@@ -514,6 +518,13 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     return options;
   }
 
+  Future<void> actionDelete() async {
+    Database db = await dbHelper.initDb();
+    int exec =
+        await db.delete("stockopnames", where: "id = ?", whereArgs: [id]);
+    Get.back();
+  }
+
   Future<void> actionSave() async {
     Database db = await dbHelper.initDb();
 
@@ -521,24 +532,36 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
 
     Map<String, dynamic> map = Map();
-    map['stockOpnameId'] = 0;
-    map['periodId'] = 0;
-    map['faId'] = 0;
-    map['locationId'] = 0;
-    map['qty'] = 0;
-    map['existStatCode'] = selectedExistence;
-    map['tagStatCode'] = selectedTagging;
-    map['usageStatCode'] = selectedUsage;
-    map['conStatCode'] = selectedCondition;
-    map['ownStatCode'] = selectedOwnership;
-    map['syncDate'] = formattedDate;
-    map['syncBy'] = box.read('userId');
-    map['uploadDate'] = formattedDate;
-    map['uploadBy'] = box.read('userId');
-    map['uploadMessage'] = "";
+    if (id == 0) {
+      map['stockOpnameId'] = 0;
+      map['periodId'] = 0;
+      map['faId'] = 0;
+      map['locationId'] = 0;
+      map['qty'] = 0;
+      map['existStatCode'] = selectedExistence;
+      map['tagStatCode'] = selectedTagging;
+      map['usageStatCode'] = selectedUsage;
+      map['conStatCode'] = selectedCondition;
+      map['ownStatCode'] = selectedOwnership;
+      map['syncDate'] = formattedDate;
+      map['syncBy'] = box.read('userId');
+      map['uploadDate'] = formattedDate;
+      map['uploadBy'] = box.read('userId');
+      map['uploadMessage'] = "";
 
-    int exec = await db.insert("stockopnames", map,
-        conflictAlgorithm: ConflictAlgorithm.replace);
-    Get.snackbar("Inserted", "ID ${exec.toString()}");
+      int exec = await db.insert("stockopnames", map,
+          conflictAlgorithm: ConflictAlgorithm.replace);
+
+      Get.snackbar("Inserted", "ID ${exec.toString()}");
+    } else {
+      map['existStatCode'] = selectedExistence;
+      map['tagStatCode'] = selectedTagging;
+      map['usageStatCode'] = selectedUsage;
+      map['conStatCode'] = selectedCondition;
+      map['ownStatCode'] = selectedOwnership;
+      int exec = await db
+          .update("stockopnames", map, where: "id = ?", whereArgs: [id]);
+      Get.snackbar("Updated", "ID ${exec.toString()}");
+    }
   }
 }
