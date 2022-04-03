@@ -82,11 +82,11 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     if (maps.length == 1) {
       setState(() {
         idStockOpname = id;
-        selectedExistence = maps[0]['existStatCode'];
-        selectedTagging = maps[0]['tagStatCode'];
-        selectedUsage = maps[0]['usageStatCode'];
-        selectedCondition = maps[0]['conStatCode'];
-        selectedOwnership = maps[0]['ownStatCode'];
+        selectedExistence = int.parse(maps[0]['existStatCode']);
+        selectedTagging = int.parse(maps[0]['tagStatCode']);
+        selectedUsage = int.parse(maps[0]['usageStatCode']);
+        selectedCondition = int.parse(maps[0]['conStatCode']);
+        selectedOwnership = int.parse(maps[0]['ownStatCode']);
       });
     }
   }
@@ -128,6 +128,30 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
       _optionsCondition = conMaps;
       _optionsOwnership = ownMaps;
     });
+  }
+
+  void actionConfirm() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to delete data ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              actionDelete();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> actionDelete() async {
@@ -607,7 +631,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                           backgroundColor: Color.fromARGB(255, 228, 11, 29),
                         ),
                         onPressed: () {
-                          actionDelete();
+                          actionConfirm();
                         },
                         child: Text(
                           "Delete",

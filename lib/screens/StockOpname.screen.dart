@@ -59,7 +59,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
           Container(
             width: Get.width * 0.2,
             child: Text(
-                "qty = ${data['qty'].toString()}\ncondition = condition = ${data['conStatCode'].toString()}"),
+                "qty = ${data['qty'].toString()}\ncondition = ${data['conStatCode'].toString()}"),
           ),
         ),
         DataCell(
