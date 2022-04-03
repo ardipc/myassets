@@ -192,7 +192,18 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         idStockOpname = exec;
       });
 
-      Get.snackbar("Inserted", "ID ${exec.toString()}");
+      Get.dialog(AlertDialog(
+        title: Text("Information"),
+        content: Text("Data has been saved."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("Close"),
+          ),
+        ],
+      ));
     } else {
       map['existStatCode'] = selectedExistence;
       map['tagStatCode'] = selectedTagging;
@@ -203,8 +214,27 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
       int exec = await db.update("stockopnames", map,
           where: "id = ?", whereArgs: [idStockOpname]);
 
-      Get.snackbar("Info", "Update successfully");
+      Get.dialog(AlertDialog(
+        title: Text("Information"),
+        content: Text("Data has been updated."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("Close"),
+          ),
+        ],
+      ));
     }
+  }
+
+  void getInfoItem(String value) {
+    setState(() {
+      tagNoController.text = value;
+      descriptionController.text = "Description ${value}";
+      faNoController.text = "FA No ${value}";
+    });
   }
 
   @override
@@ -304,20 +334,20 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                           onPressed: () async {
                             try {
                               String barcode = await BarcodeScanner.scan();
-                              print(barcode);
+                              getInfoItem(barcode);
                               setState(() {
-                                this.barcode = barcode;
+                                barcode = barcode;
                               });
                             } on PlatformException catch (error) {
                               if (error.code ==
                                   BarcodeScanner.CameraAccessDenied) {
                                 setState(() {
-                                  this.barcode =
+                                  barcode =
                                       'Izin kamera tidak diizinkan oleh si pengguna';
                                 });
                               } else {
                                 setState(() {
-                                  this.barcode = 'Error: $error';
+                                  barcode = 'Error: $error';
                                 });
                               }
                             }
