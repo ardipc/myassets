@@ -21,28 +21,53 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   final box = GetStorage();
   DbHelper dbHelper = DbHelper();
 
-  String selectedValue = "USA";
+  List _optionsPeriods = [];
+  int? selectedValue = null;
+
   String barcode = "";
+
+  int idStockOpname = 0;
 
   TextEditingController tagNoController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController faNoController = TextEditingController();
 
-  int id = 0;
-  String selectedOwnership = "Select";
-  String selectedCondition = "Select";
-  String selectedUsage = "Select";
-  String selectedTagging = "Select";
-  String selectedExistence = "Select";
+  int? selectedExistence = null;
+  List _optionsExistence = [];
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    if (Get.arguments != null) {
-      print(Get.arguments[0].runtimeType);
-      fetchData(Get.arguments[0]);
+  int? selectedTagging = null;
+  List _optionsTagging = [];
+
+  int? selectedUsage = null;
+  List _optionsUsage = [];
+
+  int? selectedCondition = null;
+  List _optionsCondition = [];
+
+  int? selectedOwnership = null;
+  List _optionsOwnership = [];
+
+  void fetchPeriod() async {
+    Database db = await dbHelper.initDb();
+
+    List<Map<String, dynamic>> maps = await db.query(
+      "periods",
+      columns: ["periodId", "periodName"],
+    );
+    List items = [];
+
+    Map<String, dynamic> map = Map();
+    map['periodId'] = 0;
+    map['periodName'] = "Select";
+    items.add(map);
+
+    for (var row in maps) {
+      items.add(row);
     }
+
+    setState(() {
+      _optionsPeriods = items;
+    });
   }
 
   Future<void> fetchData(int id) async {
@@ -56,7 +81,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
 
     if (maps.length == 1) {
       setState(() {
-        id = maps[0]['id'];
+        idStockOpname = id;
         selectedExistence = maps[0]['existStatCode'];
         selectedTagging = maps[0]['tagStatCode'];
         selectedUsage = maps[0]['usageStatCode'];
@@ -64,8 +89,110 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         selectedOwnership = maps[0]['ownStatCode'];
       });
     }
+  }
 
-    print(maps);
+  void fetchAllOptions() async {
+    Database db = await dbHelper.initDb();
+
+    List<Map<String, dynamic>> existMaps = await db.query(
+      "statuses",
+      where: 'genGroup = ?',
+      whereArgs: ['EXISTSTAT'],
+    );
+
+    List<Map<String, dynamic>> tagMaps = await db.query(
+      "statuses",
+      where: 'genGroup = ?',
+      whereArgs: ['TAGSTAT'],
+    );
+    List<Map<String, dynamic>> usageMaps = await db.query(
+      "statuses",
+      where: 'genGroup = ?',
+      whereArgs: ['USAGESTAT'],
+    );
+    List<Map<String, dynamic>> conMaps = await db.query(
+      "statuses",
+      where: 'genGroup = ?',
+      whereArgs: ['CONSTAT'],
+    );
+    List<Map<String, dynamic>> ownMaps = await db.query(
+      "statuses",
+      where: 'genGroup = ?',
+      whereArgs: ['OWNSTAT'],
+    );
+
+    setState(() {
+      _optionsExistence = existMaps;
+      _optionsTagging = tagMaps;
+      _optionsUsage = usageMaps;
+      _optionsCondition = conMaps;
+      _optionsOwnership = ownMaps;
+    });
+  }
+
+  Future<void> actionDelete() async {
+    Database db = await dbHelper.initDb();
+    int exec = await db
+        .delete("stockopnames", where: "id = ?", whereArgs: [idStockOpname]);
+    Get.back();
+  }
+
+  Future<void> actionSave() async {
+    Database db = await dbHelper.initDb();
+
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+
+    Map<String, dynamic> map = Map();
+    if (idStockOpname == 0) {
+      map['stockOpnameId'] = 0;
+      map['periodId'] = 0;
+      map['faId'] = 0;
+      map['locationId'] = 0;
+      map['qty'] = 0;
+      map['existStatCode'] = selectedExistence;
+      map['tagStatCode'] = selectedTagging;
+      map['usageStatCode'] = selectedUsage;
+      map['conStatCode'] = selectedCondition;
+      map['ownStatCode'] = selectedOwnership;
+      map['syncDate'] = formattedDate;
+      map['syncBy'] = box.read('userId');
+      map['uploadDate'] = formattedDate;
+      map['uploadBy'] = box.read('userId');
+      map['uploadMessage'] = "";
+
+      int exec = await db.insert("stockopnames", map,
+          conflictAlgorithm: ConflictAlgorithm.replace);
+
+      setState(() {
+        idStockOpname = exec;
+      });
+
+      Get.snackbar("Inserted", "ID ${exec.toString()}");
+    } else {
+      map['existStatCode'] = selectedExistence;
+      map['tagStatCode'] = selectedTagging;
+      map['usageStatCode'] = selectedUsage;
+      map['conStatCode'] = selectedCondition;
+      map['ownStatCode'] = selectedOwnership;
+
+      int exec = await db.update("stockopnames", map,
+          where: "id = ?", whereArgs: [idStockOpname]);
+
+      Get.snackbar("Info", "Update successfully");
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchAllOptions();
+    fetchPeriod();
+    if (Get.arguments != null) {
+      print(Get.arguments[0].runtimeType);
+      fetchData(Get.arguments[0]);
+    }
   }
 
   @override
@@ -100,11 +227,16 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         child: DropdownButton(
                           isExpanded: true,
                           hint: const Text("Select Period"),
-                          items: dropdownItems,
+                          items: _optionsPeriods.map((item) {
+                            return DropdownMenuItem(
+                              child: Text(item['periodName']),
+                              value: item['periodId'],
+                            );
+                          }).toList(),
                           value: selectedValue,
                           onChanged: (value) {
                             setState(() {
-                              selectedValue = value.toString();
+                              selectedValue = int.parse(value.toString());
                             });
                           },
                         ),
@@ -249,11 +381,17 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               child: DropdownButton(
                                 isExpanded: true,
                                 hint: const Text("Select Existence"),
-                                items: dropdownExistence,
+                                items: _optionsExistence.map((item) {
+                                  return DropdownMenuItem(
+                                    child: Text(item['genName']),
+                                    value: item['genId'],
+                                  );
+                                }).toList(),
                                 value: selectedExistence,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedExistence = value.toString();
+                                    selectedExistence =
+                                        int.parse(value.toString());
                                   });
                                 },
                               ),
@@ -285,11 +423,17 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               child: DropdownButton(
                                 isExpanded: true,
                                 hint: const Text("Select Tagging"),
-                                items: dropdownTagging,
+                                items: _optionsTagging.map((item) {
+                                  return DropdownMenuItem(
+                                    child: Text(item['genName']),
+                                    value: item['genId'],
+                                  );
+                                }).toList(),
                                 value: selectedTagging,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedTagging = value.toString();
+                                    selectedTagging =
+                                        int.parse(value.toString());
                                   });
                                 },
                               ),
@@ -321,11 +465,16 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               child: DropdownButton(
                                 isExpanded: true,
                                 hint: const Text("Select Usage"),
-                                items: dropdownUsage,
+                                items: _optionsUsage.map((item) {
+                                  return DropdownMenuItem(
+                                    child: Text(item['genName']),
+                                    value: item['genId'],
+                                  );
+                                }).toList(),
                                 value: selectedUsage,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedUsage = value.toString();
+                                    selectedUsage = int.parse(value.toString());
                                   });
                                 },
                               ),
@@ -357,11 +506,17 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               child: DropdownButton(
                                 isExpanded: true,
                                 hint: const Text("Select Condition"),
-                                items: dropdownCondition,
+                                items: _optionsCondition.map((item) {
+                                  return DropdownMenuItem(
+                                    child: Text(item['genName']),
+                                    value: item['genId'],
+                                  );
+                                }).toList(),
                                 value: selectedCondition,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedCondition = value.toString();
+                                    selectedCondition =
+                                        int.parse(value.toString());
                                   });
                                 },
                               ),
@@ -393,11 +548,17 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               child: DropdownButton(
                                 isExpanded: true,
                                 hint: const Text("Select Ownership"),
-                                items: dropdownOwnership,
+                                items: _optionsOwnership.map((item) {
+                                  return DropdownMenuItem(
+                                    child: Text(item['genName']),
+                                    value: item['genId'],
+                                  );
+                                }).toList(),
                                 value: selectedOwnership,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedOwnership = value.toString();
+                                    selectedOwnership =
+                                        int.parse(value.toString());
                                   });
                                 },
                               ),
@@ -435,7 +596,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                       ),
                     ),
                   ),
-                  if (Get.arguments != null) ...[
+                  if (idStockOpname != 0) ...[
                     Container(
                       margin:
                           EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
@@ -445,7 +606,9 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         style: TextButton.styleFrom(
                           backgroundColor: Color.fromARGB(255, 228, 11, 29),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          actionDelete();
+                        },
                         child: Text(
                           "Delete",
                           style: TextStyle(
@@ -463,105 +626,5 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         ),
       ),
     );
-  }
-
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("USA"), value: "USA"),
-      DropdownMenuItem(child: Text("Canada"), value: "Canada"),
-      DropdownMenuItem(child: Text("Brazil"), value: "Brazil"),
-      DropdownMenuItem(child: Text("England"), value: "England"),
-    ];
-    return menuItems;
-  }
-
-  List<DropdownMenuItem<String>> get dropdownOwnership {
-    List<DropdownMenuItem<String>> options = [
-      DropdownMenuItem(child: Text("Select"), value: "Select"),
-      DropdownMenuItem(child: Text("Dipinjam"), value: "Dipinjam"),
-      DropdownMenuItem(child: Text("Permanent"), value: "Permanent"),
-    ];
-    return options;
-  }
-
-  List<DropdownMenuItem<String>> get dropdownCondition {
-    List<DropdownMenuItem<String>> options = [
-      DropdownMenuItem(child: Text("Select"), value: "Select"),
-      DropdownMenuItem(child: Text("Baik"), value: "Baik"),
-      DropdownMenuItem(child: Text("Rusak"), value: "Rusak"),
-    ];
-    return options;
-  }
-
-  List<DropdownMenuItem<String>> get dropdownUsage {
-    List<DropdownMenuItem<String>> options = [
-      DropdownMenuItem(child: Text("Select"), value: "Select"),
-      DropdownMenuItem(child: Text("Digunakan"), value: "Digunakan"),
-    ];
-    return options;
-  }
-
-  List<DropdownMenuItem<String>> get dropdownTagging {
-    List<DropdownMenuItem<String>> options = [
-      DropdownMenuItem(child: Text("Select"), value: "Select"),
-      DropdownMenuItem(child: Text("Lengkap"), value: "Lengkap"),
-    ];
-    return options;
-  }
-
-  List<DropdownMenuItem<String>> get dropdownExistence {
-    List<DropdownMenuItem<String>> options = [
-      DropdownMenuItem(child: Text("Select"), value: "Select"),
-      DropdownMenuItem(child: Text("ADA"), value: "ADA"),
-      DropdownMenuItem(child: Text("HILANG"), value: "HILANG"),
-    ];
-    return options;
-  }
-
-  Future<void> actionDelete() async {
-    Database db = await dbHelper.initDb();
-    int exec =
-        await db.delete("stockopnames", where: "id = ?", whereArgs: [id]);
-    Get.back();
-  }
-
-  Future<void> actionSave() async {
-    Database db = await dbHelper.initDb();
-
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
-
-    Map<String, dynamic> map = Map();
-    if (id == 0) {
-      map['stockOpnameId'] = 0;
-      map['periodId'] = 0;
-      map['faId'] = 0;
-      map['locationId'] = 0;
-      map['qty'] = 0;
-      map['existStatCode'] = selectedExistence;
-      map['tagStatCode'] = selectedTagging;
-      map['usageStatCode'] = selectedUsage;
-      map['conStatCode'] = selectedCondition;
-      map['ownStatCode'] = selectedOwnership;
-      map['syncDate'] = formattedDate;
-      map['syncBy'] = box.read('userId');
-      map['uploadDate'] = formattedDate;
-      map['uploadBy'] = box.read('userId');
-      map['uploadMessage'] = "";
-
-      int exec = await db.insert("stockopnames", map,
-          conflictAlgorithm: ConflictAlgorithm.replace);
-
-      Get.snackbar("Inserted", "ID ${exec.toString()}");
-    } else {
-      map['existStatCode'] = selectedExistence;
-      map['tagStatCode'] = selectedTagging;
-      map['usageStatCode'] = selectedUsage;
-      map['conStatCode'] = selectedCondition;
-      map['ownStatCode'] = selectedOwnership;
-      int exec = await db
-          .update("stockopnames", map, where: "id = ?", whereArgs: [id]);
-      Get.snackbar("Updated", "ID ${exec.toString()}");
-    }
   }
 }

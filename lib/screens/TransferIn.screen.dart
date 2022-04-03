@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myasset/helpers/db.helper.dart';
 import 'package:responsive_table/responsive_table.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class TransferInScreen extends StatefulWidget {
   const TransferInScreen({Key? key}) : super(key: key);
@@ -12,8 +14,7 @@ class TransferInScreen extends StatefulWidget {
 }
 
 class _TransferInScreen extends State<TransferInScreen> {
-  String selectedValue = "USA";
-
+  DbHelper dbHelper = DbHelper();
   late List<DatatableHeader> _headers;
 
   List<Map<String, dynamic>> _sources = [];
@@ -22,11 +23,111 @@ class _TransferInScreen extends State<TransferInScreen> {
   int _currentPage = 1;
   bool _isLoading = true;
 
+  int selectedValue = 0;
+  List _dropdownPeriods = [];
+
+  List<DataRow> genData({int n: 10}) {
+    List<DataRow> temps = [];
+    final List source = List.filled(n, Random.secure());
+    var i = 1;
+    for (var data in source) {
+      DataRow row = DataRow(cells: [
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: Text("$i"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.15,
+            child: Text("27-Feb-2022"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.25,
+            child: Text("800IT202200$i"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.25,
+            child: Text("SJ/2022/II/00$i"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: Text("Approved"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: TextButton(
+              onPressed: () {},
+              child: Icon(Icons.edit_note),
+            ),
+          ),
+        ),
+      ]);
+      temps.add(row);
+      i++;
+    }
+    return temps;
+  }
+
+  void fetchData() async {
+    setState(() => _isLoading = true);
+    _rows = await genData(n: 10);
+    setState(() => _isLoading = false);
+  }
+
+  void fetchPeriod() async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> maps = await db.query(
+      "periods",
+      columns: ["periodId", "periodName"],
+    );
+    List items = [];
+
+    Map<String, dynamic> map = Map();
+    map['periodId'] = 0;
+    map['periodName'] = "Select";
+    items.add(map);
+
+    for (var row in maps) {
+      items.add(row);
+    }
+
+    setState(() {
+      _dropdownPeriods = items;
+    });
+  }
+
+  void actionDownload() async {
+    Database db = await dbHelper.initDb();
+    Map<String, dynamic> map = Map();
+    map['periodName'] = 'Februari 2022 (1 Feb 2022 - 29 Feb 2022)';
+    map['startDate'] = '2022-02-01';
+    map['endDate'] = '2022-02-29';
+    map['closeActualDate'] = '2022-02-25';
+    map['soStartDate'] = '2022-02-25';
+    map['soEndDate'] = '2022-02-25';
+    map['syncDate'] = '2022-04-02';
+    map['syncBy'] = 0;
+    int id = await db.insert("periods", map,
+        conflictAlgorithm: ConflictAlgorithm.replace);
+    Get.snackbar("Insert", "ID ${id.toString()}");
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     fetchData();
+    fetchPeriod();
   }
 
   @override
@@ -60,11 +161,16 @@ class _TransferInScreen extends State<TransferInScreen> {
                       child: DropdownButton(
                         isExpanded: true,
                         hint: const Text("Select Period"),
-                        items: dropdownItems,
+                        items: _dropdownPeriods.map((item) {
+                          return DropdownMenuItem(
+                            child: Text(item['periodName']),
+                            value: item['periodId'],
+                          );
+                        }).toList(),
                         value: selectedValue,
                         onChanged: (value) {
                           setState(() {
-                            selectedValue = value.toString();
+                            selectedValue = int.parse(value.toString());
                           });
                         },
                       ),
@@ -73,7 +179,7 @@ class _TransferInScreen extends State<TransferInScreen> {
                 ),
                 TextButton.icon(
                   onPressed: () {
-                    Get.toNamed('/table');
+                    actionDownload();
                   },
                   icon: Icon(Icons.download),
                   label: Text("Download"),
@@ -176,73 +282,5 @@ class _TransferInScreen extends State<TransferInScreen> {
         ],
       ),
     );
-  }
-
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("USA"), value: "USA"),
-      DropdownMenuItem(child: Text("Canada"), value: "Canada"),
-      DropdownMenuItem(child: Text("Brazil"), value: "Brazil"),
-      DropdownMenuItem(child: Text("England"), value: "England"),
-    ];
-    return menuItems;
-  }
-
-  List<DataRow> genData({int n: 10}) {
-    List<DataRow> temps = [];
-    final List source = List.filled(n, Random.secure());
-    var i = 1;
-    for (var data in source) {
-      DataRow row = DataRow(cells: [
-        DataCell(
-          Container(
-            width: Get.width * 0.1,
-            child: Text("$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.15,
-            child: Text("27-Feb-2022"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.25,
-            child: Text("800IT202200$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.25,
-            child: Text("SJ/2022/II/00$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.1,
-            child: Text("Approved"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.1,
-            child: TextButton(
-              onPressed: () {},
-              child: Icon(Icons.edit_note),
-            ),
-          ),
-        ),
-      ]);
-      temps.add(row);
-      i++;
-    }
-    return temps;
-  }
-
-  void fetchData() async {
-    setState(() => _isLoading = true);
-    _rows = await genData(n: 10);
-    setState(() => _isLoading = false);
   }
 }

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/Table.screen.dart';
 import 'package:responsive_table/responsive_table.dart';
@@ -17,7 +18,8 @@ class StockOpnameScreen extends StatefulWidget {
 class _StockOpnameScreenState extends State<StockOpnameScreen> {
   DbHelper dbHelper = DbHelper();
 
-  String selectedValue = "USA";
+  int? selectedValue = null;
+  List _dropdownPeriods = [];
 
   late List<DatatableHeader> _headers;
 
@@ -27,12 +29,129 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   int _currentPage = 1;
   bool _isLoading = true;
 
+  Future<List<DataRow>> genData() async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> maps = await db.query("stockopnames");
+
+    List<DataRow> temps = [];
+    var i = 1;
+    for (var data in maps) {
+      DataRow row = DataRow(cells: [
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: Text("$i"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.2,
+            child: Text(data['faId'].toString()),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.2,
+            child: Text(data['locationId'].toString()),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.2,
+            child: Text(
+                "qty = ${data['qty'].toString()}\ncondition = condition = ${data['conStatCode'].toString()}"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.3,
+            child: InkWell(
+              onTap: () => Get.toNamed(
+                '/stockopnameitem',
+                arguments: [data['id']],
+              )?.whenComplete(() => fetchData()),
+              child: Text(
+                  "qty = ${data['qty'].toString()}\nexistence = ${data['existStatCode'].toString()}\ntagging = ${data['tagStatCode'].toString()}\nusage = ${data['usageStatCode'].toString()}\ncondition = ${data['conStatCode'].toString()}\nowner = ${data['ownStatCode'].toString()}"),
+            ),
+          ),
+        ),
+      ]);
+      temps.add(row);
+      i++;
+    }
+    return temps;
+  }
+
+  void fetchPeriod() async {
+    Database db = await dbHelper.initDb();
+
+    List<Map<String, dynamic>> maps = await db.query(
+      "periods",
+      columns: ["periodId", "periodName"],
+    );
+
+    setState(() {
+      _dropdownPeriods = maps;
+    });
+  }
+
+  void fetchData() async {
+    setState(() => _isLoading = true);
+    _headers = [
+      DatatableHeader(text: "No.", value: "no", show: true),
+      DatatableHeader(text: "Tag No", value: "tagNo", show: true),
+      DatatableHeader(text: "Description", value: "description", show: true),
+      DatatableHeader(
+          text: "Closing Result", value: "closingResult", show: true),
+      DatatableHeader(text: "Stock Opname", value: "stockOpname", show: true)
+    ];
+    _rows = await genData();
+    setState(() => _isLoading = false);
+  }
+
+  void actionDownload() async {
+    Database db = await dbHelper.initDb();
+
+    Batch batch = db.batch();
+    // batch.delete("statuses", where: "genId = ?", whereArgs: [1]);
+    // batch.delete("statuses", where: "genId = ?", whereArgs: [2]);
+    // batch.insert(
+    //   "statuses",
+    //   {
+    //     'genCode': 'TAG01',
+    //     'genName': 'Lengkap',
+    //     'genGroup': 'TAGSTAT',
+    //     'sort': 1,
+    //     'syncDate': '2022-02-02',
+    //     'syncBy': 0
+    //   },
+    //   conflictAlgorithm: ConflictAlgorithm.replace,
+    // );
+    // batch.insert(
+    //   "statuses",
+    //   {
+    //     'genCode': 'EXIST02',
+    //     'genName': 'Kurang Lengkap',
+    //     'genGroup': 'TAGSTAT',
+    //     'sort': 2,
+    //     'syncDate': '2022-02-02',
+    //     'syncBy': 0
+    //   },
+    //   conflictAlgorithm: ConflictAlgorithm.replace,
+    // );
+
+    List result = await batch.commit();
+
+    Get.snackbar("Insert", "ID ${result.toString()}");
+    fetchPeriod();
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    fetchPeriod();
     fetchData();
-    print("initState");
   }
 
   @override
@@ -90,11 +209,16 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                       child: DropdownButton(
                         isExpanded: true,
                         hint: const Text("Select Period"),
-                        items: dropdownItems,
+                        items: _dropdownPeriods.map((item) {
+                          return DropdownMenuItem(
+                            child: Text(item['periodName']),
+                            value: item['periodId'],
+                          );
+                        }).toList(),
                         value: selectedValue,
                         onChanged: (value) {
                           setState(() {
-                            selectedValue = value.toString();
+                            selectedValue = int.parse(value.toString());
                           });
                         },
                       ),
@@ -103,7 +227,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                 ),
                 TextButton.icon(
                   onPressed: () {
-                    Get.toNamed('/table');
+                    actionDownload();
                   },
                   icon: Icon(Icons.download),
                   label: Text("Download"),
@@ -248,82 +372,5 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
         ],
       ),
     );
-  }
-
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("USA"), value: "USA"),
-      DropdownMenuItem(child: Text("Canada"), value: "Canada"),
-      DropdownMenuItem(child: Text("Brazil"), value: "Brazil"),
-      DropdownMenuItem(child: Text("England"), value: "England"),
-    ];
-    return menuItems;
-  }
-
-  Future<List<DataRow>> genData() async {
-    Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> maps = await db.query("stockopnames");
-
-    List<DataRow> temps = [];
-    var i = 1;
-    for (var data in maps) {
-      DataRow row = DataRow(cells: [
-        DataCell(
-          Container(
-            width: Get.width * 0.1,
-            child: Text("$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.2,
-            child: Text(data['faId'].toString()),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.2,
-            child: Text(data['locationId'].toString()),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.2,
-            child: Text(
-                "qty = ${data['qty'].toString()}\ncondition = condition = ${data['conStatCode'].toString()}"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.3,
-            child: InkWell(
-              onTap: () => Get.toNamed(
-                '/stockopnameitem',
-                arguments: [data['id']],
-              )?.whenComplete(() => fetchData()),
-              child: Text(
-                  "qty = ${data['qty'].toString()}\nexistence = ${data['existStatCode'].toString()}\ntagging = ${data['tagStatCode'].toString()}\nusage = ${data['usageStatCode'].toString()}\ncondition = ${data['conStatCode'].toString()}\nowner = ${data['ownStatCode'].toString()}"),
-            ),
-          ),
-        ),
-      ]);
-      temps.add(row);
-      i++;
-    }
-    return temps;
-  }
-
-  void fetchData() async {
-    setState(() => _isLoading = true);
-    _headers = [
-      DatatableHeader(text: "No.", value: "no", show: true),
-      DatatableHeader(text: "Tag No", value: "tagNo", show: true),
-      DatatableHeader(text: "Description", value: "description", show: true),
-      DatatableHeader(
-          text: "Closing Result", value: "closingResult", show: true),
-      DatatableHeader(text: "Stock Opname", value: "stockOpname", show: true)
-    ];
-    _rows = await genData();
-    setState(() => _isLoading = false);
   }
 }
