@@ -2,7 +2,10 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/Table.screen.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class TransferInItemScreen extends StatefulWidget {
   TransferInItemScreen({Key? key}) : super(key: key);
@@ -12,8 +15,69 @@ class TransferInItemScreen extends StatefulWidget {
 }
 
 class _TransferInItemScreenState extends State<TransferInItemScreen> {
-  String selectedValue = "USA";
-  String barcode = "";
+  DbHelper dbHelper = DbHelper();
+
+  int? idFaTrans = 0;
+  int? plantId = 0;
+  String? transTypeCode = "T";
+  String? transferTypeCode = "TI";
+
+  final transNo = TextEditingController();
+  final dateTime = TextEditingController();
+  final manualRef = TextEditingController();
+  final otherRef = TextEditingController();
+  final oldLocFrom = TextEditingController();
+  final newLocFrom = TextEditingController();
+
+  Future<void> actionSave() async {
+    Database db = await dbHelper.initDb();
+
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+
+    Map<String, dynamic> map = Map();
+    if (idFaTrans == 0) {
+    } else {}
+  }
+
+  Future<void> fetchData(int id) async {
+    Database db = await dbHelper.initDb();
+
+    List<Map<String, dynamic>> maps = await db.query(
+      "fatrans",
+      where: "id = ?",
+      whereArgs: [id],
+    );
+
+    if (maps.length == 1) {
+      setState(() {
+        idFaTrans = id;
+        dateTime.text = maps[0]['transDate'];
+        plantId = maps[0]['plantId'];
+        transTypeCode = maps[0]['transTypeCode'];
+        transferTypeCode = maps[0]['transferTypeCode'];
+        transNo.text = maps[0]['transNo'];
+        dateTime.text = maps[0]['dateTime'];
+        manualRef.text = maps[0]['manualRef'];
+        otherRef.text = maps[0]['otherRef'];
+        oldLocFrom.text = maps[0]['oldLocFrom'];
+        newLocFrom.text = maps[0]['newLocFrom'];
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (Get.arguments != null) {
+      fetchData(Get.arguments[0]);
+    } else {
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+      dateTime.text = formattedDate;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +107,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       ),
                       Expanded(
                         child: TextField(
+                          controller: transNo,
                           decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                            contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.blueAccent),
                             ),
@@ -64,8 +129,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       ),
                       Expanded(
                         child: TextField(
+                          controller: dateTime,
                           decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                            contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.blueAccent)),
@@ -87,8 +153,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       ),
                       Expanded(
                           child: TextField(
+                        controller: manualRef,
                         decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 10),
+                          contentPadding: EdgeInsets.all(10),
                           border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.blueAccent)),
                         ),
@@ -106,8 +173,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       ),
                       Expanded(
                         child: TextField(
+                          controller: otherRef,
                           decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                            contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.blueAccent)),
@@ -128,8 +196,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       Container(
                         width: Get.width * 0.2,
                         child: TextField(
+                          controller: oldLocFrom,
                           decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                            contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.blueAccent)),
@@ -139,7 +208,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       Expanded(
                         child: TextField(
                           decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                            contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.blueAccent)),
@@ -160,8 +229,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       Container(
                         width: Get.width * 0.2,
                         child: TextField(
+                          controller: newLocFrom,
                           decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                            contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.blueAccent)),
@@ -171,7 +241,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       Expanded(
                         child: TextField(
                           decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                            contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.blueAccent)),
@@ -196,7 +266,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor: Color.fromARGB(255, 62, 81, 255),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      actionSave();
+                    },
                     child: Text(
                       "Save as Draft",
                       style: TextStyle(

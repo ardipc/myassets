@@ -244,7 +244,6 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     fetchAllOptions();
     fetchPeriod();
     if (Get.arguments != null) {
-      print(Get.arguments[0].runtimeType);
       fetchData(Get.arguments[0]);
     }
   }
@@ -322,8 +321,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                           child: new TextField(
                             controller: tagNoController,
                             decoration: InputDecoration(
-                              contentPadding:
-                                  EdgeInsets.symmetric(vertical: 10),
+                              contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),
@@ -373,8 +371,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                           child: TextField(
                             controller: descriptionController,
                             decoration: InputDecoration(
-                              contentPadding:
-                                  EdgeInsets.symmetric(vertical: 10),
+                              contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),
@@ -402,8 +399,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                             },
                             controller: faNoController,
                             decoration: InputDecoration(
-                              contentPadding:
-                                  EdgeInsets.symmetric(vertical: 10),
+                              contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),

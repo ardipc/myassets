@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:responsive_table/responsive_table.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -14,6 +16,7 @@ class TransferInScreen extends StatefulWidget {
 }
 
 class _TransferInScreen extends State<TransferInScreen> {
+  final box = GetStorage();
   DbHelper dbHelper = DbHelper();
   late List<DatatableHeader> _headers;
 
@@ -23,14 +26,20 @@ class _TransferInScreen extends State<TransferInScreen> {
   int _currentPage = 1;
   bool _isLoading = true;
 
-  int selectedValue = 0;
+  int? selectedValue = null;
   List _dropdownPeriods = [];
 
-  List<DataRow> genData({int n: 10}) {
+  Future<List<DataRow>> genData() async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> maps = await db.query(
+      "fatrans",
+      where: "transferTypeCode = ? AND isVoid = ?",
+      whereArgs: ["TI", 0],
+    );
+
     List<DataRow> temps = [];
-    final List source = List.filled(n, Random.secure());
     var i = 1;
-    for (var data in source) {
+    for (var data in maps) {
       DataRow row = DataRow(cells: [
         DataCell(
           Container(
@@ -41,32 +50,35 @@ class _TransferInScreen extends State<TransferInScreen> {
         DataCell(
           Container(
             width: Get.width * 0.15,
-            child: Text("27-Feb-2022"),
+            child: Text(data['transDate']),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.25,
-            child: Text("800IT202200$i"),
+            child: Text(data['transNo']),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.25,
-            child: Text("SJ/2022/II/00$i"),
+            child: Text(data['manualRef']),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.1,
-            child: Text("Approved"),
+            child: Text(data['isApproved'] == 0 ? "Not Yet" : "Approved"),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.1,
             child: TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Get.toNamed('/transferinitem', arguments: [data['id']])
+                    ?.whenComplete(() => fetchData());
+              },
               child: Icon(Icons.edit_note),
             ),
           ),
@@ -80,7 +92,7 @@ class _TransferInScreen extends State<TransferInScreen> {
 
   void fetchData() async {
     setState(() => _isLoading = true);
-    _rows = await genData(n: 10);
+    _rows = await genData();
     setState(() => _isLoading = false);
   }
 
@@ -91,11 +103,6 @@ class _TransferInScreen extends State<TransferInScreen> {
       columns: ["periodId", "periodName"],
     );
     List items = [];
-
-    Map<String, dynamic> map = Map();
-    map['periodId'] = 0;
-    map['periodName'] = "Select";
-    items.add(map);
 
     for (var row in maps) {
       items.add(row);
@@ -108,18 +115,36 @@ class _TransferInScreen extends State<TransferInScreen> {
 
   void actionDownload() async {
     Database db = await dbHelper.initDb();
+
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+
     Map<String, dynamic> map = Map();
-    map['periodName'] = 'Februari 2022 (1 Feb 2022 - 29 Feb 2022)';
-    map['startDate'] = '2022-02-01';
-    map['endDate'] = '2022-02-29';
-    map['closeActualDate'] = '2022-02-25';
-    map['soStartDate'] = '2022-02-25';
-    map['soEndDate'] = '2022-02-25';
-    map['syncDate'] = '2022-04-02';
+    map['transId'] = 1;
+    map['plantId'] = 1;
+    map['transTypeCode'] = "T";
+    map['transDate'] = "2022-04-04";
+    map['transNo'] = "TR02";
+    map['manualRef'] = "MR002";
+    map['otherRef'] = "";
+    map['transferTypeCode'] = "TI";
+    map['oldLocId'] = 0;
+    map['newLocId'] = 0;
+    map['isApproved'] = 0;
+    map['isVoid'] = 0;
+    map['saveDate'] = formattedDate;
+    map['savedBy'] = box.read('userId');
+    map['uploadDate'] = "";
+    map['uploadBy'] = "";
+    map['uploadMessage'] = "";
+    map['syncDate'] = "";
     map['syncBy'] = 0;
-    int id = await db.insert("periods", map,
+
+    int insertId = await db.insert("fatrans", map,
         conflictAlgorithm: ConflictAlgorithm.replace);
-    Get.snackbar("Insert", "ID ${id.toString()}");
+    Get.snackbar("Information", insertId.toString());
+
+    fetchData();
   }
 
   @override
@@ -193,7 +218,8 @@ class _TransferInScreen extends State<TransferInScreen> {
               children: [
                 TextButton.icon(
                   onPressed: () {
-                    Get.toNamed('/transferinitem');
+                    Get.toNamed('/transferinitem')
+                        ?.whenComplete(() => fetchData());
                   },
                   icon: Icon(Icons.add),
                   label: Text("Add"),
