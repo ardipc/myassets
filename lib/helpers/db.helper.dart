@@ -131,7 +131,7 @@ class DbHelper {
         transNo TEXT,
         manualRef TEXT,
         otherRef TEXT,
-        transgerTypeCode TEXT,
+        transferTypeCode TEXT,
         oldLocId INTEGER,
         newLocId INTEGER,
         isApproved INTEGER,

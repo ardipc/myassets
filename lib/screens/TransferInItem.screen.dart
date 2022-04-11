@@ -2,6 +2,7 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/Table.screen.dart';
@@ -15,6 +16,7 @@ class TransferInItemScreen extends StatefulWidget {
 }
 
 class _TransferInItemScreenState extends State<TransferInItemScreen> {
+  final box = GetStorage();
   DbHelper dbHelper = DbHelper();
 
   int? idFaTrans = 0;
@@ -37,7 +39,69 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
     Map<String, dynamic> map = Map();
     if (idFaTrans == 0) {
-    } else {}
+      map['transId'] = 0;
+      map['plantId'] = box.read('plantId');
+      map['transTypeCode'] = 'T';
+      map['transDate'] = dateTime.text;
+      map['transNo'] = transNo.text;
+      map['manualRef'] = manualRef.text;
+      map['otherRef'] = otherRef.text;
+      map['transferTypeCode'] = 'TI';
+      map['oldLocId'] = int.parse(oldLocFrom.text);
+      map['newLocId'] = int.parse(newLocFrom.text);
+      map['isApproved'] = 0;
+      map['isVoid'] = 0;
+      map['saveDate'] = formattedDate;
+      map['savedBy'] = box.read('userId');
+      map['uploadDate'] = '';
+      map['uploadBy'] = '';
+      map['uploadMessage'] = '';
+      map['syncDate'] = '';
+      map['syncBy'] = 0;
+
+      int exec = await db.insert("fatrans", map,
+          conflictAlgorithm: ConflictAlgorithm.replace);
+
+      setState(() {
+        idFaTrans = exec;
+      });
+
+      Get.dialog(AlertDialog(
+        title: Text("Information"),
+        content: Text("Data has been saved."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("Close"),
+          ),
+        ],
+      ));
+    } else {
+      map['transDate'] = dateTime.text;
+      map['transNo'] = transNo.text;
+      map['manualRef'] = manualRef.text;
+      map['otherRef'] = otherRef.text;
+      map['oldLocId'] = int.parse(oldLocFrom.text);
+      map['newLocId'] = int.parse(newLocFrom.text);
+
+      int exec = await db
+          .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
+
+      Get.dialog(AlertDialog(
+        title: Text("Information"),
+        content: Text("Data has been updated."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("Close"),
+          ),
+        ],
+      ));
+    }
   }
 
   Future<void> fetchData(int id) async {
@@ -278,26 +342,30 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                     ),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                  height: 50,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 131, 142, 240),
-                    ),
-                    onPressed: () {
-                      Get.toNamed('/transferinitemlist');
-                    },
-                    child: Text(
-                      "Open Item List",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
+                if (idFaTrans != 0) ...[
+                  Container(
+                    margin:
+                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                    height: 50,
+                    width: 600,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 131, 142, 240),
+                      ),
+                      onPressed: () {
+                        Get.toNamed('/transferinitemlist',
+                            arguments: [idFaTrans, transNo.text]);
+                      },
+                      child: Text(
+                        "Open Item List",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
                   height: 50,
@@ -334,24 +402,27 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                     ),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                  height: 50,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 228, 11, 29),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      "Delete",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
+                if (idFaTrans != 0) ...[
+                  Container(
+                    margin:
+                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                    height: 50,
+                    width: 600,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 228, 11, 29),
+                      ),
+                      onPressed: () {},
+                      child: Text(
+                        "Delete",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           )

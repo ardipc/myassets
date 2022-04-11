@@ -2,7 +2,10 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/Table.screen.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class TransferInItemFormScreen extends StatefulWidget {
   TransferInItemFormScreen({Key? key}) : super(key: key);
@@ -13,8 +16,34 @@ class TransferInItemFormScreen extends StatefulWidget {
 }
 
 class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
+  final box = GetStorage();
+  DbHelper dbHelper = DbHelper();
+
   String selectedValue = "USA";
   String barcode = "";
+
+  final tagNo = TextEditingController();
+  final description = TextEditingController();
+  final faNo = TextEditingController();
+
+  int? selectedStatus = null;
+  List _optionsStatus = [];
+
+  final remarks = TextEditingController();
+
+  void fetchAllOptions() async {
+    Database db = await dbHelper.initDb();
+
+    List<Map<String, dynamic>> conMaps = await db.query(
+      "statuses",
+      where: 'genGroup = ?',
+      whereArgs: ['CONSTAT'],
+    );
+
+    setState(() {
+      _optionsStatus = conMaps;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +65,10 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                   width: Get.width * 0.76,
                   child: TextField(
                     decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
+                      contentPadding: EdgeInsets.all(10),
                       border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blueAccent)),
+                        borderSide: BorderSide(color: Colors.blueAccent),
+                      ),
                     ),
                   ),
                 ),
@@ -65,11 +95,12 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                       ),
                       Expanded(
                         child: new TextField(
+                          controller: tagNo,
                           decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                            contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
+                              borderSide: BorderSide(color: Colors.blueAccent),
+                            ),
                           ),
                         ),
                       ),
@@ -77,20 +108,19 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                         onPressed: () async {
                           try {
                             String barcode = await BarcodeScanner.scan();
-                            print(barcode);
                             setState(() {
-                              this.barcode = barcode;
+                              this.tagNo.text = barcode;
                             });
                           } on PlatformException catch (error) {
                             if (error.code ==
                                 BarcodeScanner.CameraAccessDenied) {
                               setState(() {
-                                this.barcode =
+                                this.tagNo.text =
                                     'Izin kamera tidak diizinkan oleh si pengguna';
                               });
                             } else {
                               setState(() {
-                                this.barcode = 'Error: $error';
+                                this.tagNo.text = 'Error: $error';
                               });
                             }
                           }
@@ -113,13 +143,16 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                         width: Get.width * 0.14,
                       ),
                       Expanded(
-                          child: TextField(
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 10),
-                          border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blueAccent)),
+                        child: TextField(
+                          controller: description,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(10),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blueAccent),
+                            ),
+                          ),
                         ),
-                      )),
+                      ),
                     ],
                   ),
                   const SizedBox(
@@ -132,13 +165,16 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                         width: Get.width * 0.14,
                       ),
                       Expanded(
-                          child: TextField(
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 10),
-                          border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blueAccent)),
+                        child: TextField(
+                          controller: faNo,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(10),
+                            border: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.blueAccent)),
+                          ),
                         ),
-                      )),
+                      ),
                     ],
                   ),
                   const SizedBox(
@@ -152,7 +188,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                       ),
                       Expanded(
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 10.0),
+                          padding: EdgeInsets.all(10.0),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4.0),
                             border: Border.all(
@@ -163,12 +199,17 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton(
                               isExpanded: true,
-                              hint: const Text("Select Period"),
-                              items: dropdownItems,
+                              hint: const Text("Select Status"),
+                              items: _optionsStatus.map((item) {
+                                return DropdownMenuItem(
+                                  child: Text(item['genName']),
+                                  value: item['genId'],
+                                );
+                              }).toList(),
                               value: selectedValue,
                               onChanged: (value) {
                                 setState(() {
-                                  selectedValue = value.toString();
+                                  selectedStatus = int.parse(value.toString());
                                 });
                               },
                             ),
@@ -188,11 +229,12 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                       ),
                       Expanded(
                         child: TextField(
+                          controller: remarks,
                           decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                            contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
+                              borderSide: BorderSide(color: Colors.blueAccent),
+                            ),
                           ),
                         ),
                       ),
@@ -214,9 +256,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor: Color.fromARGB(255, 62, 81, 255),
                     ),
-                    onPressed: () {
-                      Get.toNamed('/TransferInItemForm');
-                    },
+                    onPressed: () {},
                     child: Text(
                       "Save",
                       style: TextStyle(
@@ -250,15 +290,5 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
         ],
       ),
     );
-  }
-
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("USA"), value: "USA"),
-      DropdownMenuItem(child: Text("Canada"), value: "Canada"),
-      DropdownMenuItem(child: Text("Brazil"), value: "Brazil"),
-      DropdownMenuItem(child: Text("England"), value: "England"),
-    ];
-    return menuItems;
   }
 }

@@ -2,7 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:myasset/helpers/db.helper.dart';
 import 'package:responsive_table/responsive_table.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class TransferInItemListScreen extends StatefulWidget {
   const TransferInItemListScreen({Key? key}) : super(key: key);
@@ -12,7 +15,13 @@ class TransferInItemListScreen extends StatefulWidget {
 }
 
 class _TransferInItemListScreen extends State<TransferInItemListScreen> {
+  final box = GetStorage();
+  DbHelper dbHelper = DbHelper();
+
   String selectedValue = "USA";
+
+  int idFaTrans = 0;
+  final transNo = TextEditingController();
 
   late List<DatatableHeader> _headers;
 
@@ -26,7 +35,88 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    idFaTrans = Get.arguments[0];
+    transNo.text = Get.arguments[1];
     fetchData();
+  }
+
+  List<DropdownMenuItem<String>> get dropdownItems {
+    List<DropdownMenuItem<String>> menuItems = [
+      DropdownMenuItem(child: Text("USA"), value: "USA"),
+      DropdownMenuItem(child: Text("Canada"), value: "Canada"),
+      DropdownMenuItem(child: Text("Brazil"), value: "Brazil"),
+      DropdownMenuItem(child: Text("England"), value: "England"),
+    ];
+    return menuItems;
+  }
+
+  Future<List<DataRow>> genData() async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> maps = await db.query(
+      "fatransitem",
+      where: "faId = ?",
+      whereArgs: [Get.arguments[0]],
+    );
+
+    List<DataRow> temps = [];
+    var i = 1;
+    for (var data in maps) {
+      DataRow row = DataRow(cells: [
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: Text("$i"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.2,
+            child: Text(data['tagNo']),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.25,
+            child: Text(data['remarks']),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: Text("1"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: Text(data['conStatCode']),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: TextButton(
+              onPressed: () {
+                Get.toNamed(
+                  '/transferinitemform',
+                  arguments: [Get.arguments[0], Get.arguments[1], data['id']],
+                );
+              },
+              child: Icon(Icons.edit_note),
+            ),
+          ),
+        ),
+      ]);
+      temps.add(row);
+      i++;
+    }
+    return temps;
+  }
+
+  void fetchData() async {
+    setState(() => _isLoading = true);
+    _rows = await genData();
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -48,6 +138,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                 SizedBox(
                   width: Get.width * 0.76,
                   child: TextField(
+                    controller: transNo,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 10),
                       border: OutlineInputBorder(
@@ -64,7 +155,10 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
               children: [
                 TextButton.icon(
                   onPressed: () {
-                    Get.toNamed('/transferinitemform');
+                    Get.toNamed(
+                      '/transferinitemform',
+                      arguments: [Get.arguments[0], Get.arguments[1], 0],
+                    );
                   },
                   icon: Icon(Icons.add),
                   label: Text("Add"),
@@ -153,73 +247,5 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
         ],
       ),
     );
-  }
-
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("USA"), value: "USA"),
-      DropdownMenuItem(child: Text("Canada"), value: "Canada"),
-      DropdownMenuItem(child: Text("Brazil"), value: "Brazil"),
-      DropdownMenuItem(child: Text("England"), value: "England"),
-    ];
-    return menuItems;
-  }
-
-  List<DataRow> genData({int n: 10}) {
-    List<DataRow> temps = [];
-    final List source = List.filled(n, Random.secure());
-    var i = 1;
-    for (var data in source) {
-      DataRow row = DataRow(cells: [
-        DataCell(
-          Container(
-            width: Get.width * 0.1,
-            child: Text("$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.2,
-            child: Text("TN202202-000$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.25,
-            child: Text("Tablet #$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.1,
-            child: Text("10$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.1,
-            child: Text("RUSAK"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.1,
-            child: TextButton(
-              onPressed: () {},
-              child: Icon(Icons.edit_note),
-            ),
-          ),
-        ),
-      ]);
-      temps.add(row);
-      i++;
-    }
-    return temps;
-  }
-
-  void fetchData() async {
-    setState(() => _isLoading = true);
-    _rows = await genData(n: 5);
-    setState(() => _isLoading = false);
   }
 }
