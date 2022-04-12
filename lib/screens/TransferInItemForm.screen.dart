@@ -22,6 +22,8 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
   String selectedValue = "USA";
   String barcode = "";
 
+  int idFaTransItem = 0;
+
   final tagNo = TextEditingController();
   final description = TextEditingController();
   final faNo = TextEditingController();
@@ -43,6 +45,129 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
     setState(() {
       _optionsStatus = conMaps;
     });
+  }
+
+  Future<void> fetchData(int id) async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> maps = await db.query(
+      "fatransitem", 
+      where: "faId = ?", 
+      whereArgs: [id],
+    );
+
+    if(maps.length > 0) {
+      tagNo.text = maps[0]['tagNo'];
+      selectedStatus = int.parse(maps[0]['conStatCode']);
+      remarks.text = maps[0]['remarks'];
+    }
+  }
+
+  Future<void> getInformationByTagNo(String tag) async {
+    Database db = await dbHelper.initDb();
+    // for get the detail by tagNo
+  }
+
+  void actionConfirm() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to delete data ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              actionDelete();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> actionDelete() async {
+    Database db = await dbHelper.initDb();
+    int exec = await db
+        .delete("fatransitem", where: "id = ?", whereArgs: [idFaTransItem]);
+    Get.back();
+  }
+
+  Future<void> actionSave() async {
+    Database db = await dbHelper.initDb();
+    String dateNow = DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now());
+
+    Map<String, dynamic> map = Map();
+
+    if(idFaTransItem == 0) {
+      map['transItemId'] = 0;
+      map['faItemId'] = 0;
+      map['faId'] = Get.arguments[0];
+      map['remarks'] = remarks.text;
+      map['conStatCode'] = selectedStatus;
+      map['tagNo'] = tagNo.text;
+      map['saveDate'] = dateNow;
+      map['saveBy'] = box.read('userId'),
+      map['syncDate'] = '';
+      map['syncBy'] = 0;
+      map['uploadDate'] = '';
+      map['uploadBy'] = 0;
+      map['uploadMessage'] = '';
+
+      int exec = await db.insert("fatransitem", map,
+          conflictAlgorithm: ConflictAlgorithm.replace);
+
+      setState(() {
+        idFaTrans = exec;
+      });
+
+      Get.dialog(AlertDialog(
+        title: Text("Information"),
+        content: Text("Data has been saved."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("Close"),
+          ),
+        ],
+      ));
+    } else {
+      map['remarks'] = remarks.text;
+      map['conStatCode'] = selectedStatus;
+      map['tagNo'] = tagNo.text;
+      
+      int exec = await db
+          .update("fatransitem", map, where: "id = ?", whereArgs: [idFaTrans]);
+
+      Get.dialog(AlertDialog(
+        title: Text("Information"),
+        content: Text("Data has been updated."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("Close"),
+          ),
+        ],
+      ));
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if(Get.arguments[2] != 0) {
+      idFaTransItem = Get.arguments[2];
+      fetchData(Get.arguments[2]);
+    }
   }
 
   @override
@@ -256,7 +381,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor: Color.fromARGB(255, 62, 81, 255),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      actionSave();
+                    },
                     child: Text(
                       "Save",
                       style: TextStyle(
@@ -274,7 +401,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor: Color.fromARGB(255, 228, 11, 29),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      actionConfirm();
+                    },
                     child: Text(
                       "Delete",
                       style: TextStyle(

@@ -100,7 +100,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                 Get.toNamed(
                   '/transferinitemform',
                   arguments: [Get.arguments[0], Get.arguments[1], data['id']],
-                );
+                )?.whenComplete(() => fetchData());
               },
               child: Icon(Icons.edit_note),
             ),
@@ -158,7 +158,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                     Get.toNamed(
                       '/transferinitemform',
                       arguments: [Get.arguments[0], Get.arguments[1], 0],
-                    );
+                    )?.whenComplete(() => fetchData());
                   },
                   icon: Icon(Icons.add),
                   label: Text("Add"),
