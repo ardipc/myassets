@@ -125,6 +125,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                 SizedBox(
                   width: Get.width * 0.76,
                   child: TextField(
+                    enabled: false,
                     controller: transNo,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.all(10),

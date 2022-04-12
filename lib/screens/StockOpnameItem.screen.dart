@@ -411,6 +411,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            enabled: false,
+                            readOnly: true,
                             controller: descriptionController,
                             decoration: InputDecoration(
                               contentPadding: EdgeInsets.all(10),
@@ -433,6 +435,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         ),
                         Expanded(
                           child: TextFormField(
+                            enabled: false,
+                            readOnly: true,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter some text';

@@ -237,6 +237,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                   SizedBox(
                     width: Get.width * 0.76,
                     child: TextField(
+                      enabled: false,
                       controller: transNo,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.all(10),
@@ -323,6 +324,8 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            enabled: false,
+                            readOnly: true,
                             controller: description,
                             decoration: InputDecoration(
                               contentPadding: EdgeInsets.all(10),
@@ -346,6 +349,8 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            enabled: false,
+                            readOnly: true,
                             controller: faNo,
                             decoration: InputDecoration(
                               contentPadding: EdgeInsets.all(10),

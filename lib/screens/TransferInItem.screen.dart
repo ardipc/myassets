@@ -407,6 +407,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            enabled: false,
+                            readOnly: true,
                             decoration: InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
@@ -440,6 +442,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            enabled: false,
+                            readOnly: true,
                             decoration: InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
