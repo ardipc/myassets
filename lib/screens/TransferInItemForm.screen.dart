@@ -49,6 +49,37 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
     });
   }
 
+  void actionConfirm() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to delete data ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              actionDelete();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> actionDelete() async {
+    Database db = await dbHelper.initDb();
+    int exec = await db
+        .delete("fatransitem", where: "id = ?", whereArgs: [idTransItem]);
+    Get.back();
+  }
+
   Future<void> actionSave() async {
     Database db = await dbHelper.initDb();
 
@@ -136,6 +167,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
     fetchAllOptions();
     print(Get.arguments[2]);
     if (Get.arguments[2] != 0) {
+      idTransItem = Get.arguments[2];
       fetchData(Get.arguments[2]);
     }
   }
