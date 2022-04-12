@@ -44,6 +44,8 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
       whereArgs: ['CONSTAT'],
     );
 
+    print(conMaps);
+
     setState(() {
       _optionsStatus = conMaps;
     });
@@ -153,9 +155,11 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
       whereArgs: [id],
     );
     if (maps.length > 0) {
-      tagNo.text = maps[0]['tagNo'];
-      selectedStatus = maps[0]['conStatCode'];
-      remarks.text = maps[0]['remarks'];
+      setState(() {
+        tagNo.text = maps[0]['tagNo'];
+        selectedStatus = int.parse(maps[0]['conStatCode']);
+        remarks.text = maps[0]['remarks'];
+      });
     }
   }
 
@@ -412,7 +416,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                         style: TextButton.styleFrom(
                           backgroundColor: Color.fromARGB(255, 228, 11, 29),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          actionConfirm();
+                        },
                         child: Text(
                           "Delete",
                           style: TextStyle(
