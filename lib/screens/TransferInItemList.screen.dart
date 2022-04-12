@@ -40,16 +40,6 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
     fetchData();
   }
 
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("USA"), value: "USA"),
-      DropdownMenuItem(child: Text("Canada"), value: "Canada"),
-      DropdownMenuItem(child: Text("Brazil"), value: "Brazil"),
-      DropdownMenuItem(child: Text("England"), value: "England"),
-    ];
-    return menuItems;
-  }
-
   Future<List<DataRow>> genData() async {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.query(
@@ -57,6 +47,8 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
       where: "faId = ?",
       whereArgs: [Get.arguments[0]],
     );
+
+    print(maps);
 
     List<DataRow> temps = [];
     var i = 1;
@@ -100,7 +92,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                 Get.toNamed(
                   '/transferinitemform',
                   arguments: [Get.arguments[0], Get.arguments[1], data['id']],
-                );
+                )?.whenComplete(() => fetchData());
               },
               child: Icon(Icons.edit_note),
             ),
@@ -140,7 +132,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                   child: TextField(
                     controller: transNo,
                     decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
+                      contentPadding: EdgeInsets.all(10),
                       border: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.blueAccent)),
                     ),
@@ -158,7 +150,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                     Get.toNamed(
                       '/transferinitemform',
                       arguments: [Get.arguments[0], Get.arguments[1], 0],
-                    );
+                    )?.whenComplete(() => fetchData());
                   },
                   icon: Icon(Icons.add),
                   label: Text("Add"),

@@ -43,19 +43,19 @@ class _TransferInScreen extends State<TransferInScreen> {
       DataRow row = DataRow(cells: [
         DataCell(
           Container(
-            width: Get.width * 0.1,
+            width: Get.width * 0.075,
             child: Text("$i"),
           ),
         ),
         DataCell(
           Container(
-            width: Get.width * 0.15,
+            width: Get.width * 0.2,
             child: Text(data['transDate']),
           ),
         ),
         DataCell(
           Container(
-            width: Get.width * 0.25,
+            width: Get.width * 0.20,
             child: Text(data['transNo']),
           ),
         ),
@@ -68,7 +68,12 @@ class _TransferInScreen extends State<TransferInScreen> {
         DataCell(
           Container(
             width: Get.width * 0.1,
-            child: Text(data['isApproved'] == 0 ? "Not Yet" : "Approved"),
+            child: Text(
+              data['isApproved'] == 0 ? "Not Yet" : "Approved",
+              style: TextStyle(
+                color: data['isApproved'] == 0 ? Colors.red : Colors.green,
+              ),
+            ),
           ),
         ),
         DataCell(
