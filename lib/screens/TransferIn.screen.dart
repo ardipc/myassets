@@ -118,6 +118,30 @@ class _TransferInScreen extends State<TransferInScreen> {
     });
   }
 
+  void confirmDownload() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to sync data period now ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              actionDownload();
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
   void actionDownload() async {
     Database db = await dbHelper.initDb();
 
@@ -209,7 +233,7 @@ class _TransferInScreen extends State<TransferInScreen> {
                 ),
                 TextButton.icon(
                   onPressed: () {
-                    actionDownload();
+                    confirmDownload();
                   },
                   icon: Icon(Icons.download),
                   label: Text("Download"),

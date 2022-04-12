@@ -33,7 +33,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.rawQuery(
         "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genId = s.existStatCode LEFT JOIN statuses t ON t.genId = s.tagStatCode LEFT JOIN statuses u ON u.genId = s.usageStatCode LEFT JOIN statuses c ON c.genId = s.conStatCode LEFT JOIN statuses o ON o.genId = s.ownStatCode");
-    print(maps);
+
     List<DataRow> temps = [];
     var i = 1;
     for (var data in maps) {

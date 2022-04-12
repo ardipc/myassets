@@ -19,6 +19,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   final box = GetStorage();
   DbHelper dbHelper = DbHelper();
 
+  TimeOfDay selectedTime = TimeOfDay(hour: 00, minute: 00);
+
   int? idFaTrans = 0;
   int? plantId = 0;
   String? transTypeCode = "T";
@@ -170,6 +172,87 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     }
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      initialDatePickerMode: DatePickerMode.day,
+      firstDate: DateTime(2015),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        dateTime.text = picked.toString().substring(0, 10);
+      });
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked =
+        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    if (picked != null) {
+      TimeOfDay now = picked;
+      setState(() {
+        dateTime.text = dateTime.text +
+            " " +
+            now.hour.toString().padLeft(2, "0") +
+            ":" +
+            now.minute.toString().padLeft(2, "0");
+      });
+    }
+  }
+
+  void confirmUploadToServer() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to upload data to server now ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // please add action in here
+              // ex. actionUploadToServer();
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void confirmApprove() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to approve this data now ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // please add action in here
+              // ex. actionUploadToServer();
+              actionApprove();
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -245,7 +328,17 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                           ),
                         ),
                         TextButton(
-                            onPressed: () {}, child: Icon(Icons.date_range)),
+                          onPressed: () {
+                            _selectDate(context);
+                          },
+                          child: Icon(Icons.date_range),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            _selectTime(context);
+                          },
+                          child: Icon(Icons.timer),
+                        ),
                       ],
                     ),
                     const SizedBox(
@@ -420,7 +513,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         backgroundColor: Color.fromARGB(255, 40, 165, 61),
                       ),
                       onPressed: () {
-                        actionApprove();
+                        confirmApprove();
                       },
                       child: Text(
                         "Approve",
@@ -440,7 +533,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       style: TextButton.styleFrom(
                         backgroundColor: Color.fromARGB(255, 116, 54, 173),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        confirmUploadToServer();
+                      },
                       child: Text(
                         "Upload to Server",
                         style: TextStyle(

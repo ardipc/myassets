@@ -91,9 +91,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
     Map<String, dynamic> map = Map();
 
     if (idTransItem == 0) {
-      map['transItemId'] = 0;
+      map['transItemId'] = Get.arguments[0];
       map['faItemId'] = 0;
-      map['faId'] = Get.arguments[0];
+      map['faId'] = int.parse(faNo.text);
       map['remarks'] = remarks.text;
       map['conStatCode'] = selectedStatus;
       map['tagNo'] = tagNo.text;
@@ -163,13 +163,54 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
     }
   }
 
+  Future<void> getInfoItem(String value) async {
+    Database db = await dbHelper.initDb();
+    int parseToInt = int.parse(value == '' ? '0' : value);
+    List<Map<String, dynamic>> maps =
+        await db.query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
+    if (maps.length == 1) {
+      setState(() {
+        tagNo.text = value;
+        description.text = maps[0]['assetName'];
+        faNo.text = maps[0]['faId'].toString();
+      });
+    }
+  }
+
+  void confirmDownloadItems() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to sync data items now ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // please add action in here
+              // ex. actionUploadToServer();
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     transNo.text = Get.arguments[1];
+    tagNo.addListener(() {
+      getInfoItem(tagNo.text);
+    });
     fetchAllOptions();
-    print(Get.arguments[2]);
     if (Get.arguments[2] != 0) {
       idTransItem = Get.arguments[2];
       fetchData(Get.arguments[2]);
@@ -242,19 +283,21 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                           onPressed: () async {
                             try {
                               String barcode = await BarcodeScanner.scan();
+                              getInfoItem(barcode);
                               setState(() {
-                                this.tagNo.text = barcode;
+                                barcode = barcode;
+                                tagNo.text = barcode;
                               });
                             } on PlatformException catch (error) {
                               if (error.code ==
                                   BarcodeScanner.CameraAccessDenied) {
                                 setState(() {
-                                  this.tagNo.text =
+                                  tagNo.text =
                                       'Izin kamera tidak diizinkan oleh si pengguna';
                                 });
                               } else {
                                 setState(() {
-                                  this.tagNo.text = 'Error: $error';
+                                  tagNo.text = 'Error: $error';
                                 });
                               }
                             }
@@ -262,7 +305,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                           child: Icon(Icons.qr_code),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            confirmDownloadItems();
+                          },
                           child: Icon(Icons.download),
                         ),
                       ],

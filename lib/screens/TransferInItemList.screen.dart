@@ -42,13 +42,8 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
 
   Future<List<DataRow>> genData() async {
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> maps = await db.query(
-      "fatransitem",
-      where: "faId = ?",
-      whereArgs: [Get.arguments[0]],
-    );
-
-    print(maps);
+    List<Map<String, dynamic>> maps = await db.rawQuery(
+        "SELECT s.*, i.tagNo, i.assetName, c.genName AS con FROM fatransitem s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses c ON c.genId = s.conStatCode WHERE s.transItemId = ${Get.arguments[0]}");
 
     List<DataRow> temps = [];
     var i = 1;
@@ -63,13 +58,13 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
         DataCell(
           Container(
             width: Get.width * 0.2,
-            child: Text(data['tagNo']),
+            child: Text(data['tagNo'].toString()),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.25,
-            child: Text(data['remarks']),
+            child: Text(data['assetName']),
           ),
         ),
         DataCell(
@@ -81,7 +76,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
         DataCell(
           Container(
             width: Get.width * 0.1,
-            child: Text(data['conStatCode']),
+            child: Text(data['con']),
           ),
         ),
         DataCell(
