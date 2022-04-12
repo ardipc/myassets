@@ -31,8 +31,9 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
 
   Future<List<DataRow>> genData() async {
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> maps = await db.query("stockopnames");
-
+    List<Map<String, dynamic>> maps = await db.rawQuery(
+        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genId = s.existStatCode LEFT JOIN statuses t ON t.genId = s.tagStatCode LEFT JOIN statuses u ON u.genId = s.usageStatCode LEFT JOIN statuses c ON c.genId = s.conStatCode LEFT JOIN statuses o ON o.genId = s.ownStatCode");
+    print(maps);
     List<DataRow> temps = [];
     var i = 1;
     for (var data in maps) {
@@ -45,33 +46,33 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
         ),
         DataCell(
           Container(
-            width: Get.width * 0.2,
-            child: Text(data['faId'].toString()),
+            width: Get.width * 0.12,
+            child: Text(data['tagNo'].toString()),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.2,
-            child: Text(data['locationId'].toString()),
+            child: Text(data['assetName'].toString()),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.2,
             child: Text(
-                "qty = ${data['qty'].toString()}\ncondition = ${data['conStatCode'].toString()}"),
+                "qty = ${data['qty'].toString()}\ncondition = ${data['con'].toString()}"),
           ),
         ),
         DataCell(
           Container(
-            width: Get.width * 0.3,
+            width: Get.width * 0.31,
             child: InkWell(
               onTap: () => Get.toNamed(
                 '/stockopnameitem',
                 arguments: [data['id']],
               )?.whenComplete(() => fetchData()),
               child: Text(
-                  "qty = ${data['qty'].toString()}\nexistence = ${data['existStatCode'].toString()}\ntagging = ${data['tagStatCode'].toString()}\nusage = ${data['usageStatCode'].toString()}\ncondition = ${data['conStatCode'].toString()}\nowner = ${data['ownStatCode'].toString()}"),
+                  "qty = ${data['qty'].toString()}\nexistence = ${data['existence'].toString()}\ntagging = ${data['tag'].toString()}\nusage = ${data['usagename'].toString()}\ncondition = ${data['con'].toString()}\nowner = ${data['own'].toString()}"),
             ),
           ),
         ),
@@ -144,6 +145,96 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
 
     Get.snackbar("Insert", "ID ${result.toString()}");
     fetchPeriod();
+  }
+
+  void confirmDownload() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to sync data period now ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              actionDownload();
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void confirmUploadToServer() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to upload data to server now ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // please add action in here
+              // ex. actionUploadToServer();
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void confirmKonfirmasi() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to confirm data now ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // please add action in here
+              // actionInsertToItems();
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> actionInsertToItems() async {
+    Database db = await dbHelper.initDb();
+    Map<String, dynamic> map = Map();
+    map['tagNo'] = 2;
+    map['assetName'] = 'Keyboard';
+    map['locId'] = 1;
+    map['added'] = 0;
+    map['disposed'] = '';
+    map['syncDate'] = '';
+    map['syncBy'] = 0;
+    db.insert("faitems", map, conflictAlgorithm: ConflictAlgorithm.replace);
+
+    List<Map<String, dynamic>> maps = await db.query("faitems");
+    print(maps);
   }
 
   @override
@@ -227,7 +318,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                 ),
                 TextButton.icon(
                   onPressed: () {
-                    actionDownload();
+                    confirmDownload();
                   },
                   icon: Icon(Icons.download),
                   label: Text("Download"),
@@ -317,7 +408,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                       backgroundColor: Color.fromARGB(255, 62, 81, 255),
                     ),
                     onPressed: () {
-                      Get.toNamed('/stockopnameitem')
+                      Get.toNamed('/stockopnameitem', arguments: [0])
                           ?.whenComplete(() => fetchData());
                     },
                     child: Text(
@@ -337,7 +428,9 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor: Color.fromARGB(255, 85, 189, 90),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      confirmKonfirmasi();
+                    },
                     child: Text(
                       "Confirm",
                       style: TextStyle(
@@ -356,7 +449,9 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor: Color.fromARGB(255, 108, 47, 207),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      confirmUploadToServer();
+                    },
                     child: Text(
                       "Upload to Server",
                       style: TextStyle(
