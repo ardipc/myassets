@@ -77,7 +77,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     Database db = await dbHelper.initDb();
 
     DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+    String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
 
     Map<String, dynamic> map = Map();
     if (idFaTrans == 0) {
@@ -261,7 +261,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       fetchData(Get.arguments[0]);
     } else {
       DateTime now = DateTime.now();
-      String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+      String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
       dateTime.text = formattedDate;
     }
   }

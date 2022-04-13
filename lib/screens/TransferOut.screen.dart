@@ -37,6 +37,8 @@ class _TransferOutScreen extends State<TransferOutScreen> {
       whereArgs: ["TO", 0],
     );
 
+    print(maps);
+
     List<DataRow> temps = [];
     var i = 1;
     for (var data in maps) {

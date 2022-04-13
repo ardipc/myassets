@@ -194,7 +194,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     Database db = await dbHelper.initDb();
 
     DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+    String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
 
     Map<String, dynamic> map = Map();
     if (idStockOpname == 0) {
