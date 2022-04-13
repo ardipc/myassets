@@ -171,6 +171,15 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     );
   }
 
+  Future<void> actionDelete(int id) async {
+    Database db = await dbHelper.initDb();
+    // List<Map<String, dynamic>> maps = await db.query("stockopnames");
+    // print(maps);
+    int exec =
+        await db.delete("stockopnames", where: "id = ?", whereArgs: [id]);
+    print(exec);
+  }
+
   void confirmUploadToServer() {
     Get.dialog(
       AlertDialog(

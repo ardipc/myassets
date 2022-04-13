@@ -186,75 +186,88 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     Database db = await dbHelper.initDb();
     int exec = await db
         .delete("stockopnames", where: "id = ?", whereArgs: [idStockOpname]);
-    print(exec);
     Get.back();
   }
 
   Future<void> actionSave() async {
-    Database db = await dbHelper.initDb();
-
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
-
-    Map<String, dynamic> map = Map();
-    if (idStockOpname == 0) {
-      map['stockOpnameId'] = 0;
-      map['periodId'] = 0;
-      map['faId'] = faNoController.text;
-      map['locationId'] = 0;
-      map['qty'] = 0;
-      map['existStatCode'] = selectedExistence;
-      map['tagStatCode'] = selectedTagging;
-      map['usageStatCode'] = selectedUsage;
-      map['conStatCode'] = selectedCondition;
-      map['ownStatCode'] = selectedOwnership;
-      map['syncDate'] = formattedDate;
-      map['syncBy'] = box.read('userId');
-      map['uploadDate'] = formattedDate;
-      map['uploadBy'] = box.read('userId');
-      map['uploadMessage'] = "";
-
-      int exec = await db.insert("stockopnames", map,
-          conflictAlgorithm: ConflictAlgorithm.replace);
-
-      setState(() {
-        idStockOpname = exec;
-      });
-
-      Get.dialog(AlertDialog(
-        title: Text("Information"),
-        content: Text("Data has been saved."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text("Close"),
-          ),
-        ],
-      ));
+    if (tagNoController.text.isEmpty &&
+        selectedExistence == null &&
+        selectedTagging == null &&
+        selectedUsage == null &&
+        selectedCondition == null &&
+        selectedOwnership == null) {
+      Get.dialog(
+        AlertDialog(
+          title: Text("Information"),
+          content: Text("Please fill all the field."),
+        ),
+      );
     } else {
-      map['existStatCode'] = selectedExistence;
-      map['tagStatCode'] = selectedTagging;
-      map['usageStatCode'] = selectedUsage;
-      map['conStatCode'] = selectedCondition;
-      map['ownStatCode'] = selectedOwnership;
+      Database db = await dbHelper.initDb();
 
-      int exec = await db.update("stockopnames", map,
-          where: "id = ?", whereArgs: [idStockOpname]);
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
 
-      Get.dialog(AlertDialog(
-        title: Text("Information"),
-        content: Text("Data has been updated."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text("Close"),
-          ),
-        ],
-      ));
+      Map<String, dynamic> map = Map();
+      if (idStockOpname == 0) {
+        map['stockOpnameId'] = 0;
+        map['periodId'] = 0;
+        map['faId'] = faNoController.text;
+        map['locationId'] = 0;
+        map['qty'] = 0;
+        map['existStatCode'] = selectedExistence;
+        map['tagStatCode'] = selectedTagging;
+        map['usageStatCode'] = selectedUsage;
+        map['conStatCode'] = selectedCondition;
+        map['ownStatCode'] = selectedOwnership;
+        map['syncDate'] = formattedDate;
+        map['syncBy'] = box.read('userId');
+        map['uploadDate'] = formattedDate;
+        map['uploadBy'] = box.read('userId');
+        map['uploadMessage'] = "";
+
+        int exec = await db.insert("stockopnames", map,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+
+        setState(() {
+          idStockOpname = exec;
+        });
+
+        Get.dialog(AlertDialog(
+          title: Text("Information"),
+          content: Text("Data has been saved."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        ));
+      } else {
+        map['existStatCode'] = selectedExistence;
+        map['tagStatCode'] = selectedTagging;
+        map['usageStatCode'] = selectedUsage;
+        map['conStatCode'] = selectedCondition;
+        map['ownStatCode'] = selectedOwnership;
+
+        int exec = await db.update("stockopnames", map,
+            where: "id = ?", whereArgs: [idStockOpname]);
+
+        Get.dialog(AlertDialog(
+          title: Text("Information"),
+          content: Text("Data has been updated."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        ));
+      }
     }
   }
 

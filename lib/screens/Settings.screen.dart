@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -9,6 +10,40 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final box = GetStorage();
+
+  final apiAddressController = TextEditingController();
+  final locationCodeController = TextEditingController();
+
+  void actionSave() {
+    if (apiAddressController.text.isEmpty &&
+        locationCodeController.text.isEmpty) {
+      Get.dialog(
+        AlertDialog(
+          title: Text("Information"),
+          content: Text("There are still empty, please fill all field."),
+        ),
+      );
+    } else {
+      box.write('apiAddress', apiAddressController.text);
+      box.write('locationCode', locationCodeController.text);
+      Get.dialog(
+        AlertDialog(
+          title: Text("Information"),
+          content: Text("Data has been saved."),
+        ),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    apiAddressController.text = box.read('apiAddress') ?? "";
+    locationCodeController.text = box.read('locationCode') ?? "";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,13 +66,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: <Widget>[
                   Text("API Address     :  "),
                   Expanded(
-                      child: new TextField(
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blueAccent)),
+                    child: new TextField(
+                      controller: apiAddressController,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(10),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blueAccent),
+                        ),
+                      ),
                     ),
-                  )),
+                  ),
                 ],
               ),
               SizedBox(
@@ -47,13 +85,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: <Widget>[
                   new Text("Location Code :  "),
                   new Expanded(
-                      child: new TextField(
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blueAccent)),
+                    child: new TextField(
+                      controller: locationCodeController,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(10),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blueAccent),
+                        ),
+                      ),
                     ),
-                  )),
+                  ),
                 ],
               ),
               SizedBox(
@@ -66,7 +107,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: TextButton.styleFrom(
                     backgroundColor: Color.fromRGBO(44, 116, 180, 1),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    actionSave();
+                  },
                   child: Text(
                     "Save Setting",
                     style: TextStyle(
