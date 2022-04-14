@@ -74,75 +74,95 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   }
 
   Future<void> actionSave() async {
-    Database db = await dbHelper.initDb();
-
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
-
-    Map<String, dynamic> map = Map();
-    if (idFaTrans == 0) {
-      map['transId'] = 0;
-      map['plantId'] = box.read('plantId');
-      map['transTypeCode'] = 'T';
-      map['transDate'] = dateTime.text;
-      map['transNo'] = transNo.text;
-      map['manualRef'] = manualRef.text;
-      map['otherRef'] = otherRef.text;
-      map['transferTypeCode'] = 'TI';
-      map['oldLocId'] = int.parse(oldLocFrom.text);
-      map['newLocId'] = int.parse(newLocFrom.text);
-      map['isApproved'] = 0;
-      map['isVoid'] = 0;
-      map['saveDate'] = formattedDate;
-      map['savedBy'] = box.read('userId');
-      map['uploadDate'] = '';
-      map['uploadBy'] = '';
-      map['uploadMessage'] = '';
-      map['syncDate'] = '';
-      map['syncBy'] = 0;
-
-      int exec = await db.insert("fatrans", map,
-          conflictAlgorithm: ConflictAlgorithm.replace);
-
-      setState(() {
-        idFaTrans = exec;
-      });
-
-      Get.dialog(AlertDialog(
-        title: Text("Information"),
-        content: Text("Data has been saved."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text("Close"),
-          ),
-        ],
-      ));
+    if (transNo.text.isEmpty &&
+        manualRef.text.isEmpty &&
+        oldLocFrom.text.isEmpty &&
+        newLocFrom.text.isEmpty) {
+      Get.dialog(
+        AlertDialog(
+          title: const Text("Information"),
+          content: const Text("Please fill all the field."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
     } else {
-      map['transDate'] = dateTime.text;
-      map['transNo'] = transNo.text;
-      map['manualRef'] = manualRef.text;
-      map['otherRef'] = otherRef.text;
-      map['oldLocId'] = int.parse(oldLocFrom.text);
-      map['newLocId'] = int.parse(newLocFrom.text);
+      Database db = await dbHelper.initDb();
 
-      int exec = await db
-          .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
 
-      Get.dialog(AlertDialog(
-        title: Text("Information"),
-        content: Text("Data has been updated."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text("Close"),
-          ),
-        ],
-      ));
+      Map<String, dynamic> map = Map();
+      if (idFaTrans == 0) {
+        map['transId'] = 0;
+        map['plantId'] = box.read('plantId');
+        map['transTypeCode'] = 'T';
+        map['transDate'] = dateTime.text;
+        map['transNo'] = transNo.text;
+        map['manualRef'] = manualRef.text;
+        map['otherRef'] = otherRef.text;
+        map['transferTypeCode'] = 'TI';
+        map['oldLocId'] = int.parse(oldLocFrom.text);
+        map['newLocId'] = int.parse(newLocFrom.text);
+        map['isApproved'] = 0;
+        map['isVoid'] = 0;
+        map['saveDate'] = formattedDate;
+        map['savedBy'] = box.read('userId');
+        map['uploadDate'] = '';
+        map['uploadBy'] = '';
+        map['uploadMessage'] = '';
+        map['syncDate'] = '';
+        map['syncBy'] = 0;
+
+        int exec = await db.insert("fatrans", map,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+
+        setState(() {
+          idFaTrans = exec;
+        });
+
+        Get.dialog(AlertDialog(
+          title: Text("Information"),
+          content: Text("Data has been saved."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        ));
+      } else {
+        map['transDate'] = dateTime.text;
+        map['transNo'] = transNo.text;
+        map['manualRef'] = manualRef.text;
+        map['otherRef'] = otherRef.text;
+        map['oldLocId'] = int.parse(oldLocFrom.text);
+        map['newLocId'] = int.parse(newLocFrom.text);
+
+        int exec = await db
+            .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
+
+        Get.dialog(AlertDialog(
+          title: Text("Information"),
+          content: Text("Data has been updated."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        ));
+      }
     }
   }
 
@@ -181,6 +201,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       lastDate: DateTime(2101),
     );
     if (picked != null) {
+      _selectTime(context);
       setState(() {
         dateTime.text = picked.toString().substring(0, 10);
       });
@@ -332,12 +353,6 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                             _selectDate(context);
                           },
                           child: Icon(Icons.date_range),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            _selectTime(context);
-                          },
-                          child: Icon(Icons.timer),
                         ),
                       ],
                     ),

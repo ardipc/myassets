@@ -198,8 +198,16 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         selectedOwnership == null) {
       Get.dialog(
         AlertDialog(
-          title: Text("Information"),
-          content: Text("Please fill all the field."),
+          title: const Text("Information"),
+          content: const Text("Please fill all the field."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text("OK"),
+            ),
+          ],
         ),
       );
     } else {

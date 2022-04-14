@@ -83,67 +83,84 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
   }
 
   Future<void> actionSave() async {
-    Database db = await dbHelper.initDb();
-
-    String formattedDate =
-        DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now());
-
-    Map<String, dynamic> map = Map();
-
-    if (idTransItem == 0) {
-      map['transItemId'] = Get.arguments[0];
-      map['faItemId'] = 0;
-      map['faId'] = int.parse(faNo.text);
-      map['remarks'] = remarks.text;
-      map['conStatCode'] = selectedStatus;
-      map['tagNo'] = tagNo.text;
-      map['saveDate'] = formattedDate;
-      map['saveBy'] = box.read('userId');
-      map['syncDate'] = '';
-      map['syncBy'] = '';
-      map['uploadDate'] = '';
-      map['uploadBy'] = '';
-      map['uploadMessage'] = '';
-
-      int exec = await db.insert("fatransitem", map,
-          conflictAlgorithm: ConflictAlgorithm.replace);
-
-      setState(() {
-        idTransItem = exec;
-      });
-
-      Get.dialog(AlertDialog(
-        title: Text("Information"),
-        content: Text("Data has been saved."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text("Close"),
-          ),
-        ],
-      ));
+    if (tagNo.text.isEmpty && selectedStatus == null && remarks.text.isEmpty) {
+      Get.dialog(
+        AlertDialog(
+          title: const Text("Information"),
+          content: const Text("Please fill all the field."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
     } else {
-      map['remarks'] = remarks.text;
-      map['conStatCode'] = selectedStatus;
-      map['tagNo'] = tagNo.text;
+      Database db = await dbHelper.initDb();
 
-      int exec = await db.update("fatransitem", map,
-          where: "id = ?", whereArgs: [idTransItem]);
+      String formattedDate =
+          DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now());
 
-      Get.dialog(AlertDialog(
-        title: Text("Information"),
-        content: Text("Data has been updated."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text("Close"),
-          ),
-        ],
-      ));
+      Map<String, dynamic> map = Map();
+
+      if (idTransItem == 0) {
+        map['transItemId'] = Get.arguments[0];
+        map['faItemId'] = 0;
+        map['faId'] = int.parse(faNo.text);
+        map['remarks'] = remarks.text;
+        map['conStatCode'] = selectedStatus;
+        map['tagNo'] = tagNo.text;
+        map['saveDate'] = formattedDate;
+        map['saveBy'] = box.read('userId');
+        map['syncDate'] = '';
+        map['syncBy'] = '';
+        map['uploadDate'] = '';
+        map['uploadBy'] = '';
+        map['uploadMessage'] = '';
+
+        int exec = await db.insert("fatransitem", map,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+
+        setState(() {
+          idTransItem = exec;
+        });
+
+        Get.dialog(AlertDialog(
+          title: Text("Information"),
+          content: Text("Data has been saved."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        ));
+      } else {
+        map['remarks'] = remarks.text;
+        map['conStatCode'] = selectedStatus;
+        map['tagNo'] = tagNo.text;
+
+        int exec = await db.update("fatransitem", map,
+            where: "id = ?", whereArgs: [idTransItem]);
+
+        Get.dialog(AlertDialog(
+          title: Text("Information"),
+          content: Text("Data has been updated."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        ));
+      }
     }
   }
 
