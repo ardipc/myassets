@@ -49,6 +49,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
+        leading: IconButton(
+          icon: Icon(Icons.chevron_left),
+          onPressed: () {
+            Get.offAllNamed('/home');
+          },
+        ),
       ),
       body: Card(
         elevation: 4,

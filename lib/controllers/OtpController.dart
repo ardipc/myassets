@@ -26,7 +26,7 @@ class OtpController extends GetxController {
   }
 
   void actionSubmitOtp() async {
-    Get.offAllNamed('/home');
+    Get.offAndToNamed('/settings');
     Get.snackbar(
       "OTP",
       pin,

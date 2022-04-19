@@ -11,10 +11,10 @@ class HomeController extends GetxController {
   User? user;
 
   @override
-  void onInit() {
+  Future<void> onInit() async {
     // TODO: implement onInit
-    getData();
     super.onInit();
+    getData();
   }
 
   @override
