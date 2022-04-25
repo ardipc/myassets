@@ -41,10 +41,10 @@ class LoginController extends GetxController {
 
   void actionLogin() async {
     final box = GetStorage();
-    Database db = await dbHelper.initDb();
     if (username.text == "admin" && password.text == "123") {
-      Get.offNamed('/settings');
+      Get.offAndToNamed('/home', arguments: ['superadmin']);
     } else {
+      Database db = await dbHelper.initDb();
       List<User> users =
           await dbHelper.selectUserToLogin(username.text, password.text);
       if (users.isEmpty) {

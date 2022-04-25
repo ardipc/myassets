@@ -1,9 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:platform_device_id/platform_device_id.dart';
 
 class RegisterController extends GetxController {
+  final box = GetStorage();
   DbHelper dbHelper = DbHelper();
 
   TextEditingController apiAddress = TextEditingController();
@@ -16,6 +18,8 @@ class RegisterController extends GetxController {
   void onInit() async {
     // TODO: implement onInit
     deviceId.text = (await PlatformDeviceId.getDeviceId)!;
+    apiAddress.text = box.read('apiAddress') ?? "";
+    locationId.text = box.read('locationId') ?? "";
     super.onInit();
   }
 

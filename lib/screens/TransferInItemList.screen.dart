@@ -40,23 +40,10 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
     fetchData();
   }
 
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("USA"), value: "USA"),
-      DropdownMenuItem(child: Text("Canada"), value: "Canada"),
-      DropdownMenuItem(child: Text("Brazil"), value: "Brazil"),
-      DropdownMenuItem(child: Text("England"), value: "England"),
-    ];
-    return menuItems;
-  }
-
   Future<List<DataRow>> genData() async {
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> maps = await db.query(
-      "fatransitem",
-      where: "faId = ?",
-      whereArgs: [Get.arguments[0]],
-    );
+    List<Map<String, dynamic>> maps = await db.rawQuery(
+        "SELECT s.*, i.tagNo, i.assetName, c.genName AS con FROM fatransitem s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses c ON c.genId = s.conStatCode WHERE s.transItemId = ${Get.arguments[0]}");
 
     List<DataRow> temps = [];
     var i = 1;
@@ -71,13 +58,13 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
         DataCell(
           Container(
             width: Get.width * 0.2,
-            child: Text(data['tagNo']),
+            child: Text(data['tagNo'].toString()),
           ),
         ),
         DataCell(
           Container(
             width: Get.width * 0.25,
-            child: Text(data['remarks']),
+            child: Text(data['assetName']),
           ),
         ),
         DataCell(
@@ -89,7 +76,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
         DataCell(
           Container(
             width: Get.width * 0.1,
-            child: Text(data['conStatCode']),
+            child: Text(data['con']),
           ),
         ),
         DataCell(
@@ -138,9 +125,10 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                 SizedBox(
                   width: Get.width * 0.76,
                   child: TextField(
+                    enabled: false,
                     controller: transNo,
                     decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
+                      contentPadding: EdgeInsets.all(10),
                       border: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.blueAccent)),
                     ),

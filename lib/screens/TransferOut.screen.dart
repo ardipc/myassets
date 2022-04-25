@@ -2,7 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
+import 'package:myasset/helpers/db.helper.dart';
 import 'package:responsive_table/responsive_table.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class TransferOutScreen extends StatefulWidget {
   const TransferOutScreen({Key? key}) : super(key: key);
@@ -12,8 +16,8 @@ class TransferOutScreen extends StatefulWidget {
 }
 
 class _TransferOutScreen extends State<TransferOutScreen> {
-  String selectedValue = "USA";
-
+  final box = GetStorage();
+  DbHelper dbHelper = DbHelper();
   late List<DatatableHeader> _headers;
 
   List<Map<String, dynamic>> _sources = [];
@@ -22,11 +26,164 @@ class _TransferOutScreen extends State<TransferOutScreen> {
   int _currentPage = 1;
   bool _isLoading = true;
 
+  int? selectedValue = null;
+  List _dropdownPeriods = [];
+
+  Future<List<DataRow>> genData() async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> maps = await db.query(
+      "fatrans",
+      where: "transferTypeCode = ? AND isVoid = ?",
+      whereArgs: ["TO", 0],
+    );
+
+    print(maps);
+
+    List<DataRow> temps = [];
+    var i = 1;
+    for (var data in maps) {
+      DataRow row = DataRow(cells: [
+        DataCell(
+          Container(
+            width: Get.width * 0.075,
+            child: Text("$i"),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.2,
+            child: Text(data['transDate']),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.20,
+            child: Text(data['transNo']),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.25,
+            child: Text(data['manualRef']),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: Text(
+              data['isApproved'] == 0 ? "Not Yet" : "Approved",
+              style: TextStyle(
+                color: data['isApproved'] == 0 ? Colors.red : Colors.green,
+              ),
+            ),
+          ),
+        ),
+        DataCell(
+          Container(
+            width: Get.width * 0.1,
+            child: TextButton(
+              onPressed: () {
+                Get.toNamed('/transferoutitem', arguments: [data['id']])
+                    ?.whenComplete(() => fetchData());
+              },
+              child: Icon(Icons.edit_note),
+            ),
+          ),
+        ),
+      ]);
+      temps.add(row);
+      i++;
+    }
+    return temps;
+  }
+
+  void fetchData() async {
+    setState(() => _isLoading = true);
+    _rows = await genData();
+    setState(() => _isLoading = false);
+  }
+
+  void fetchPeriod() async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> maps = await db.query(
+      "periods",
+      columns: ["periodId", "periodName"],
+    );
+    List items = [];
+
+    for (var row in maps) {
+      items.add(row);
+    }
+
+    setState(() {
+      _dropdownPeriods = items;
+    });
+  }
+
+  void confirmDownload() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to sync data period now ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              actionDownload();
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void actionDownload() async {
+    Database db = await dbHelper.initDb();
+
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+
+    Map<String, dynamic> map = Map();
+    map['transId'] = 1;
+    map['plantId'] = 1;
+    map['transTypeCode'] = "T";
+    map['transDate'] = "2022-04-04";
+    map['transNo'] = "TR02";
+    map['manualRef'] = "MR002";
+    map['otherRef'] = "";
+    map['transferTypeCode'] = "TO";
+    map['oldLocId'] = 0;
+    map['newLocId'] = 0;
+    map['isApproved'] = 0;
+    map['isVoid'] = 0;
+    map['saveDate'] = formattedDate;
+    map['savedBy'] = box.read('userId');
+    map['uploadDate'] = "";
+    map['uploadBy'] = "";
+    map['uploadMessage'] = "";
+    map['syncDate'] = "";
+    map['syncBy'] = 0;
+
+    int insertId = await db.insert("fatrans", map,
+        conflictAlgorithm: ConflictAlgorithm.replace);
+    Get.snackbar("Information", insertId.toString());
+
+    fetchData();
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     fetchData();
+    fetchPeriod();
   }
 
   @override
@@ -60,11 +217,16 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                       child: DropdownButton(
                         isExpanded: true,
                         hint: const Text("Select Period"),
-                        items: dropdownItems,
+                        items: _dropdownPeriods.map((item) {
+                          return DropdownMenuItem(
+                            child: Text(item['periodName']),
+                            value: item['periodId'],
+                          );
+                        }).toList(),
                         value: selectedValue,
                         onChanged: (value) {
                           setState(() {
-                            selectedValue = value.toString();
+                            selectedValue = int.parse(value.toString());
                           });
                         },
                       ),
@@ -73,7 +235,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                 ),
                 TextButton.icon(
                   onPressed: () {
-                    Get.toNamed('/table');
+                    confirmDownload();
                   },
                   icon: Icon(Icons.download),
                   label: Text("Download"),
@@ -87,7 +249,8 @@ class _TransferOutScreen extends State<TransferOutScreen> {
               children: [
                 TextButton.icon(
                   onPressed: () {
-                    Get.toNamed('/transferoutitem');
+                    Get.toNamed('/transferoutitem')
+                        ?.whenComplete(() => fetchData());
                   },
                   icon: Icon(Icons.add),
                   label: Text("Add"),
@@ -176,73 +339,5 @@ class _TransferOutScreen extends State<TransferOutScreen> {
         ],
       ),
     );
-  }
-
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("USA"), value: "USA"),
-      DropdownMenuItem(child: Text("Canada"), value: "Canada"),
-      DropdownMenuItem(child: Text("Brazil"), value: "Brazil"),
-      DropdownMenuItem(child: Text("England"), value: "England"),
-    ];
-    return menuItems;
-  }
-
-  List<DataRow> genData({int n: 10}) {
-    List<DataRow> temps = [];
-    final List source = List.filled(n, Random.secure());
-    var i = 1;
-    for (var data in source) {
-      DataRow row = DataRow(cells: [
-        DataCell(
-          Container(
-            width: Get.width * 0.1,
-            child: Text("$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.15,
-            child: Text("27-Feb-2022"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.25,
-            child: Text("800IT202200$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.25,
-            child: Text("SJ/2022/II/00$i"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.1,
-            child: Text("Approved"),
-          ),
-        ),
-        DataCell(
-          Container(
-            width: Get.width * 0.1,
-            child: TextButton(
-              onPressed: () {},
-              child: Icon(Icons.edit_note),
-            ),
-          ),
-        ),
-      ]);
-      temps.add(row);
-      i++;
-    }
-    return temps;
-  }
-
-  void fetchData() async {
-    setState(() => _isLoading = true);
-    _rows = await genData(n: 10);
-    setState(() => _isLoading = false);
   }
 }

@@ -19,6 +19,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   final box = GetStorage();
   DbHelper dbHelper = DbHelper();
 
+  TimeOfDay selectedTime = TimeOfDay(hour: 00, minute: 00);
+
   int? idFaTrans = 0;
   int? plantId = 0;
   String? transTypeCode = "T";
@@ -31,76 +33,136 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   final oldLocFrom = TextEditingController();
   final newLocFrom = TextEditingController();
 
-  Future<void> actionSave() async {
+  void actionConfirm() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to delete data ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              actionDelete();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> actionDelete() async {
     Database db = await dbHelper.initDb();
+    int exec =
+        await db.delete("fatrans", where: "id = ?", whereArgs: [idFaTrans]);
+    Get.back();
+  }
 
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
-
+  Future<void> actionApprove() async {
+    Database db = await dbHelper.initDb();
     Map<String, dynamic> map = Map();
-    if (idFaTrans == 0) {
-      map['transId'] = 0;
-      map['plantId'] = box.read('plantId');
-      map['transTypeCode'] = 'T';
-      map['transDate'] = dateTime.text;
-      map['transNo'] = transNo.text;
-      map['manualRef'] = manualRef.text;
-      map['otherRef'] = otherRef.text;
-      map['transferTypeCode'] = 'TI';
-      map['oldLocId'] = int.parse(oldLocFrom.text);
-      map['newLocId'] = int.parse(newLocFrom.text);
-      map['isApproved'] = 0;
-      map['isVoid'] = 0;
-      map['saveDate'] = formattedDate;
-      map['savedBy'] = box.read('userId');
-      map['uploadDate'] = '';
-      map['uploadBy'] = '';
-      map['uploadMessage'] = '';
-      map['syncDate'] = '';
-      map['syncBy'] = 0;
+    map['isApproved'] = 1;
+    int exec = await db
+        .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
+    Get.back();
+  }
 
-      int exec = await db.insert("fatrans", map,
-          conflictAlgorithm: ConflictAlgorithm.replace);
-
-      setState(() {
-        idFaTrans = exec;
-      });
-
-      Get.dialog(AlertDialog(
-        title: Text("Information"),
-        content: Text("Data has been saved."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text("Close"),
-          ),
-        ],
-      ));
+  Future<void> actionSave() async {
+    if (transNo.text.isEmpty &&
+        manualRef.text.isEmpty &&
+        oldLocFrom.text.isEmpty &&
+        newLocFrom.text.isEmpty) {
+      Get.dialog(
+        AlertDialog(
+          title: const Text("Information"),
+          content: const Text("Please fill all the field."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
     } else {
-      map['transDate'] = dateTime.text;
-      map['transNo'] = transNo.text;
-      map['manualRef'] = manualRef.text;
-      map['otherRef'] = otherRef.text;
-      map['oldLocId'] = int.parse(oldLocFrom.text);
-      map['newLocId'] = int.parse(newLocFrom.text);
+      Database db = await dbHelper.initDb();
 
-      int exec = await db
-          .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
 
-      Get.dialog(AlertDialog(
-        title: Text("Information"),
-        content: Text("Data has been updated."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text("Close"),
-          ),
-        ],
-      ));
+      Map<String, dynamic> map = Map();
+      if (idFaTrans == 0) {
+        map['transId'] = 0;
+        map['plantId'] = box.read('plantId');
+        map['transTypeCode'] = 'T';
+        map['transDate'] = dateTime.text;
+        map['transNo'] = transNo.text;
+        map['manualRef'] = manualRef.text;
+        map['otherRef'] = otherRef.text;
+        map['transferTypeCode'] = 'TI';
+        map['oldLocId'] = int.parse(oldLocFrom.text);
+        map['newLocId'] = int.parse(newLocFrom.text);
+        map['isApproved'] = 0;
+        map['isVoid'] = 0;
+        map['saveDate'] = formattedDate;
+        map['savedBy'] = box.read('userId');
+        map['uploadDate'] = '';
+        map['uploadBy'] = '';
+        map['uploadMessage'] = '';
+        map['syncDate'] = '';
+        map['syncBy'] = 0;
+
+        int exec = await db.insert("fatrans", map,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+
+        setState(() {
+          idFaTrans = exec;
+        });
+
+        Get.dialog(AlertDialog(
+          title: Text("Information"),
+          content: Text("Data has been saved."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        ));
+      } else {
+        map['transDate'] = dateTime.text;
+        map['transNo'] = transNo.text;
+        map['manualRef'] = manualRef.text;
+        map['otherRef'] = otherRef.text;
+        map['oldLocId'] = int.parse(oldLocFrom.text);
+        map['newLocId'] = int.parse(newLocFrom.text);
+
+        int exec = await db
+            .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
+
+        Get.dialog(AlertDialog(
+          title: Text("Information"),
+          content: Text("Data has been updated."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        ));
+      }
     }
   }
 
@@ -124,10 +186,92 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         dateTime.text = maps[0]['dateTime'];
         manualRef.text = maps[0]['manualRef'];
         otherRef.text = maps[0]['otherRef'];
-        oldLocFrom.text = maps[0]['oldLocFrom'];
-        newLocFrom.text = maps[0]['newLocFrom'];
+        oldLocFrom.text = maps[0]['oldLocId'].toString();
+        newLocFrom.text = maps[0]['newLocId'].toString();
       });
     }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      initialDatePickerMode: DatePickerMode.day,
+      firstDate: DateTime(2015),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      _selectTime(context);
+      setState(() {
+        dateTime.text = picked.toString().substring(0, 10);
+      });
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked =
+        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    if (picked != null) {
+      TimeOfDay now = picked;
+      setState(() {
+        dateTime.text = dateTime.text +
+            " " +
+            now.hour.toString().padLeft(2, "0") +
+            ":" +
+            now.minute.toString().padLeft(2, "0");
+      });
+    }
+  }
+
+  void confirmUploadToServer() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to upload data to server now ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // please add action in here
+              // ex. actionUploadToServer();
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void confirmApprove() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to approve this data now ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // please add action in here
+              // ex. actionUploadToServer();
+              actionApprove();
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -138,7 +282,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       fetchData(Get.arguments[0]);
     } else {
       DateTime now = DateTime.now();
-      String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+      String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
       dateTime.text = formattedDate;
     }
   }
@@ -149,200 +293,190 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       appBar: AppBar(
         title: const Text('Transfer In Form'),
       ),
-      body: Column(
-        children: [
-          Card(
-            elevation: 4,
-            margin: EdgeInsets.all(12.0),
-            shape: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(3),
-              borderSide: BorderSide(color: Colors.grey, width: 1),
-            ),
-            color: Colors.white,
-            child: Container(
-              padding: EdgeInsets.all(14.0),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        child: Text("Trans No : "),
-                        width: Get.width * 0.14,
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: transNo,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blueAccent),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Card(
+              elevation: 4,
+              margin: EdgeInsets.all(12.0),
+              shape: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(3),
+                borderSide: BorderSide(color: Colors.grey, width: 1),
+              ),
+              color: Colors.white,
+              child: Container(
+                padding: EdgeInsets.all(14.0),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          child: Text("Trans No : "),
+                          width: Get.width * 0.14,
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: transNo,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(10),
+                              border: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.blueAccent),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 14,
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        child: Text("Date/Time : "),
-                        width: Get.width * 0.14,
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: dateTime,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
-                          ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 14,
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          child: Text("Date/Time : "),
+                          width: Get.width * 0.14,
                         ),
-                      ),
-                      TextButton(
-                          onPressed: () {}, child: Icon(Icons.date_range)),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 14,
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        child: Text("Manual Ref : "),
-                        width: Get.width * 0.14,
-                      ),
-                      Expanded(
+                        Expanded(
                           child: TextField(
-                        controller: manualRef,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.all(10),
-                          border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blueAccent)),
+                            controller: dateTime,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(10),
+                              border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent)),
+                            ),
+                          ),
                         ),
-                      )),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 14,
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        child: Text("Other Ref : "),
-                        width: Get.width * 0.14,
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: otherRef,
+                        TextButton(
+                          onPressed: () {
+                            _selectDate(context);
+                          },
+                          child: Icon(Icons.date_range),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 14,
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          child: Text("Manual Ref : "),
+                          width: Get.width * 0.14,
+                        ),
+                        Expanded(
+                            child: TextField(
+                          controller: manualRef,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.blueAccent)),
                           ),
+                        )),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 14,
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          child: Text("Other Ref : "),
+                          width: Get.width * 0.14,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 14,
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        child: Text("Loc. From : "),
-                        width: Get.width * 0.14,
-                      ),
-                      Container(
-                        width: Get.width * 0.2,
-                        child: TextField(
-                          controller: oldLocFrom,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
+                        Expanded(
+                          child: TextField(
+                            controller: otherRef,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(10),
+                              border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent)),
+                            ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 14,
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          child: Text("Loc. From : "),
+                          width: Get.width * 0.14,
+                        ),
+                        Container(
+                          width: Get.width * 0.2,
+                          child: TextField(
+                            controller: oldLocFrom,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(10),
+                              border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent)),
+                            ),
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 14,
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        child: Text("Loc. To : "),
-                        width: Get.width * 0.14,
-                      ),
-                      Container(
-                        width: Get.width * 0.2,
-                        child: TextField(
-                          controller: newLocFrom,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
+                        Expanded(
+                          child: TextField(
+                            enabled: false,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(10),
+                              border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent)),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 14,
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          child: Text("Loc. To : "),
+                          width: Get.width * 0.14,
+                        ),
+                        Container(
+                          width: Get.width * 0.2,
+                          child: TextField(
+                            controller: newLocFrom,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(10),
+                              border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent)),
+                            ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
+                        Expanded(
+                          child: TextField(
+                            enabled: false,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(10),
+                              border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent)),
+                            ),
                           ),
-                        ),
-                      )
-                    ],
-                  ),
-                ],
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Container(
-            width: Get.width,
-            child: Column(
-              children: [
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                  height: 50,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 62, 81, 255),
-                    ),
-                    onPressed: () {
-                      actionSave();
-                    },
-                    child: Text(
-                      "Save as Draft",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-                if (idFaTrans != 0) ...[
+            Container(
+              width: Get.width,
+              child: Column(
+                children: [
                   Container(
                     margin:
                         EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
@@ -350,14 +484,13 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                     width: 600,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 131, 142, 240),
+                        backgroundColor: Color.fromARGB(255, 62, 81, 255),
                       ),
                       onPressed: () {
-                        Get.toNamed('/transferinitemlist',
-                            arguments: [idFaTrans, transNo.text]);
+                        actionSave();
                       },
                       child: Text(
-                        "Open Item List",
+                        "Save as Draft",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -365,44 +498,30 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       ),
                     ),
                   ),
-                ],
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                  height: 50,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 40, 165, 61),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      "Approve",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
+                  if (idFaTrans != 0) ...[
+                    Container(
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      height: 50,
+                      width: 600,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 131, 142, 240),
+                        ),
+                        onPressed: () {
+                          Get.toNamed('/transferinitemlist',
+                              arguments: [idFaTrans, transNo.text]);
+                        },
+                        child: Text(
+                          "Open Item List",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                  height: 50,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 116, 54, 173),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      "Upload to Server",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-                if (idFaTrans != 0) ...[
+                  ],
                   Container(
                     margin:
                         EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
@@ -410,11 +529,13 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                     width: 600,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 228, 11, 29),
+                        backgroundColor: Color.fromARGB(255, 40, 165, 61),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        confirmApprove();
+                      },
                       child: Text(
-                        "Delete",
+                        "Approve",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -422,11 +543,55 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       ),
                     ),
                   ),
+                  Container(
+                    margin:
+                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                    height: 50,
+                    width: 600,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 116, 54, 173),
+                      ),
+                      onPressed: () {
+                        confirmUploadToServer();
+                      },
+                      child: Text(
+                        "Upload to Server",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (idFaTrans != 0) ...[
+                    Container(
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      height: 50,
+                      width: 600,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 228, 11, 29),
+                        ),
+                        onPressed: () {
+                          actionConfirm();
+                        },
+                        child: Text(
+                          "Delete",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
-            ),
-          )
-        ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

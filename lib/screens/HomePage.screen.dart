@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:myasset/controllers/Home.controller.dart';
 import 'package:myasset/screens/Clear.screen.dart';
 import 'package:myasset/screens/Login.screen.dart';
 import 'package:myasset/screens/Scan.screen.dart';
@@ -17,14 +18,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final box = GetStorage();
-
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  final homeController = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
@@ -41,24 +35,6 @@ class _MyHomePageState extends State<MyHomePage> {
             Text("${box.read('roleName')}"),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget MyDialog() {
-    return Container(
-      child: Wrap(
-        children: <Widget>[
-          ListTile(
-              leading: Icon(Icons.music_note),
-              title: Text('Music'),
-              onTap: () {}),
-          ListTile(
-            leading: Icon(Icons.videocam),
-            title: Text('Video'),
-            onTap: () {},
-          ),
-        ],
       ),
     );
   }

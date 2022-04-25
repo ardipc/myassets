@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myasset/helpers/db.helper.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class ClearScreen extends StatefulWidget {
   const ClearScreen({Key? key}) : super(key: key);
@@ -9,8 +11,89 @@ class ClearScreen extends StatefulWidget {
 }
 
 class _ClearScreen extends State<ClearScreen> {
+  final dbHelper = DbHelper();
   String date = "";
-  DateTime selectedDate = DateTime.now();
+
+  int? selectedPeriod = null;
+  List _dropdownPeriods = [];
+
+  final dateTime = TextEditingController();
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      initialDatePickerMode: DatePickerMode.day,
+      firstDate: DateTime(2015),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      _selectTime(context);
+      setState(() {
+        dateTime.text = picked.toString().substring(0, 10);
+      });
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked =
+        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    if (picked != null) {
+      TimeOfDay now = picked;
+      setState(() {
+        dateTime.text = dateTime.text +
+            " " +
+            now.hour.toString().padLeft(2, "0") +
+            ":" +
+            now.minute.toString().padLeft(2, "0");
+      });
+    }
+  }
+
+  Future<void> fetchPeriod() async {
+    Database db = await dbHelper.initDb();
+
+    List<Map<String, dynamic>> maps = await db.query(
+      "periods",
+      columns: ["periodId", "periodName"],
+    );
+
+    setState(() {
+      _dropdownPeriods = maps;
+    });
+  }
+
+  void confirmClear() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to clear data ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // to do action in here
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchPeriod();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,16 +116,40 @@ class _ClearScreen extends State<ClearScreen> {
                 children: <Widget>[
                   Text("Periode :  "),
                   Expanded(
-                      child: TextField(
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blueAccent)),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4.0),
+                        border: Border.all(
+                          style: BorderStyle.solid,
+                          width: 0.80,
+                        ),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton(
+                          isExpanded: true,
+                          hint: const Text("Select Period"),
+                          items: _dropdownPeriods.map((item) {
+                            return DropdownMenuItem(
+                              child: Text(item['periodName']),
+                              value: item['periodId'],
+                            );
+                          }).toList(),
+                          value: selectedPeriod,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedPeriod = int.parse(value.toString());
+                            });
+                          },
+                        ),
+                      ),
                     ),
-                  )),
+                  ),
                   Text(" "),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _selectDate(context);
+                    },
                     child: Icon(Icons.date_range),
                   ),
                 ],
@@ -57,7 +164,9 @@ class _ClearScreen extends State<ClearScreen> {
                   style: TextButton.styleFrom(
                     backgroundColor: Color.fromRGBO(44, 116, 180, 1),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    confirmClear();
+                  },
                   child: Text(
                     "Clear",
                     style: TextStyle(
@@ -72,18 +181,5 @@ class _ClearScreen extends State<ClearScreen> {
         ),
       ),
     );
-  }
-
-  _selectDate(BuildContext context) async {
-    final DateTime? selected = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2010),
-      lastDate: DateTime(2025),
-    );
-    if (selected != null && selected != selectedDate)
-      setState(() {
-        selectedDate = selected;
-      });
   }
 }

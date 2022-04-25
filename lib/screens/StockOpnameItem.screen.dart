@@ -56,11 +56,6 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     );
     List items = [];
 
-    Map<String, dynamic> map = Map();
-    map['periodId'] = 0;
-    map['periodName'] = "Select";
-    items.add(map);
-
     for (var row in maps) {
       items.add(row);
     }
@@ -68,6 +63,31 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     setState(() {
       _optionsPeriods = items;
     });
+  }
+
+  void confirmDownloadTag() {
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirmation"),
+        content: Text("Are you sure to sync now ?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // please add action in here
+              // ex. actionUploadToServer();
+              Get.back();
+            },
+            child: Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("NO"),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> fetchData(int id) async {
@@ -80,8 +100,16 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     );
 
     if (maps.length == 1) {
+      List<Map<String, dynamic>> mapsItem = await db.query(
+        "faitems",
+        where: "faId = ?",
+        whereArgs: [maps[0]['faId']],
+      );
+
       setState(() {
         idStockOpname = id;
+        tagNoController.text =
+            mapsItem.length != 0 ? mapsItem[0]['tagNo'].toString() : "0";
         selectedExistence = int.parse(maps[0]['existStatCode']);
         selectedTagging = int.parse(maps[0]['tagStatCode']);
         selectedUsage = int.parse(maps[0]['usageStatCode']);
@@ -162,79 +190,107 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   }
 
   Future<void> actionSave() async {
-    Database db = await dbHelper.initDb();
-
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
-
-    Map<String, dynamic> map = Map();
-    if (idStockOpname == 0) {
-      map['stockOpnameId'] = 0;
-      map['periodId'] = 0;
-      map['faId'] = 0;
-      map['locationId'] = 0;
-      map['qty'] = 0;
-      map['existStatCode'] = selectedExistence;
-      map['tagStatCode'] = selectedTagging;
-      map['usageStatCode'] = selectedUsage;
-      map['conStatCode'] = selectedCondition;
-      map['ownStatCode'] = selectedOwnership;
-      map['syncDate'] = formattedDate;
-      map['syncBy'] = box.read('userId');
-      map['uploadDate'] = formattedDate;
-      map['uploadBy'] = box.read('userId');
-      map['uploadMessage'] = "";
-
-      int exec = await db.insert("stockopnames", map,
-          conflictAlgorithm: ConflictAlgorithm.replace);
-
-      setState(() {
-        idStockOpname = exec;
-      });
-
-      Get.dialog(AlertDialog(
-        title: Text("Information"),
-        content: Text("Data has been saved."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text("Close"),
-          ),
-        ],
-      ));
+    if (tagNoController.text.isEmpty &&
+        selectedExistence == null &&
+        selectedTagging == null &&
+        selectedUsage == null &&
+        selectedCondition == null &&
+        selectedOwnership == null) {
+      Get.dialog(
+        AlertDialog(
+          title: const Text("Information"),
+          content: const Text("Please fill all the field."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
     } else {
-      map['existStatCode'] = selectedExistence;
-      map['tagStatCode'] = selectedTagging;
-      map['usageStatCode'] = selectedUsage;
-      map['conStatCode'] = selectedCondition;
-      map['ownStatCode'] = selectedOwnership;
+      Database db = await dbHelper.initDb();
 
-      int exec = await db.update("stockopnames", map,
-          where: "id = ?", whereArgs: [idStockOpname]);
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
 
-      Get.dialog(AlertDialog(
-        title: Text("Information"),
-        content: Text("Data has been updated."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text("Close"),
-          ),
-        ],
-      ));
+      Map<String, dynamic> map = Map();
+      if (idStockOpname == 0) {
+        map['stockOpnameId'] = 0;
+        map['periodId'] = 0;
+        map['faId'] = faNoController.text;
+        map['locationId'] = 0;
+        map['qty'] = 0;
+        map['existStatCode'] = selectedExistence;
+        map['tagStatCode'] = selectedTagging;
+        map['usageStatCode'] = selectedUsage;
+        map['conStatCode'] = selectedCondition;
+        map['ownStatCode'] = selectedOwnership;
+        map['syncDate'] = formattedDate;
+        map['syncBy'] = box.read('userId');
+        map['uploadDate'] = formattedDate;
+        map['uploadBy'] = box.read('userId');
+        map['uploadMessage'] = "";
+
+        int exec = await db.insert("stockopnames", map,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+
+        setState(() {
+          idStockOpname = exec;
+        });
+
+        Get.dialog(AlertDialog(
+          title: Text("Information"),
+          content: Text("Data has been saved."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        ));
+      } else {
+        map['existStatCode'] = selectedExistence;
+        map['tagStatCode'] = selectedTagging;
+        map['usageStatCode'] = selectedUsage;
+        map['conStatCode'] = selectedCondition;
+        map['ownStatCode'] = selectedOwnership;
+
+        int exec = await db.update("stockopnames", map,
+            where: "id = ?", whereArgs: [idStockOpname]);
+
+        Get.dialog(AlertDialog(
+          title: Text("Information"),
+          content: Text("Data has been updated."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        ));
+      }
     }
   }
 
-  void getInfoItem(String value) {
-    setState(() {
-      tagNoController.text = value;
-      descriptionController.text = "Description ${value}";
-      faNoController.text = "FA No ${value}";
-    });
+  Future<void> getInfoItem(String value) async {
+    Database db = await dbHelper.initDb();
+    int parseToInt = int.parse(value == '' ? '0' : value);
+    List<Map<String, dynamic>> maps =
+        await db.query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
+    if (maps.length == 1) {
+      setState(() {
+        tagNoController.text = value;
+        descriptionController.text = maps[0]['assetName'];
+        faNoController.text = maps[0]['faId'].toString();
+      });
+    }
   }
 
   @override
@@ -242,8 +298,11 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     // TODO: implement initState
     super.initState();
     fetchAllOptions();
+    tagNoController.addListener(() {
+      getInfoItem(tagNoController.text);
+    });
     fetchPeriod();
-    if (Get.arguments != null) {
+    if (Get.arguments != 0) {
       fetchData(Get.arguments[0]);
     }
   }
@@ -318,13 +377,14 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                           width: Get.width * 0.14,
                         ),
                         Expanded(
-                          child: new TextField(
+                          child: TextField(
                             controller: tagNoController,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
+                                borderSide:
+                                    BorderSide(color: Colors.blueAccent),
+                              ),
                             ),
                           ),
                         ),
@@ -335,6 +395,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               getInfoItem(barcode);
                               setState(() {
                                 barcode = barcode;
+                                tagNoController.text = barcode;
                               });
                             } on PlatformException catch (error) {
                               if (error.code ==
@@ -353,7 +414,9 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                           child: Icon(Icons.qr_code),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            confirmDownloadTag();
+                          },
                           child: Icon(Icons.download),
                         ),
                       ],
@@ -369,6 +432,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            enabled: false,
+                            readOnly: true,
                             controller: descriptionController,
                             decoration: InputDecoration(
                               contentPadding: EdgeInsets.all(10),
@@ -391,6 +456,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         ),
                         Expanded(
                           child: TextFormField(
+                            enabled: false,
+                            readOnly: true,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter some text';
