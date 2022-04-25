@@ -26,7 +26,7 @@ void main() async {
   await GetStorage.init();
 
   final box = GetStorage();
-  box.write('registered', true);
+  // box.write('registered', true);
   final registered = box.read('registered');
 
   runApp(
