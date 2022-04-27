@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -30,15 +31,27 @@ class RegisterController extends GetxController {
   }
 
   void toOtpScreen() {
-    Get.toNamed(
-      '/otp',
-      arguments: [
-        apiAddress.text,
-        locationId.text,
-        username.text,
-        email.text,
-        deviceId.text
-      ],
-    );
+    if (apiAddress.text.isNotEmpty &&
+        locationId.text.isNotEmpty &&
+        username.text.isNotEmpty &&
+        email.text.isNotEmpty) {
+      Get.toNamed(
+        '/otp',
+        arguments: [
+          apiAddress.text,
+          locationId.text,
+          username.text,
+          email.text,
+          deviceId.text
+        ],
+      );
+    } else {
+      Get.dialog(
+        const AlertDialog(
+          title: Text("Warning"),
+          content: Text("All field must be filled."),
+        ),
+      );
+    }
   }
 }

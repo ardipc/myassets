@@ -11,10 +11,9 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  RegisterController registerController = Get.put(RegisterController());
-
   @override
   Widget build(BuildContext context) {
+    RegisterController registerController = Get.put(RegisterController());
     return Scaffold(
       appBar: AppBar(
         title: const Text('Register'),

@@ -13,47 +13,74 @@ class LoginScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Color.fromRGBO(48, 52, 156, 1),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Container(
-              child: Image(
-                image: AssetImage("assets/images/sariroti.png"),
-                fit: BoxFit.fill,
-                width: 280,
-                height: 300,
+              margin: EdgeInsets.only(top: 32, left: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    "API : ${loginController.box.read('apiAddress') ?? "https://api.google.com"}",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  Text(
+                    "Name : ${loginController.box.read("locationName") ?? "Location Name"}",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  Text(
+                    "Location : ${loginController.box.read("locationCode") ?? "D1234123"}",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 27), //apply padding horizontal or vertical only
-              child: Text(
-                "Fixed Assets Control System\nLogin Form",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromRGBO(255, 234, 169, 1),
-                  fontSize: 30,
-                  shadows: [
-                    Shadow(
-                        // bottomLeft
-                        offset: Offset(-1.2, -1.2),
-                        color: Color.fromRGBO(242, 159, 5, 1)),
-                    Shadow(
-                        // bottomRight
-                        offset: Offset(1.2, -1.2),
-                        color: Color.fromRGBO(242, 159, 5, 1)),
-                    Shadow(
-                        // topRight
-                        offset: Offset(1.2, 1.2),
-                        color: Color.fromRGBO(242, 159, 5, 1)),
-                    Shadow(
-                        // topLeft
-                        offset: Offset(-1.2, 1.2),
-                        color: Color.fromRGBO(242, 159, 5, 1)),
-                  ],
+            Center(
+              child: Container(
+                margin: EdgeInsets.only(top: 32),
+                child: Image(
+                  image: AssetImage("assets/images/sariroti.png"),
+                  fit: BoxFit.fill,
+                  width: 280,
+                  height: 300,
+                ),
+              ),
+            ),
+            Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 27), //apply padding horizontal or vertical only
+                child: Text(
+                  "Fixed Assets Control System\nLogin Form",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromRGBO(255, 234, 169, 1),
+                    fontSize: 30,
+                    shadows: [
+                      Shadow(
+                          // bottomLeft
+                          offset: Offset(-1.2, -1.2),
+                          color: Color.fromRGBO(242, 159, 5, 1)),
+                      Shadow(
+                          // bottomRight
+                          offset: Offset(1.2, -1.2),
+                          color: Color.fromRGBO(242, 159, 5, 1)),
+                      Shadow(
+                          // topRight
+                          offset: Offset(1.2, 1.2),
+                          color: Color.fromRGBO(242, 159, 5, 1)),
+                      Shadow(
+                          // topLeft
+                          offset: Offset(-1.2, 1.2),
+                          color: Color.fromRGBO(242, 159, 5, 1)),
+                    ],
+                  ),
                 ),
               ),
             ),

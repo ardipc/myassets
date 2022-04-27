@@ -12,10 +12,9 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  OtpController otpController = Get.put(OtpController());
-
   @override
   Widget build(BuildContext context) {
+    OtpController otpController = Get.put(OtpController());
     return Scaffold(
       appBar: AppBar(
         title: const Text('OTP'),

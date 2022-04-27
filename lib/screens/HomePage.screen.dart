@@ -31,8 +31,8 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Welcome ${box.read('realName')}"),
-            Text("${box.read('roleName')}"),
+            Text("Welcome ${box.read('username')}"),
+            Text("${box.read('roleId')}"),
           ],
         ),
       ),

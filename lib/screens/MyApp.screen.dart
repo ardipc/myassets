@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:myasset/controllers/Auth.controller.dart';
 import 'package:myasset/screens/HomePage.screen.dart';
 import 'package:myasset/screens/Login.screen.dart';
 
 class MyApp extends StatelessWidget {
+  final box = GetStorage();
   AuthController appController = Get.put(AuthController());
 
   Future<void> initializeSettings() async {
@@ -23,11 +25,9 @@ class MyApp extends StatelessWidget {
           if (snapshot.hasError) {
             return ErrorView(snapshot);
           } else {
-            return Obx(() {
-              return _authController.isLogged.value
-                  ? MyHomePage(title: "Asset Control")
-                  : LoginScreen();
-            });
+            return box.read('username') != null
+                ? MyHomePage(title: "Asset Control")
+                : LoginScreen();
           }
         }
       },
