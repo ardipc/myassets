@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
           if (snapshot.hasError) {
             return ErrorView(snapshot);
           } else {
-            return box.read('username') != null
+            return _authController.isLogged.value
                 ? MyHomePage(title: "Asset Control")
                 : LoginScreen();
           }

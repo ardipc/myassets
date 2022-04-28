@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:myasset/controllers/Auth.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/models/preferences.model.dart';
 import 'package:myasset/models/user.model.dart';
@@ -14,6 +15,8 @@ class LoginController extends GetxController {
 
   final username = TextEditingController();
   final password = TextEditingController();
+
+  final authController = AuthController();
 
   final userService = UserService();
 
@@ -55,22 +58,31 @@ class LoginController extends GetxController {
       var res =
           await userService.findUserByUserAndPass(username.text, password.text);
 
-      print(res.body);
-      print(res.body['status']);
+      if (res.body != null) {
+        if (res.body['status']) {
+          // box.write('userId', users[0].userId);
+          box.write('username', username.text);
+          box.write('roleId', res.body['roleId']);
+          box.write('token', res.body['token']);
+          // box.write('roleName', users[0].roleName);
+          // box.write('realName', users[0].realName);
 
-      if (res.body['status']) {
-        // box.write('userId', users[0].userId);
-        box.write('username', username.text);
-        box.write('roleId', res.body['roleId']);
-        box.write('token', res.body['token']);
-        // box.write('roleName', users[0].roleName);
-        // box.write('realName', users[0].realName);
-        Get.offNamed('/home');
+          authController.saveToken(res.body['token']);
+
+          Get.offNamed('/home');
+        } else {
+          Get.dialog(
+            const AlertDialog(
+              title: Text("Message"),
+              content: Text("Username and password not found!"),
+            ),
+          );
+        }
       } else {
         Get.dialog(
           const AlertDialog(
             title: Text("Message"),
-            content: Text("Username and password not found!"),
+            content: Text("Please check your connection network."),
           ),
         );
       }

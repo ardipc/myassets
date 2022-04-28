@@ -24,31 +24,31 @@ class HomeController extends GetxController {
   }
 
   void getData() async {
-    Database db = await dbHelper.initDb();
-    List<Preferences> pref = await dbHelper.initApp();
-    prefs = pref;
+    // Database db = await dbHelper.initDb();
+    // List<Preferences> pref = await dbHelper.initApp();
+    // prefs = pref;
 
-    print(pref);
+    // print(pref);
 
-    List<Map<String, dynamic>> users = await db
-        .query("users", where: "userId = ?", whereArgs: [pref[0].userId]);
-    user = User.fromMap(users[0]);
+    // List<Map<String, dynamic>> users = await db
+    //     .query("users", where: "userId = ?", whereArgs: [pref[0].userId]);
+    // user = User.fromMap(users[0]);
   }
 
   void actionLogout() async {
-    Database db = await dbHelper.initDb();
+    // Database db = await dbHelper.initDb();
 
-    Preferences obj = Preferences(
-        1, "true", "-", "-", "-", "-", 0, "-", "-", 0, "-", 0, 0, "-", 0, 0);
+    // Preferences obj = Preferences(
+    //     1, "true", "-", "-", "-", "-", 0, "-", "-", 0, "-", 0, 0, "-", 0, 0);
 
-    int count = await db
-        .update("preferences", obj.toMap(), where: "id = ?", whereArgs: [1]);
+    // int count = await db
+    //     .update("preferences", obj.toMap(), where: "id = ?", whereArgs: [1]);
 
-    if (count == 1) {
-      Get.offAllNamed('/login');
-    } else {
-      Get.snackbar("Message", "Logout error",
-          snackPosition: SnackPosition.BOTTOM);
-    }
+    // if (count == 1) {
+    //   Get.offAllNamed('/login');
+    // } else {
+    //   Get.snackbar("Message", "Logout error",
+    //       snackPosition: SnackPosition.BOTTOM);
+    // }
   }
 }

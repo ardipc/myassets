@@ -21,12 +21,17 @@ class AuthController extends GetxController with CacheManager {
   }
 
   void actionLogout() async {
+    isLogged.value = false;
+
     final box = GetStorage();
     box.remove('userId');
     box.remove('username');
     box.remove('roleId');
     box.remove('roleName');
     box.remove('realName');
+
+    removeToken();
+
     Get.offAllNamed('/login');
   }
 }

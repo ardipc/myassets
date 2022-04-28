@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/Table.screen.dart';
+import 'package:myasset/services/Period.service.dart';
 import 'package:responsive_table/responsive_table.dart';
 import 'package:sqflite/sqlite_api.dart';
 
@@ -111,40 +112,10 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   }
 
   void actionDownload() async {
-    Database db = await dbHelper.initDb();
-
-    Batch batch = db.batch();
-    // batch.delete("statuses", where: "genId = ?", whereArgs: [1]);
-    // batch.delete("statuses", where: "genId = ?", whereArgs: [2]);
-    // batch.insert(
-    //   "statuses",
-    //   {
-    //     'genCode': 'TAG01',
-    //     'genName': 'Lengkap',
-    //     'genGroup': 'TAGSTAT',
-    //     'sort': 1,
-    //     'syncDate': '2022-02-02',
-    //     'syncBy': 0
-    //   },
-    //   conflictAlgorithm: ConflictAlgorithm.replace,
-    // );
-    // batch.insert(
-    //   "statuses",
-    //   {
-    //     'genCode': 'EXIST02',
-    //     'genName': 'Kurang Lengkap',
-    //     'genGroup': 'TAGSTAT',
-    //     'sort': 2,
-    //     'syncDate': '2022-02-02',
-    //     'syncBy': 0
-    //   },
-    //   conflictAlgorithm: ConflictAlgorithm.replace,
-    // );
-
-    List result = await batch.commit();
-
-    Get.snackbar("Insert", "ID ${result.toString()}");
-    fetchPeriod();
+    final periodService = PeriodService();
+    periodService.getAll().then((value) {
+      print(value.body);
+    });
   }
 
   void confirmDownload() {
