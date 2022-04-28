@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/Table.screen.dart';
 import 'package:myasset/services/Period.service.dart';
@@ -113,8 +114,41 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
 
   void actionDownload() async {
     final periodService = PeriodService();
-    periodService.getAll().then((value) {
-      print(value.body);
+    Database db = await dbHelper.initDb();
+
+    List<Map<String, dynamic>> maps = await db.query(
+      "periods",
+      columns: ["periodId", "periodName"],
+    );
+
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
+
+    periodService.getAll().then((value) async {
+      if (value.body != null) {
+        var rows = value.body['periods'];
+        if (rows.length > 0) {
+          for (var row in rows) {
+            await db.insert(
+              "periods",
+              {
+                "periodId": row['periodId'],
+                "periodName": row['periodName'],
+                "startDate": row['startDate'].toString().substring(0, 10),
+                "endDate": row['endDate'].toString().substring(0, 10),
+                "closeActualDate":
+                    row['closeActualDate'].toString().substring(0, 10),
+                "soStartDate": row['soStartDate'].toString().substring(0, 10),
+                "soEndDate": row['soEndDate'],
+                "syncDate": formattedDate,
+                "syncBy": 0
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
+          fetchPeriod();
+        }
+      }
     });
   }
 

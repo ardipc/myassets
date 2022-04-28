@@ -67,7 +67,7 @@ class LoginController extends GetxController {
           // box.write('roleName', users[0].roleName);
           // box.write('realName', users[0].realName);
 
-          authController.saveToken(res.body['token']);
+          await authController.saveToken(res.body['token']);
 
           Get.offNamed('/home');
         } else {
