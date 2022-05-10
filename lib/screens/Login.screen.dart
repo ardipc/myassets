@@ -26,23 +26,23 @@ class LoginScreen extends StatelessWidget {
                 children: [
                   Text(
                     "API : ${loginController.box.read('apiAddress') ?? "https://api.google.com"}",
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                   Text(
-                    "Name : ${loginController.box.read("locationName") ?? "Location Name"}",
-                    style: TextStyle(color: Colors.white),
+                    "Location : ${loginController.box.read("locationName") ?? "-"}",
+                    style: const TextStyle(color: Colors.white),
                   ),
                   Text(
-                    "Location : ${loginController.box.read("locationCode") ?? "D1234123"}",
-                    style: TextStyle(color: Colors.white),
+                    "Plant : ${loginController.box.read("plantName") ?? "-"}",
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ],
               ),
             ),
             Center(
               child: Container(
-                margin: EdgeInsets.only(top: 32),
-                child: Image(
+                margin: const EdgeInsets.only(top: 32),
+                child: const Image(
                   image: AssetImage("assets/images/sariroti.png"),
                   fit: BoxFit.fill,
                   width: 280,
@@ -88,7 +88,7 @@ class LoginScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 62),
               child: TextField(
                 controller: loginController.username,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   fillColor: Colors.white,
                   filled: true,
                   border: OutlineInputBorder(),
@@ -102,7 +102,7 @@ class LoginScreen extends StatelessWidget {
               child: TextField(
                 controller: loginController.password,
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   fillColor: Colors.white,
                   filled: true,
                   border: OutlineInputBorder(),
@@ -118,7 +118,7 @@ class LoginScreen extends StatelessWidget {
                 width: 600,
                 child: TextButton(
                   style: TextButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                    backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                   ),
                   onPressed: () {
                     // Get.off(
@@ -126,7 +126,7 @@ class LoginScreen extends StatelessWidget {
                     // );
                     loginController.actionLogin();
                   },
-                  child: Text(
+                  child: const Text(
                     "LOGIN",
                     style: TextStyle(
                       color: Colors.white,

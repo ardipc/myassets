@@ -24,12 +24,12 @@ class _OtpScreenState extends State<OtpScreen> {
         child: Column(
           children: [
             Text(
-                "OTP Code has been sent to your email (${otpController.args[3]})"),
-            SizedBox(
+                "OTP Code has been sent to your email (${otpController.args[0]})"),
+            const SizedBox(
               height: 16,
             ),
-            Text("Please enter your OTP Code then submit."),
-            SizedBox(
+            const Text("Please enter your OTP Code then submit."),
+            const SizedBox(
               height: 60,
             ),
             OTPTextField(
@@ -43,10 +43,10 @@ class _OtpScreenState extends State<OtpScreen> {
                 otpController.changePin(pin);
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 60,
             ),
-            Container(
+            SizedBox(
               height: 60,
               width: MediaQuery.of(context).size.width,
               child: TextButton(
@@ -58,6 +58,28 @@ class _OtpScreenState extends State<OtpScreen> {
                 },
                 child: Text(
                   "Submit OTP",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 60,
+            ),
+            SizedBox(
+              height: 60,
+              width: MediaQuery.of(context).size.width,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Color.fromARGB(255, 45, 60, 197),
+                ),
+                onPressed: () {
+                  otpController.actionResendOtp();
+                },
+                child: const Text(
+                  "Resend OTP",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,

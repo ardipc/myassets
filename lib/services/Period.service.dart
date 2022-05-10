@@ -9,7 +9,7 @@ class PeriodService extends GetConnect with CacheManager {
     var token = getToken();
     return get(
       "${box.read("apiAddress")}/Api/Period",
-      headers: {"Authorization": "Bearer ${token}"},
+      headers: {"Authorization": "Bearer $token"},
     );
   }
 
@@ -17,7 +17,7 @@ class PeriodService extends GetConnect with CacheManager {
     var token = getToken();
     return get(
       "${box.read("apiAddress")}/Api/Period/All?lastSync=1900-01-01",
-      headers: {"Authorization": "Bearer ${token}"},
+      headers: {"Authorization": "Bearer $token"},
     );
   }
 }

@@ -32,8 +32,8 @@ void main() async {
   runApp(
     GetMaterialApp(
       theme: ThemeData(
-        primaryColor: Color.fromRGBO(48, 52, 156, 1),
-        appBarTheme: AppBarTheme(
+        primaryColor: const Color.fromRGBO(48, 52, 156, 1),
+        appBarTheme: const AppBarTheme(
           backgroundColor: Color.fromRGBO(48, 52, 156, 1),
         ),
       ),

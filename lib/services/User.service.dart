@@ -11,10 +11,6 @@ class UserService extends GetConnect {
   Future<Response> findUserByUserAndPass(String user, String password) {
     List<int> byt = utf8.encode(password);
     var encodePwd = base64.encode(byt);
-    print(user);
-    print(password);
-    print(encodePwd);
-    print("${box.read("apiAddress")}/Api/User?usr=${user}&pwd=${encodePwd}");
     return get(
         "${box.read("apiAddress")}/Api/User?usr=${user}&pwd=${encodePwd}");
   }
