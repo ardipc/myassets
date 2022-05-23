@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 class DownloadController extends GetxController {
   var isStart = false.obs;
+  var listProgress = <Widget>[].obs;
 
   @override
   void onInit() {
@@ -43,9 +44,17 @@ class DownloadController extends GetxController {
     );
   }
 
+  void restart() async {
+    isStart.value = false;
+    listProgress.clear();
+  }
+
   Future<void> startDownload() async {
     isStart.value = true;
-    await Future.delayed(Duration(seconds: 10));
-    isStart.value = false;
+    listProgress.add(Text("Starting download..."));
+    await Future.delayed(Duration(seconds: 10)).then((value) {
+      listProgress.add(Text("Download complete..."));
+    });
+    // isStart.value = false;
   }
 }

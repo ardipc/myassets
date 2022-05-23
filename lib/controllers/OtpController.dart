@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/models/preferences.model.dart';
 import 'package:myasset/services/Register.service.dart';
@@ -71,7 +72,7 @@ class OtpController extends GetxController {
   void actionSubmitOtp() async {
     try {
       if (args[2] == pin) {
-        registerService.checkOtp(args[0], args[1], args[2]).then((value) {
+        registerService.checkOtp(args[0], args[1], args[2]).then((value) async {
           Map body = value.body;
           if (body['username'].toString().isNotEmpty) {
             Get.dialog(
@@ -103,6 +104,21 @@ class OtpController extends GetxController {
 
             box.write('roleId', body['roleid']);
             box.write('roleName', body['rolename']);
+
+            Database db = await dbHelper.initDb();
+            Map<String, dynamic> map = {
+              "username": body['username'],
+              "password": body['encpassword'],
+              "empNo": body['empno'],
+              "realName": body['realname'],
+              "roleId": body['roleid'],
+              "roleName": body['rolename'],
+              "plantId": body['plantid'],
+              "locationId": args[1],
+              "syncDate": DateFormat.yMMMEd(),
+              "syncBy": 0
+            };
+            await db.insert("users", map);
 
             Get.offAndToNamed('/login');
           }

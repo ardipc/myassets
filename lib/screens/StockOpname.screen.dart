@@ -85,6 +85,15 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     return temps;
   }
 
+  void fetchSinglePeriod() async {
+    final periodService = PeriodService();
+    periodService.getNow().then((value) {
+      setState(() {
+        selectedValue = value.body['periodId'] ?? 0;
+      });
+    });
+  }
+
   void fetchPeriod() async {
     Database db = await dbHelper.initDb();
 
@@ -255,6 +264,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    fetchSinglePeriod();
     fetchPeriod();
     fetchData();
   }

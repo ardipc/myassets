@@ -27,7 +27,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextField(
                   controller: registerController.apiAddress,
                   onChanged: (value) =>
-                      registerController.checkFirstCharacterEmail(value),
+                      registerController.writeToGetStorage(value),
                   decoration: InputDecoration(
                     fillColor: Colors.white,
                     filled: true,
@@ -42,6 +42,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ],
               TextField(
                 controller: registerController.email,
+                onChanged: (String value) {
+                  registerController.checkFirstCharacterEmail(value);
+                },
                 decoration: const InputDecoration(
                   fillColor: Colors.white,
                   filled: true,
@@ -55,6 +58,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               TextField(
                 controller: registerController.deviceId,
+                readOnly: true,
+                enabled: false,
                 decoration: const InputDecoration(
                   fillColor: Colors.white,
                   filled: true,
@@ -80,6 +85,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     "Submit Registration",
                     style: TextStyle(
                       color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 22,
+              ),
+              SizedBox(
+                height: 60,
+                width: MediaQuery.of(context).size.width,
+                child: TextButton(
+                  onPressed: () {
+                    Get.toNamed('/login');
+                  },
+                  child: const Text(
+                    "Have already account ? Login Here",
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 62, 81, 255),
                       fontSize: 18,
                     ),
                   ),

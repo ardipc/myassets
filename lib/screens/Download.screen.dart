@@ -12,6 +12,16 @@ class DownloadScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Download'),
+        actions: [
+          if (downloadController.isStart.value) ...[
+            IconButton(
+              onPressed: () {
+                downloadController.restart();
+              },
+              icon: Icon(Icons.refresh),
+            )
+          ]
+        ],
       ),
       body: Obx(
         () => downloadController.isStart.value
@@ -26,10 +36,7 @@ class DownloadScreen extends StatelessWidget {
                 child: Container(
                   padding: EdgeInsets.all(6.0),
                   child: ListView(
-                    children: [
-                      Text("Starting download..."),
-                      Text("Table transactions..."),
-                    ],
+                    children: downloadController.listProgress,
                   ),
                 ),
               )

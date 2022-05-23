@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:myasset/controllers/Stockopname.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/Table.screen.dart';
+import 'package:myasset/services/Period.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class StockOpnameItemScreen extends StatefulWidget {
@@ -32,20 +33,29 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   TextEditingController descriptionController = TextEditingController();
   TextEditingController faNoController = TextEditingController();
 
-  int? selectedExistence = null;
+  String? selectedExistence = null;
   List _optionsExistence = [];
 
-  int? selectedTagging = null;
+  String? selectedTagging = null;
   List _optionsTagging = [];
 
-  int? selectedUsage = null;
+  String? selectedUsage = null;
   List _optionsUsage = [];
 
-  int? selectedCondition = null;
+  String? selectedCondition = null;
   List _optionsCondition = [];
 
-  int? selectedOwnership = null;
+  String? selectedOwnership = null;
   List _optionsOwnership = [];
+
+  void fetchSinglePeriod() async {
+    final periodService = PeriodService();
+    periodService.getNow().then((value) {
+      setState(() {
+        selectedValue = value.body['periodId'] ?? 0;
+      });
+    });
+  }
 
   void fetchPeriod() async {
     Database db = await dbHelper.initDb();
@@ -110,11 +120,11 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         idStockOpname = id;
         tagNoController.text =
             mapsItem.length != 0 ? mapsItem[0]['tagNo'].toString() : "0";
-        selectedExistence = int.parse(maps[0]['existStatCode']);
-        selectedTagging = int.parse(maps[0]['tagStatCode']);
-        selectedUsage = int.parse(maps[0]['usageStatCode']);
-        selectedCondition = int.parse(maps[0]['conStatCode']);
-        selectedOwnership = int.parse(maps[0]['ownStatCode']);
+        selectedExistence = maps[0]['existStatCode'].toString();
+        selectedTagging = maps[0]['tagStatCode'].toString();
+        selectedUsage = maps[0]['usageStatCode'].toString();
+        selectedCondition = maps[0]['conStatCode'].toString();
+        selectedOwnership = maps[0]['ownStatCode'].toString();
       });
     }
   }
@@ -301,6 +311,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     tagNoController.addListener(() {
       getInfoItem(tagNoController.text);
     });
+    fetchSinglePeriod();
     fetchPeriod();
     if (Get.arguments != 0) {
       fetchData(Get.arguments[0]);
@@ -507,8 +518,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 value: selectedExistence,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedExistence =
-                                        int.parse(value.toString());
+                                    selectedExistence = value.toString();
                                   });
                                 },
                               ),
@@ -549,8 +559,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 value: selectedTagging,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedTagging =
-                                        int.parse(value.toString());
+                                    selectedTagging = value.toString();
                                   });
                                 },
                               ),
@@ -591,7 +600,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 value: selectedUsage,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedUsage = int.parse(value.toString());
+                                    selectedUsage = value.toString();
                                   });
                                 },
                               ),
@@ -632,8 +641,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 value: selectedCondition,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedCondition =
-                                        int.parse(value.toString());
+                                    selectedCondition = value.toString();
                                   });
                                 },
                               ),
@@ -674,8 +682,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 value: selectedOwnership,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedOwnership =
-                                        int.parse(value.toString());
+                                    selectedOwnership = value.toString();
                                   });
                                 },
                               ),

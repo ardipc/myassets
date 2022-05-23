@@ -23,7 +23,10 @@ class RegisterController extends GetxController {
   void onInit() async {
     // TODO: implement onInit
     deviceId.text = (await PlatformDeviceId.getDeviceId)!;
-    apiAddress.text = box.read('apiAddress') ?? "https://api.sariroti.com";
+    if (box.read('apiAddress') == null) {
+      box.write('apiAddress', "https://api.sariroti.com");
+    }
+    apiAddress.text = box.read('apiAddress');
     locationId.text = box.read('locationId') ?? "";
     super.onInit();
   }
@@ -34,8 +37,14 @@ class RegisterController extends GetxController {
     super.onClose();
   }
 
+  void writeToGetStorage(String value) {
+    box.write('apiAddress', value);
+  }
+
   void checkFirstCharacterEmail(String value) {
-    isAt.value = value == '@' ? true : false;
+    if (value.isNotEmpty) {
+      isAt.value = value.toString()[0] == '@' ? true : false;
+    }
   }
 
   void toOtpScreen() {
@@ -76,13 +85,6 @@ class RegisterController extends GetxController {
         const AlertDialog(
           title: Text("Message"),
           content: Text("Catch Error"),
-        ),
-      );
-    } finally {
-      Get.dialog(
-        const AlertDialog(
-          title: Text("Message"),
-          content: Text("Finally"),
         ),
       );
     }

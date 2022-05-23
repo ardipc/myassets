@@ -26,7 +26,17 @@ void main() async {
   await GetStorage.init();
 
   final box = GetStorage();
-  // box.write('registered', false);
+
+  // development purpose
+  box.write('registered', false);
+  box.write('locationId', 1798);
+  box.write('locationCode', "D70001990");
+  box.write('locationName', "PT ESSEI PERBAMA BEKASI UTARA");
+  // box.write('plantId', body['plantid']);
+  box.write('plantName', "CIKARANG");
+  box.write('roleId', 2);
+  // end development purpose
+
   final registered = box.read('registered');
 
   runApp(
@@ -39,7 +49,9 @@ void main() async {
       ),
       enableLog: true,
       debugShowCheckedModeBanner: false,
-      home: registered ? MyApp() : RegisterScreen(),
+      home: (registered == "true" || registered != null)
+          ? MyApp()
+          : RegisterScreen(),
       getPages: [
         GetPage(
           name: '/',
