@@ -14,4 +14,9 @@ class UserService extends GetConnect {
     return get(
         "${box.read("apiAddress")}/Api/User?usr=${user}&pwd=${encodePwd}");
   }
+
+  Future<Response> getAll() async {
+    return get(
+        "${box.read("apiAddress")}/Api/User/All?locationId=${box.read('locationId')}&lastSync=1900-01-01");
+  }
 }

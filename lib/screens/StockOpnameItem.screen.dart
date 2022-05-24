@@ -223,15 +223,15 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     } else {
       Database db = await dbHelper.initDb();
 
-      DateTime now = DateTime.now();
-      String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
+      String formattedDate =
+          DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
 
       Map<String, dynamic> map = Map();
       if (idStockOpname == 0) {
         map['stockOpnameId'] = 0;
-        map['periodId'] = 0;
+        map['periodId'] = selectedValue;
         map['faId'] = faNoController.text;
-        map['locationId'] = 0;
+        map['locationId'] = box.read('locationId');
         map['qty'] = 0;
         map['existStatCode'] = selectedExistence;
         map['tagStatCode'] = selectedTagging;
@@ -244,25 +244,42 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         map['uploadBy'] = box.read('userId');
         map['uploadMessage'] = "";
 
+        // print(map);
+
         int exec = await db.insert("stockopnames", map,
             conflictAlgorithm: ConflictAlgorithm.replace);
 
-        setState(() {
-          idStockOpname = exec;
-        });
+        if (exec != 0) {
+          setState(() {
+            idStockOpname = exec;
+          });
 
-        Get.dialog(AlertDialog(
-          title: Text("Information"),
-          content: Text("Data has been saved."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: Text("Close"),
-            ),
-          ],
-        ));
+          Get.dialog(AlertDialog(
+            title: Text("Information"),
+            content: Text("Data has been saved."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: Text("Close"),
+              ),
+            ],
+          ));
+        } else {
+          Get.dialog(AlertDialog(
+            title: Text("Information"),
+            content: Text("Error while saved."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: Text("Close"),
+              ),
+            ],
+          ));
+        }
       } else {
         map['existStatCode'] = selectedExistence;
         map['tagStatCode'] = selectedTagging;
@@ -308,9 +325,9 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     // TODO: implement initState
     super.initState();
     fetchAllOptions();
-    tagNoController.addListener(() {
-      getInfoItem(tagNoController.text);
-    });
+    // tagNoController.addListener(() {
+    //   getInfoItem(tagNoController.text);
+    // });
     fetchSinglePeriod();
     fetchPeriod();
     if (Get.arguments != 0) {
@@ -388,13 +405,20 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                           width: Get.width * 0.14,
                         ),
                         Expanded(
-                          child: TextField(
-                            controller: tagNoController,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
+                          child: Focus(
+                            onFocusChange: (value) {
+                              if (!value) {
+                                getInfoItem(tagNoController.text);
+                              }
+                            },
+                            child: TextField(
+                              controller: tagNoController,
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.all(10),
+                                border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent),
+                                ),
                               ),
                             ),
                           ),
@@ -443,8 +467,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
-                            enabled: false,
-                            readOnly: true,
+                            // enabled: false,
+                            // readOnly: true,
                             controller: descriptionController,
                             decoration: InputDecoration(
                               contentPadding: EdgeInsets.all(10),
@@ -467,8 +491,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         ),
                         Expanded(
                           child: TextFormField(
-                            enabled: false,
-                            readOnly: true,
+                            // enabled: false,
+                            // readOnly: true,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter some text';
@@ -512,7 +536,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 items: _optionsExistence.map((item) {
                                   return DropdownMenuItem(
                                     child: Text(item['genName']),
-                                    value: item['genId'],
+                                    value: item['genCode'],
                                   );
                                 }).toList(),
                                 value: selectedExistence,
@@ -553,7 +577,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 items: _optionsTagging.map((item) {
                                   return DropdownMenuItem(
                                     child: Text(item['genName']),
-                                    value: item['genId'],
+                                    value: item['genCode'],
                                   );
                                 }).toList(),
                                 value: selectedTagging,
@@ -594,7 +618,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 items: _optionsUsage.map((item) {
                                   return DropdownMenuItem(
                                     child: Text(item['genName']),
-                                    value: item['genId'],
+                                    value: item['genCode'],
                                   );
                                 }).toList(),
                                 value: selectedUsage,
@@ -635,7 +659,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 items: _optionsCondition.map((item) {
                                   return DropdownMenuItem(
                                     child: Text(item['genName']),
-                                    value: item['genId'],
+                                    value: item['genCode'],
                                   );
                                 }).toList(),
                                 value: selectedCondition,
@@ -676,7 +700,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 items: _optionsOwnership.map((item) {
                                   return DropdownMenuItem(
                                     child: Text(item['genName']),
-                                    value: item['genId'],
+                                    value: item['genCode'],
                                   );
                                 }).toList(),
                                 value: selectedOwnership,

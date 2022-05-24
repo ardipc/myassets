@@ -35,6 +35,7 @@ void main() async {
   // box.write('plantId', body['plantid']);
   box.write('plantName', "CIKARANG");
   box.write('roleId', 2);
+  box.write('userId', 286);
   // end development purpose
 
   final registered = box.read('registered');

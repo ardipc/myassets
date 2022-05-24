@@ -1,12 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/screens/Table.screen.dart';
 import 'package:myasset/services/Period.service.dart';
+import 'package:myasset/services/Stockopname.service.dart';
 import 'package:responsive_table/responsive_table.dart';
 import 'package:sqflite/sqlite_api.dart';
 
@@ -34,7 +31,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   Future<List<DataRow>> genData() async {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.rawQuery(
-        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genId = s.existStatCode LEFT JOIN statuses t ON t.genId = s.tagStatCode LEFT JOIN statuses u ON u.genId = s.usageStatCode LEFT JOIN statuses c ON c.genId = s.conStatCode LEFT JOIN statuses o ON o.genId = s.ownStatCode");
+        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode");
 
     List<DataRow> temps = [];
     var i = 1;
@@ -194,6 +191,31 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     print(exec);
   }
 
+  Future<void> actionUploadToServer() async {
+    Database db = await dbHelper.initDb();
+    var stockopanemService = StockopnameService();
+
+    List<Map<String, dynamic>> maps = await db.rawQuery(
+        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode");
+    for (var data in maps) {
+      Map<String, dynamic> map = {};
+      map['stockOpnameId'] = 0;
+      map['periodId'] = data['periodId'];
+      map['faId'] = data['faId'];
+      map['locationId'] = data['locationId'];
+      map['qty'] = data['qty'];
+      map['existStatCode'] = data['existStatCode'];
+      map['tagStatCode'] = data['tagStatCode'];
+      map['usageStatCode'] = data['usageStatCode'];
+      map['conStatCode'] = data['conStatCode'];
+      map['ownStatCode'] = data['ownStatCode'];
+
+      stockopanemService.createStockopname(map).then((value) {
+        print(value.body);
+      });
+    }
+  }
+
   void confirmUploadToServer() {
     Get.dialog(
       AlertDialog(
@@ -204,6 +226,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
             onPressed: () {
               // please add action in here
               // ex. actionUploadToServer();
+              actionUploadToServer();
               Get.back();
             },
             child: Text("YES"),

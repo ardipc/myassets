@@ -23,36 +23,6 @@ class DbHelper {
 
   //buat tabel baru dengan nama contact
   void _createDb(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS contact (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        phone TEXT
-      )
-    ''');
-
-    // preferences
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS preferences (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        registered TEXT,
-        apiAddress TEXT,
-        locationId INTEGER,
-        locationCode TEXT,
-        locationName TEXT,
-        intransitId INTEGER,
-        intransitCode TEXT,
-        intransitName TEXT,
-        plantId INTEGER,
-        plantName TEXT,
-        roleId INTEGER,
-        userId INTEGER,
-        token TEXT,
-        isOnline INTEGER,
-        periodId INTEGER
-      )
-    ''');
-
     // periods
     await db.execute('''
       CREATE TABLE IF NOT EXISTS periods (
