@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
+import 'package:myasset/services/FAItem.service.dart';
 import 'package:myasset/services/Period.service.dart';
 import 'package:myasset/services/Status.service.dart';
 import 'package:myasset/services/User.service.dart';
@@ -131,6 +132,28 @@ class DownloadController extends GetxController {
       }
     });
     listProgress.add(rowProgress("Table users completed."));
+
+    var faItemService = FAItemService();
+    listProgress.add(rowProgress("Sync table faitems."));
+    await db.delete("faitems", where: null);
+    await faItemService.getAll().then((value) async {
+      List users = value.body['faitems'];
+      for (var i = 0; i < users.length; i++) {
+        listProgress.add(rowProgress("ID ${users[i]['faId']} inserted."));
+        Map<String, dynamic> map = {
+          "faId": users[i]['faId'],
+          "tagNo": users[i]['tagNo'],
+          "assetName": users[i]['assetName'],
+          "locId": users[i]['locationId'],
+          "added": users[i]['added'],
+          "disposed": users[i]['disposed'],
+          "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
+          "syncBy": box.read('userId')
+        };
+        await db.insert("faitems", map);
+      }
+    });
+    listProgress.add(rowProgress("Table faitems completed."));
   }
 
   Widget rowProgress(String text) {
