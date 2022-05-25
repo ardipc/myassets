@@ -86,7 +86,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     final periodService = PeriodService();
     periodService.getNow().then((value) {
       setState(() {
-        selectedValue = value.body['periodId'] ?? 0;
+        selectedValue = value.body['periodId'];
       });
     });
   }

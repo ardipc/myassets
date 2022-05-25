@@ -6,6 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/Table.screen.dart';
+import 'package:myasset/services/Location.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferInItemScreen extends StatefulWidget {
@@ -30,8 +31,13 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   final dateTime = TextEditingController();
   final manualRef = TextEditingController();
   final otherRef = TextEditingController();
+
   final oldLocFrom = TextEditingController();
+  int? oldLocId = 0;
+  final detailOldLocFrom = TextEditingController();
+
   final newLocFrom = TextEditingController();
+  final detailNewLocFrom = TextEditingController();
 
   void actionConfirm() {
     Get.dialog(
@@ -274,6 +280,26 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     );
   }
 
+  Future<void> getLocationByCoce(String code) async {
+    final locationService = LocationService();
+    locationService.getByCode(code).then((value) {
+      int locationId = value.body['locationId'];
+      if (locationId != 0) {
+        oldLocId = locationId;
+        detailOldLocFrom.text = value.body['locationName'];
+      } else {
+        oldLocId = 0;
+        detailOldLocFrom.text = "";
+        Get.dialog(
+          const AlertDialog(
+            title: Text("Information"),
+            content: Text("Location not found."),
+          ),
+        );
+      }
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -285,6 +311,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
       dateTime.text = formattedDate;
     }
+    newLocFrom.text = box.read('locationCode');
+    detailNewLocFrom.text = box.read('locationName');
   }
 
   @override
@@ -310,14 +338,14 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                   children: [
                     Row(
                       children: [
-                        Container(
-                          child: Text("Trans No : "),
+                        SizedBox(
+                          child: const Text("Trans No : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
                           child: TextField(
                             controller: transNo,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                 borderSide:
@@ -340,7 +368,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         Expanded(
                           child: TextField(
                             controller: dateTime,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
@@ -368,7 +396,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         Expanded(
                             child: TextField(
                           controller: manualRef,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
                                 borderSide:
@@ -389,7 +417,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         Expanded(
                           child: TextField(
                             controller: otherRef,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
@@ -410,21 +438,29 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         ),
                         Container(
                           width: Get.width * 0.2,
-                          child: TextField(
-                            controller: oldLocFrom,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
+                          child: Focus(
+                            onFocusChange: (value) {
+                              if (!value) {
+                                getLocationByCoce(oldLocFrom.text);
+                              }
+                            },
+                            child: TextField(
+                              controller: oldLocFrom,
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.all(10),
+                                border: OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent)),
+                              ),
                             ),
                           ),
                         ),
                         Expanded(
                           child: TextField(
+                            controller: detailOldLocFrom,
                             enabled: false,
                             readOnly: true,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
@@ -457,6 +493,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            controller: detailNewLocFrom,
                             enabled: false,
                             readOnly: true,
                             decoration: InputDecoration(

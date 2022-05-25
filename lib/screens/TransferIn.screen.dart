@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
+import 'package:myasset/services/Period.service.dart';
 import 'package:responsive_table/responsive_table.dart';
 import 'package:sqflite/sqlite_api.dart';
 
@@ -28,6 +29,15 @@ class _TransferInScreen extends State<TransferInScreen> {
 
   int? selectedValue = null;
   List _dropdownPeriods = [];
+
+  void fetchSinglePeriod() async {
+    final periodService = PeriodService();
+    periodService.getNow().then((value) {
+      setState(() {
+        selectedValue = value.body['periodId'];
+      });
+    });
+  }
 
   Future<List<DataRow>> genData() async {
     Database db = await dbHelper.initDb();
@@ -182,6 +192,7 @@ class _TransferInScreen extends State<TransferInScreen> {
     super.initState();
     fetchData();
     fetchPeriod();
+    fetchSinglePeriod();
   }
 
   @override
