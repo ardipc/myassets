@@ -23,6 +23,8 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
   String selectedValue = "USA";
   String barcode = "";
 
+  int? faIdValue = 0;
+
   int idTransItem = 0;
   final transNo = TextEditingController();
 
@@ -43,8 +45,6 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
       where: 'genGroup = ?',
       whereArgs: ['CONSTAT'],
     );
-
-    print(conMaps);
 
     setState(() {
       _optionsStatus = conMaps;
@@ -109,7 +109,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
       if (idTransItem == 0) {
         map['transItemId'] = Get.arguments[0];
         map['faItemId'] = 0;
-        map['faId'] = int.parse(faNo.text);
+        map['faId'] = faIdValue;
+        map['faNo'] = faNo.text;
+        map['description'] = description.text;
         map['remarks'] = remarks.text;
         map['conStatCode'] = selectedStatus;
         map['tagNo'] = tagNo.text;
@@ -141,6 +143,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
           ],
         ));
       } else {
+        map['faId'] = faIdValue;
+        map['faNo'] = faNo.text;
+        map['description'] = description.text;
         map['remarks'] = remarks.text;
         map['conStatCode'] = selectedStatus;
         map['tagNo'] = tagNo.text;
@@ -182,14 +187,16 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
 
   Future<void> getInfoItem(String value) async {
     Database db = await dbHelper.initDb();
-    int parseToInt = int.parse(value == '' ? '0' : value);
+    String parseToInt = value == '' ? '0' : value;
     List<Map<String, dynamic>> maps =
         await db.query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
     if (maps.length == 1) {
       setState(() {
         tagNo.text = value;
         description.text = maps[0]['assetName'];
-        faNo.text = maps[0]['faId'].toString();
+        faIdValue = maps[0]['faId'];
+        faNo.text = maps[0]['faNo'].toString();
+        description.text = maps[0]['description'];
       });
     }
   }
@@ -224,9 +231,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
     // TODO: implement initState
     super.initState();
     transNo.text = Get.arguments[1];
-    tagNo.addListener(() {
-      getInfoItem(tagNo.text);
-    });
+    // tagNo.addListener(() {
+    //   getInfoItem(tagNo.text);
+    // });
     fetchAllOptions();
     if (Get.arguments[2] != 0) {
       idTransItem = Get.arguments[2];
@@ -286,13 +293,24 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                           width: Get.width * 0.14,
                         ),
                         Expanded(
-                          child: new TextField(
-                            controller: tagNo,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
+                          child: Focus(
+                            onFocusChange: (value) {
+                              if (value) {
+                                getInfoItem(tagNo.text);
+                              } else {
+                                description.text = "";
+                                faNo.text = "";
+                                faIdValue = 0;
+                              }
+                            },
+                            child: TextField(
+                              controller: tagNo,
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.all(10),
+                                border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent),
+                                ),
                               ),
                             ),
                           ),

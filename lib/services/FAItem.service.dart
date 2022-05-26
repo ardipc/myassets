@@ -8,7 +8,8 @@ class FAItemService extends GetConnect with CacheManager {
   Future<Response> getAll() {
     var token = getToken();
     return get(
-      "${box.read("apiAddress")}/Api/FAItem/all?locationId=${box.read('locationId')}&lastSync=1900-01-01",
+      // "${box.read("apiAddress")}/Api/FAItem/all?locationId=${box.read('locationId')}&lastSync=1900-01-01",
+      "${box.read("apiAddress")}/Api/FAItem/all?locationId=192&lastxSync=1900-01-01",
       headers: {"Authorization": "Bearer $token"},
     );
   }

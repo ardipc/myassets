@@ -68,13 +68,46 @@ class DbHelper {
       )
     ''');
 
+    // fa item
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS faitems (
+        faId INTEGER PRIMARY KEY AUTOINCREMENT,
+        faNo TEXT,
+        tagNo TEXT,
+        assetName TEXT,
+        locId INTEGER,
+        added INTEGER,
+        disposed TEXT,
+        syncDate TEXT,
+        syncBy INTEGER
+      )
+    ''');
+
+    // so confirm
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS soconfirms (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        soConfirmId INTEGER,
+        periodId INTEGER,
+        locId INTEGER,
+        confirmDate TEXT,
+        confirmBy TEXT,
+        uploadDate TEXT,
+        uploadBy INTEGER,
+        uploadMessage TEXT
+      )
+    ''');
+
     // stockopname
     await db.execute('''
       CREATE TABLE IF NOT EXISTS stockopnames (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         stockOpnameId INTEGER,
         periodId INTEGER,
+        tagNo TEXT,
+        description TEXT,
         faId INTEGER,
+        faNo TEXT,
         locationId INTEGER,
         qty INTEGER,
         existStatCode TEXT,
@@ -103,7 +136,11 @@ class DbHelper {
         otherRef TEXT,
         transferTypeCode TEXT,
         oldLocId INTEGER,
+        oldLocCode TEXT,
+        oldLocName TEXT,
         newLocId INTEGER,
+        newLocCode TEXT,
+        newLocName TEXT,
         isApproved INTEGER,
         isVoid INTEGER,
         saveDate TEXT,
@@ -116,35 +153,6 @@ class DbHelper {
       )
     ''');
 
-    // fa item
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS faitems (
-        faId INTEGER PRIMARY KEY AUTOINCREMENT,
-        tagNo INTEGER,
-        assetName TEXT,
-        locId INTEGER,
-        added INTEGER,
-        disposed TEXT,
-        syncDate TEXT,
-        syncBy INTEGER
-      )
-    ''');
-
-    // so confirm
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS soconfirms (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        soConfirmId INTEGER,
-        periodId INTEGER,
-        locId INTEGER,
-        confirmDate TEXT,
-        confirmBy TEXT,
-        uploadDate TEXT,
-        uploadBy INTEGER,
-        uploadMessage TEXT
-      )
-    ''');
-
     // fa trans item
     await db.execute('''
       CREATE TABLE IF NOT EXISTS fatransitem (
@@ -152,6 +160,8 @@ class DbHelper {
         transItemId INTEGER,
         faItemId INTEGER,
         faId INTEGER,
+        faNo TEXT,
+        description TEXT,
         remarks TEXT,
         conStatCode TEXT,
         tagNo TEXT,

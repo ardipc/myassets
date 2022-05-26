@@ -26,6 +26,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   int? selectedValue = null;
 
   String barcode = "";
+  int? faIdValue = 0;
 
   int idStockOpname = 0;
 
@@ -118,8 +119,11 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
 
       setState(() {
         idStockOpname = id;
+        faIdValue = maps[0]['faId'];
         tagNoController.text =
-            mapsItem.length != 0 ? mapsItem[0]['tagNo'].toString() : "0";
+            mapsItem.isNotEmpty ? mapsItem[0]['tagNo'].toString() : "0";
+        descriptionController.text = maps[0]['description'];
+        faNoController.text = maps[0]['faNo'];
         selectedExistence = maps[0]['existStatCode'].toString();
         selectedTagging = maps[0]['tagStatCode'].toString();
         selectedUsage = maps[0]['usageStatCode'].toString();
@@ -230,7 +234,10 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
       if (idStockOpname == 0) {
         map['stockOpnameId'] = 0;
         map['periodId'] = selectedValue;
-        map['faId'] = faNoController.text;
+        map['faId'] = faIdValue;
+        map['faNo'] = faNoController.text;
+        map['tagNo'] = tagNoController.text;
+        map['description'] = descriptionController.text;
         map['locationId'] = box.read('locationId');
         map['qty'] = 0;
         map['existStatCode'] = selectedExistence;
@@ -281,6 +288,10 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
           ));
         }
       } else {
+        map['tagNo'] = tagNoController.text;
+        map['faId'] = faIdValue;
+        map['faNo'] = faNoController.text;
+        map['description'] = descriptionController.text;
         map['existStatCode'] = selectedExistence;
         map['tagStatCode'] = selectedTagging;
         map['usageStatCode'] = selectedUsage;
@@ -308,14 +319,15 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
 
   Future<void> getInfoItem(String value) async {
     Database db = await dbHelper.initDb();
-    int parseToInt = int.parse(value == '' ? '0' : value);
+    String parseToInt = value == '' ? '0' : value;
     List<Map<String, dynamic>> maps =
         await db.query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
     if (maps.length == 1) {
       setState(() {
+        faIdValue = maps[0]['faId'];
         tagNoController.text = value;
         descriptionController.text = maps[0]['assetName'];
-        faNoController.text = maps[0]['faId'].toString();
+        faNoController.text = maps[0]['faNo'];
       });
     }
   }

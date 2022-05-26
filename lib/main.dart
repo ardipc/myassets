@@ -29,6 +29,7 @@ void main() async {
 
   // development purpose
   box.write('registered', false);
+  box.write('apiAddress', "https://api.sariroti.com");
   box.write('locationId', 1798);
   box.write('locationCode', "D70001990");
   box.write('locationName', "PT ESSEI PERBAMA BEKASI UTARA");

@@ -114,8 +114,12 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         map['manualRef'] = manualRef.text;
         map['otherRef'] = otherRef.text;
         map['transferTypeCode'] = 'TI';
-        map['oldLocId'] = int.parse(oldLocFrom.text);
-        map['newLocId'] = int.parse(newLocFrom.text);
+        map['oldLocId'] = oldLocId;
+        map['oldLocCode'] = oldLocFrom.text;
+        map['oldLocName'] = detailOldLocFrom.text;
+        map['newLocId'] = box.read('locationId');
+        map['newLocCode'] = box.read('locationCode');
+        map['newLocName'] = box.read('locationName');
         map['isApproved'] = 0;
         map['isVoid'] = 0;
         map['saveDate'] = formattedDate;
@@ -129,45 +133,53 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         int exec = await db.insert("fatrans", map,
             conflictAlgorithm: ConflictAlgorithm.replace);
 
-        setState(() {
-          idFaTrans = exec;
-        });
+        if (exec != 0) {
+          setState(() {
+            idFaTrans = exec;
+          });
 
-        Get.dialog(AlertDialog(
-          title: Text("Information"),
-          content: Text("Data has been saved."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: Text("Close"),
-            ),
-          ],
-        ));
+          Get.dialog(AlertDialog(
+            title: Text("Information"),
+            content: Text("Data has been saved."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: Text("Close"),
+              ),
+            ],
+          ));
+        }
       } else {
         map['transDate'] = dateTime.text;
         map['transNo'] = transNo.text;
         map['manualRef'] = manualRef.text;
         map['otherRef'] = otherRef.text;
-        map['oldLocId'] = int.parse(oldLocFrom.text);
-        map['newLocId'] = int.parse(newLocFrom.text);
+        map['oldLocId'] = oldLocId;
+        map['oldLocCode'] = oldLocFrom.text;
+        map['oldLocName'] = detailOldLocFrom.text;
+        map['newLocId'] = box.read('locationId');
+        map['newLocCode'] = box.read('locationCode');
+        map['newLocName'] = box.read('locationName');
 
         int exec = await db
             .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
 
-        Get.dialog(AlertDialog(
-          title: Text("Information"),
-          content: Text("Data has been updated."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: Text("Close"),
-            ),
-          ],
-        ));
+        if (exec != 0) {
+          Get.dialog(AlertDialog(
+            title: Text("Information"),
+            content: Text("Data has been updated."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: Text("Close"),
+              ),
+            ],
+          ));
+        }
       }
     }
   }
@@ -192,8 +204,13 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         dateTime.text = maps[0]['dateTime'];
         manualRef.text = maps[0]['manualRef'];
         otherRef.text = maps[0]['otherRef'];
-        oldLocFrom.text = maps[0]['oldLocId'].toString();
-        newLocFrom.text = maps[0]['newLocId'].toString();
+
+        oldLocId = maps[0]['oldLocId'];
+        oldLocFrom.text = maps[0]['oldLocCode'].toString();
+        detailOldLocFrom.text = maps[0]['oldLocName'].toString();
+
+        newLocFrom.text = box.read('locationCode');
+        detailNewLocFrom.text = maps[0]['newLocName'].toString();
       });
     }
   }

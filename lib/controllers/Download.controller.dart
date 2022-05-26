@@ -142,6 +142,7 @@ class DownloadController extends GetxController {
         listProgress.add(rowProgress("ID ${users[i]['faId']} inserted."));
         Map<String, dynamic> map = {
           "faId": users[i]['faId'],
+          "faNo": users[i]['faNo'],
           "tagNo": users[i]['tagNo'],
           "assetName": users[i]['assetName'],
           "locId": users[i]['locationId'],
