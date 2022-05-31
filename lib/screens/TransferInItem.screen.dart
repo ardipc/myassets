@@ -1,11 +1,8 @@
-import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/screens/Table.screen.dart';
 import 'package:myasset/services/Location.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
@@ -113,7 +110,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         map['transNo'] = transNo.text;
         map['manualRef'] = manualRef.text;
         map['otherRef'] = otherRef.text;
-        map['transferTypeCode'] = 'TI';
+        map['transferTypeCode'] = transferTypeCode;
         map['oldLocId'] = oldLocId;
         map['oldLocCode'] = oldLocFrom.text;
         map['oldLocName'] = detailOldLocFrom.text;

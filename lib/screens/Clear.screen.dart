@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myasset/controllers/Clear.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:sqflite/sqlite_api.dart';
 
@@ -63,7 +64,7 @@ class _ClearScreen extends State<ClearScreen> {
     });
   }
 
-  void confirmClear() {
+  void confirmClear(ClearController controller) {
     Get.dialog(
       AlertDialog(
         title: Text("Confirmation"),
@@ -72,6 +73,7 @@ class _ClearScreen extends State<ClearScreen> {
           TextButton(
             onPressed: () {
               // to do action in here
+              controller.clearAllData(selectedPeriod ?? 0);
               Get.back();
             },
             child: Text("YES"),
@@ -96,6 +98,8 @@ class _ClearScreen extends State<ClearScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final clearController = Get.put(ClearController());
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Clear'),
@@ -165,7 +169,7 @@ class _ClearScreen extends State<ClearScreen> {
                     backgroundColor: Color.fromRGBO(44, 116, 180, 1),
                   ),
                   onPressed: () {
-                    confirmClear();
+                    confirmClear(clearController);
                   },
                   child: Text(
                     "Clear",

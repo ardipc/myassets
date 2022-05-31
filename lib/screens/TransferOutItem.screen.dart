@@ -1,11 +1,9 @@
-import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/screens/Table.screen.dart';
+import 'package:myasset/services/Location.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferOutItemScreen extends StatefulWidget {
@@ -30,8 +28,13 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
   final dateTime = TextEditingController();
   final manualRef = TextEditingController();
   final otherRef = TextEditingController();
+
   final oldLocFrom = TextEditingController();
+  int? oldLocId = 0;
+  final detailOldLocFrom = TextEditingController();
+
   final newLocFrom = TextEditingController();
+  final detailNewLocFrom = TextEditingController();
 
   void actionConfirm() {
     Get.dialog(
@@ -107,9 +110,13 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         map['transNo'] = transNo.text;
         map['manualRef'] = manualRef.text;
         map['otherRef'] = otherRef.text;
-        map['transferTypeCode'] = 'TO';
-        map['oldLocId'] = int.parse(oldLocFrom.text);
-        map['newLocId'] = int.parse(newLocFrom.text);
+        map['transferTypeCode'] = transferTypeCode;
+        map['newLocId'] = oldLocId;
+        map['newLocCode'] = newLocFrom.text;
+        map['newLocName'] = detailNewLocFrom.text;
+        map['oldLocId'] = box.read('locationId');
+        map['oldLocCode'] = box.read('locationCode');
+        map['oldLocName'] = box.read('locationName');
         map['isApproved'] = 0;
         map['isVoid'] = 0;
         map['saveDate'] = formattedDate;
@@ -123,45 +130,53 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         int exec = await db.insert("fatrans", map,
             conflictAlgorithm: ConflictAlgorithm.replace);
 
-        setState(() {
-          idFaTrans = exec;
-        });
+        if (exec != 0) {
+          setState(() {
+            idFaTrans = exec;
+          });
 
-        Get.dialog(AlertDialog(
-          title: Text("Information"),
-          content: Text("Data has been saved."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: Text("Close"),
-            ),
-          ],
-        ));
+          Get.dialog(AlertDialog(
+            title: Text("Information"),
+            content: Text("Data has been saved."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: Text("Close"),
+              ),
+            ],
+          ));
+        }
       } else {
         map['transDate'] = dateTime.text;
         map['transNo'] = transNo.text;
         map['manualRef'] = manualRef.text;
         map['otherRef'] = otherRef.text;
-        map['oldLocId'] = int.parse(oldLocFrom.text);
-        map['newLocId'] = int.parse(newLocFrom.text);
+        map['newLocId'] = oldLocId;
+        map['newLocCode'] = newLocFrom.text;
+        map['newLocName'] = detailNewLocFrom.text;
+        map['oldLocId'] = box.read('locationId');
+        map['oldLocCode'] = box.read('locationCode');
+        map['oldLocName'] = box.read('locationName');
 
         int exec = await db
             .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
 
-        Get.dialog(AlertDialog(
-          title: Text("Information"),
-          content: Text("Data has been updated."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: Text("Close"),
-            ),
-          ],
-        ));
+        if (exec != 0) {
+          Get.dialog(AlertDialog(
+            title: Text("Information"),
+            content: Text("Data has been updated."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: Text("Close"),
+              ),
+            ],
+          ));
+        }
       }
     }
   }
@@ -186,8 +201,13 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         dateTime.text = maps[0]['dateTime'];
         manualRef.text = maps[0]['manualRef'];
         otherRef.text = maps[0]['otherRef'];
-        oldLocFrom.text = maps[0]['oldLocId'].toString();
-        newLocFrom.text = maps[0]['newLocId'].toString();
+
+        oldLocId = maps[0]['newLocId'];
+        newLocFrom.text = maps[0]['newLocCode'].toString();
+        detailNewLocFrom.text = maps[0]['newLocName'].toString();
+
+        oldLocFrom.text = box.read('locationCode');
+        detailOldLocFrom.text = box.read('locationName');
       });
     }
   }
@@ -274,6 +294,26 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     );
   }
 
+  Future<void> getLocationByCoce(String code) async {
+    final locationService = LocationService();
+    locationService.getByCode(code).then((value) {
+      int locationId = value.body['locationId'];
+      if (locationId != 0) {
+        oldLocId = locationId;
+        detailNewLocFrom.text = value.body['locationName'];
+      } else {
+        oldLocId = 0;
+        detailOldLocFrom.text = "";
+        Get.dialog(
+          const AlertDialog(
+            title: Text("Information"),
+            content: Text("Location not found."),
+          ),
+        );
+      }
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -285,6 +325,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
       dateTime.text = formattedDate;
     }
+    oldLocFrom.text = box.read('locationCode');
+    detailOldLocFrom.text = box.read('locationName');
   }
 
   @override
@@ -310,14 +352,14 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                   children: [
                     Row(
                       children: [
-                        Container(
-                          child: Text("Trans No : "),
+                        SizedBox(
+                          child: const Text("Trans No : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
                           child: TextField(
                             controller: transNo,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                 borderSide:
@@ -340,7 +382,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         Expanded(
                           child: TextField(
                             controller: dateTime,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
@@ -368,7 +410,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         Expanded(
                             child: TextField(
                           controller: manualRef,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             contentPadding: EdgeInsets.all(10),
                             border: OutlineInputBorder(
                                 borderSide:
@@ -389,7 +431,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         Expanded(
                           child: TextField(
                             controller: otherRef,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
@@ -405,26 +447,34 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                     Row(
                       children: [
                         Container(
-                          child: Text("Loc. To : "),
+                          child: Text("Loc. From : "),
                           width: Get.width * 0.14,
                         ),
                         Container(
                           width: Get.width * 0.2,
-                          child: TextField(
-                            controller: oldLocFrom,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
+                          child: Focus(
+                            onFocusChange: (value) {
+                              if (!value) {
+                                getLocationByCoce(oldLocFrom.text);
+                              }
+                            },
+                            child: TextField(
+                              controller: oldLocFrom,
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.all(10),
+                                border: OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent)),
+                              ),
                             ),
                           ),
                         ),
                         Expanded(
                           child: TextField(
+                            controller: detailOldLocFrom,
                             enabled: false,
                             readOnly: true,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
@@ -440,7 +490,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                     Row(
                       children: [
                         Container(
-                          child: Text("Loc. From : "),
+                          child: Text("Loc. To : "),
                           width: Get.width * 0.14,
                         ),
                         Container(
@@ -457,6 +507,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            controller: detailNewLocFrom,
                             enabled: false,
                             readOnly: true,
                             decoration: InputDecoration(
