@@ -46,6 +46,7 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
     List<Map<String, dynamic>> maps = await db.rawQuery(
         "SELECT s.*, i.tagNo, i.assetName, c.genName AS con FROM fatransitem s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses c ON c.genId = s.conStatCode WHERE s.transItemId = ${Get.arguments[0]}");
 
+    print(maps);
     List<DataRow> temps = [];
     var i = 1;
     for (var data in maps) {
@@ -65,7 +66,7 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
         DataCell(
           Container(
             width: Get.width * 0.25,
-            child: Text(data['assetName']),
+            child: Text(data['description'].toString()),
           ),
         ),
         DataCell(
@@ -128,7 +129,7 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
                   child: TextField(
                     enabled: false,
                     controller: transNo,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       contentPadding: EdgeInsets.all(10),
                       border: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.blueAccent)),

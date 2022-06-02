@@ -303,7 +303,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         detailNewLocFrom.text = value.body['locationName'];
       } else {
         oldLocId = 0;
-        detailOldLocFrom.text = "";
+        detailNewLocFrom.text = "";
         Get.dialog(
           const AlertDialog(
             title: Text("Information"),
@@ -452,20 +452,13 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         ),
                         Container(
                           width: Get.width * 0.2,
-                          child: Focus(
-                            onFocusChange: (value) {
-                              if (!value) {
-                                getLocationByCoce(oldLocFrom.text);
-                              }
-                            },
-                            child: TextField(
-                              controller: oldLocFrom,
-                              decoration: const InputDecoration(
-                                contentPadding: EdgeInsets.all(10),
-                                border: OutlineInputBorder(
-                                    borderSide:
-                                        BorderSide(color: Colors.blueAccent)),
-                              ),
+                          child: TextField(
+                            controller: oldLocFrom,
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.all(10),
+                              border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent)),
                             ),
                           ),
                         ),
@@ -495,13 +488,20 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         ),
                         Container(
                           width: Get.width * 0.2,
-                          child: TextField(
-                            controller: newLocFrom,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
+                          child: Focus(
+                            onFocusChange: (value) {
+                              if (!value) {
+                                getLocationByCoce(newLocFrom.text);
+                              }
+                            },
+                            child: TextField(
+                              controller: newLocFrom,
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.all(10),
+                                border: OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent)),
+                              ),
                             ),
                           ),
                         ),

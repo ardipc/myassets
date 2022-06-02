@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/screens/Table.screen.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferOutItemFormScreen extends StatefulWidget {
@@ -22,6 +21,8 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
 
   String selectedValue = "USA";
   String barcode = "";
+
+  int? faIdValue = 0;
 
   int idTransItem = 0;
   final transNo = TextEditingController();
@@ -43,8 +44,6 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
       where: 'genGroup = ?',
       whereArgs: ['CONSTAT'],
     );
-
-    print(conMaps);
 
     setState(() {
       _optionsStatus = conMaps;
@@ -109,10 +108,12 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
       if (idTransItem == 0) {
         map['transItemId'] = Get.arguments[0];
         map['faItemId'] = 0;
-        map['faId'] = int.parse(faNo.text);
+        map['faId'] = faIdValue;
         map['remarks'] = remarks.text;
         map['conStatCode'] = selectedStatus;
         map['tagNo'] = tagNo.text;
+        map['description'] = description.text;
+        map['faNo'] = faNo.text;
         map['saveDate'] = formattedDate;
         map['saveBy'] = box.read('userId');
         map['syncDate'] = '';
@@ -141,9 +142,12 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
           ],
         ));
       } else {
+        map['faId'] = faIdValue;
         map['remarks'] = remarks.text;
         map['conStatCode'] = selectedStatus;
         map['tagNo'] = tagNo.text;
+        map['description'] = description.text;
+        map['faNo'] = faNo.text;
 
         int exec = await db.update("fatransitem", map,
             where: "id = ?", whereArgs: [idTransItem]);
@@ -171,7 +175,8 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
       where: "id = ?",
       whereArgs: [id],
     );
-    if (maps.length > 0) {
+    if (maps.isNotEmpty) {
+      print(maps);
       setState(() {
         tagNo.text = maps[0]['tagNo'];
         selectedStatus = int.parse(maps[0]['conStatCode']);
@@ -188,8 +193,8 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
     if (maps.length == 1) {
       setState(() {
         tagNo.text = value;
-        description.text = maps[0]['assetName'];
-        faNo.text = maps[0]['faId'].toString();
+        description.text = maps[0]['assetName'].toString();
+        faNo.text = maps[0]['faNo'].toString();
       });
     }
   }
@@ -224,9 +229,9 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
     // TODO: implement initState
     super.initState();
     transNo.text = Get.arguments[1];
-    tagNo.addListener(() {
-      getInfoItem(tagNo.text);
-    });
+    // tagNo.addListener(() {
+    //   getInfoItem(tagNo.text);
+    // });
     fetchAllOptions();
     if (Get.arguments[2] != 0) {
       idTransItem = Get.arguments[2];
@@ -256,7 +261,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                     child: TextField(
                       enabled: false,
                       controller: transNo,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(10),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.blueAccent),
@@ -276,23 +281,30 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
               ),
               color: Colors.white,
               child: Container(
-                padding: EdgeInsets.all(14.0),
+                padding: const EdgeInsets.all(14.0),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        Container(
-                          child: Text("Tag No : "),
+                        SizedBox(
+                          child: const Text("Tag No : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
-                          child: new TextField(
-                            controller: tagNo,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
+                          child: Focus(
+                            onFocusChange: (value) {
+                              if (!value) {
+                                getInfoItem(tagNo.text);
+                              }
+                            },
+                            child: TextField(
+                              controller: tagNo,
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.all(10),
+                                border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent),
+                                ),
                               ),
                             ),
                           ),
@@ -344,7 +356,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                             enabled: false,
                             readOnly: true,
                             controller: description,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                 borderSide:
@@ -369,7 +381,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                             enabled: false,
                             readOnly: true,
                             controller: faNo,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
@@ -433,7 +445,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                         Expanded(
                           child: TextField(
                             controller: remarks,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                 borderSide:

@@ -176,9 +176,12 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
       where: "id = ?",
       whereArgs: [id],
     );
-    if (maps.length > 0) {
+    if (maps.isNotEmpty) {
       setState(() {
         tagNo.text = maps[0]['tagNo'];
+        description.text = maps[0]['description'].toString();
+        faNo.text = maps[0]['faNo'].toString();
+        faIdValue = maps[0]['faId'];
         selectedStatus = int.parse(maps[0]['conStatCode']);
         remarks.text = maps[0]['remarks'];
       });
@@ -196,7 +199,6 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
         description.text = maps[0]['assetName'];
         faIdValue = maps[0]['faId'];
         faNo.text = maps[0]['faNo'].toString();
-        description.text = maps[0]['description'];
       });
     }
   }
@@ -295,12 +297,8 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                         Expanded(
                           child: Focus(
                             onFocusChange: (value) {
-                              if (value) {
+                              if (!value) {
                                 getInfoItem(tagNo.text);
-                              } else {
-                                description.text = "";
-                                faNo.text = "";
-                                faIdValue = 0;
                               }
                             },
                             child: TextField(
