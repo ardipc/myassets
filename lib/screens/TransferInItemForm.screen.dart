@@ -32,7 +32,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
   final description = TextEditingController();
   final faNo = TextEditingController();
 
-  int? selectedStatus = null;
+  String? selectedStatus;
   List _optionsStatus = [];
 
   final remarks = TextEditingController();
@@ -182,7 +182,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
         description.text = maps[0]['description'].toString();
         faNo.text = maps[0]['faNo'].toString();
         faIdValue = maps[0]['faId'];
-        selectedStatus = int.parse(maps[0]['conStatCode']);
+        selectedStatus = maps[0]['conStatCode'];
         remarks.text = maps[0]['remarks'];
       });
     }
@@ -360,7 +360,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                             enabled: false,
                             readOnly: true,
                             controller: description,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                 borderSide:
@@ -385,7 +385,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                             enabled: false,
                             readOnly: true,
                             controller: faNo,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
@@ -421,14 +421,13 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                                 items: _optionsStatus.map((item) {
                                   return DropdownMenuItem(
                                     child: Text(item['genName']),
-                                    value: item['genId'],
+                                    value: item['genCode'],
                                   );
                                 }).toList(),
                                 value: selectedStatus,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedStatus =
-                                        int.parse(value.toString());
+                                    selectedStatus = value.toString();
                                   });
                                 },
                               ),

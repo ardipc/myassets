@@ -23,9 +23,6 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
   int idFaTrans = 0;
   final transNo = TextEditingController();
 
-  late List<DatatableHeader> _headers;
-
-  List<Map<String, dynamic>> _sources = [];
   List<DataRow> _rows = [];
 
   int _currentPage = 1;
@@ -43,7 +40,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
   Future<List<DataRow>> genData() async {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.rawQuery(
-        "SELECT s.*, i.tagNo, i.assetName, c.genName AS con FROM fatransitem s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses c ON c.genId = s.conStatCode WHERE s.transItemId = ${Get.arguments[0]}");
+        "SELECT s.*, i.assetName, c.genName AS con FROM fatransitem s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses c ON c.genCode = s.conStatCode WHERE s.transItemId = ${Get.arguments[0]}");
 
     List<DataRow> temps = [];
     var i = 1;
@@ -76,7 +73,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
         DataCell(
           Container(
             width: Get.width * 0.1,
-            child: Text(data['con']),
+            child: Text(data['con'].toString()),
           ),
         ),
         DataCell(

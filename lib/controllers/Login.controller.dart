@@ -49,6 +49,7 @@ class LoginController extends GetxController {
 
   void actionLogin() async {
     if (username.text == "admin" && password.text == "123") {
+      box.write('roleId', 0);
       Get.offAndToNamed('/home', arguments: ['superadmin']);
     } else {
       // Database db = await dbHelper.initDb();

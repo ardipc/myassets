@@ -74,7 +74,7 @@ class OtpController extends GetxController {
       if (args[2] == pin) {
         registerService.checkOtp(args[0], args[1], args[2]).then((value) async {
           Map body = value.body;
-          if (body['username'].toString().isNotEmpty) {
+          if (body['username'].toString() == "") {
             Get.dialog(
               AlertDialog(
                 title: const Text("Warning"),

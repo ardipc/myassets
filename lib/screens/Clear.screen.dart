@@ -68,7 +68,7 @@ class _ClearScreen extends State<ClearScreen> {
     Get.dialog(
       AlertDialog(
         title: Text("Confirmation"),
-        content: Text("Are you sure to clear data ?"),
+        content: Text("Are you sure to clear data on period ?"),
         actions: [
           TextButton(
             onPressed: () {

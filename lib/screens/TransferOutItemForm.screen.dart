@@ -31,7 +31,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
   final description = TextEditingController();
   final faNo = TextEditingController();
 
-  int? selectedStatus = null;
+  String? selectedStatus;
   List _optionsStatus = [];
 
   final remarks = TextEditingController();
@@ -176,10 +176,11 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
       whereArgs: [id],
     );
     if (maps.isNotEmpty) {
-      print(maps);
       setState(() {
         tagNo.text = maps[0]['tagNo'];
-        selectedStatus = int.parse(maps[0]['conStatCode']);
+        faNo.text = maps[0]['faNo'].toString();
+        description.text = maps[0]['description'].toString();
+        selectedStatus = maps[0]['conStatCode'].toString();
         remarks.text = maps[0]['remarks'];
       });
     }
@@ -195,6 +196,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
         tagNo.text = value;
         description.text = maps[0]['assetName'].toString();
         faNo.text = maps[0]['faNo'].toString();
+        faIdValue = maps[0]['faId'];
       });
     }
   }
@@ -417,14 +419,13 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                                 items: _optionsStatus.map((item) {
                                   return DropdownMenuItem(
                                     child: Text(item['genName']),
-                                    value: item['genId'],
+                                    value: item['genCode'],
                                   );
                                 }).toList(),
                                 value: selectedStatus,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedStatus =
-                                        int.parse(value.toString());
+                                    selectedStatus = value.toString();
                                   });
                                 },
                               ),
