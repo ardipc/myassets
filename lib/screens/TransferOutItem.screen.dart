@@ -327,6 +327,10 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     }
     oldLocFrom.text = box.read('locationCode');
     detailOldLocFrom.text = box.read('locationName');
+
+    oldLocId = box.read('intransitId');
+    newLocFrom.text = box.read('intransitCode');
+    detailNewLocFrom.text = box.read('intransitName');
   }
 
   @override
