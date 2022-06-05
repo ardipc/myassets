@@ -199,7 +199,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
         "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode");
     for (var data in maps) {
       Map<String, dynamic> map = {};
-      map['stockOpnameId'] = 0;
+      map['stockOpnameId'] = data['stockOpnameId'];
       map['periodId'] = data['periodId'];
       map['faId'] = data['faId'];
       map['locationId'] = data['locationId'];
@@ -210,10 +210,29 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       map['conStatCode'] = data['conStatCode'];
       map['ownStatCode'] = data['ownStatCode'];
 
-      stockopanemService.createStockopname(map).then((value) {
-        print(value.body);
+      stockopanemService.createStockopname(map).then((value) async {
+        var res = value.body;
+        if (res['message'].toString() != "") {
+          Map<String, dynamic> m = {};
+          m['stockOpnameId'] = res['stockOpnameId'];
+          await db.update(
+            "stockopnames",
+            m,
+            where: "id = ?",
+            whereArgs: [
+              data['id'],
+            ],
+          );
+        }
       });
     }
+
+    Get.dialog(
+      const AlertDialog(
+        title: Text("Message"),
+        content: Text("Data success uploaded."),
+      ),
+    );
   }
 
   void confirmUploadToServer() {
