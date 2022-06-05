@@ -157,6 +157,7 @@ class DbHelper {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS fatransitem (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        transId INTEGER,
         transItemId INTEGER,
         faItemId INTEGER,
         faId INTEGER,

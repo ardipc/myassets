@@ -106,7 +106,8 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
       Map<String, dynamic> map = Map();
 
       if (idTransItem == 0) {
-        map['transItemId'] = Get.arguments[0];
+        map['transId'] = Get.arguments[0];
+        map['transItemId'] = 0;
         map['faItemId'] = 0;
         map['faId'] = faIdValue;
         map['remarks'] = remarks.text;
