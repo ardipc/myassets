@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:myasset/controllers/Stockopname.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/screens/Table.screen.dart';
 import 'package:myasset/services/Period.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 

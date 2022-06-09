@@ -11,6 +11,8 @@ class RegisterController extends GetxController {
   DbHelper dbHelper = DbHelper();
   RegisterService registerService = RegisterService();
 
+  var loaderButtonRegistration = false.obs;
+
   var isAt = false.obs;
 
   TextEditingController apiAddress = TextEditingController();
@@ -48,9 +50,11 @@ class RegisterController extends GetxController {
   }
 
   void toOtpScreen() {
+    loaderButtonRegistration.value = true;
     try {
       if (email.text.isNotEmpty) {
         registerService.register(email.text, deviceId.text).then((value) {
+          print(value.body);
           Map body = value.body;
           if (body['message'].toString().isNotEmpty) {
             Get.dialog(
@@ -60,6 +64,7 @@ class RegisterController extends GetxController {
               ),
             );
           } else {
+            loaderButtonRegistration.value = false;
             Get.toNamed(
               '/otp',
               arguments: [

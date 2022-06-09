@@ -26,8 +26,8 @@ class MyApp extends StatelessWidget {
             return ErrorView(snapshot);
           } else {
             return _authController.isLogged.value
-                ? MyHomePage(title: "Asset Control")
-                : LoginScreen();
+                ? const MyHomePage(title: "Asset Control")
+                : const LoginScreen();
           }
         }
       },
@@ -41,9 +41,9 @@ class MyApp extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: const [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: CircularProgressIndicator(),
           ),
           Text('Loading...'),

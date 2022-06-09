@@ -27,10 +27,11 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             // Text("Welcome ${box.read('username')}"),
-            Text("Welcome to Asset Control"),
-            // Text("${box.read('roleId')}"),
+            const Text("Welcome to Asset Control"),
+            Text("${box.read('realName') ?? "-"}"),
+            Text("${box.read('roleName') ?? "-"}"),
           ],
         ),
       ),

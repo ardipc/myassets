@@ -35,6 +35,7 @@ class OtpController extends GetxController {
   void actionResendOtp() async {
     try {
       registerService.resendOtp(args[0], args[4]).then((value) {
+        print(value.body);
         Map body = value.body;
         if (body['message'].toString().isNotEmpty) {
           Get.dialog(
@@ -59,20 +60,19 @@ class OtpController extends GetxController {
           content: Text("Catch Error."),
         ),
       );
-    } finally {
-      Get.dialog(
-        const AlertDialog(
-          title: Text("Warning"),
-          content: Text("Catch Finally."),
-        ),
-      );
     }
   }
 
   void actionSubmitOtp() async {
+    Database db = await dbHelper.initDb();
+
     try {
       if (args[2] == pin) {
-        registerService.checkOtp(args[0], args[1], args[2]).then((value) async {
+        registerService
+            .checkOtp(
+                args[0].toString(), args[1].toString(), args[2].toString())
+            .then((value) async {
+          print(value.body);
           Map body = value.body;
           if (body['username'].toString() == "") {
             Get.dialog(
@@ -105,7 +105,6 @@ class OtpController extends GetxController {
             box.write('roleId', body['roleid']);
             box.write('roleName', body['rolename']);
 
-            Database db = await dbHelper.initDb();
             Map<String, dynamic> map = {
               "username": body['username'],
               "password": body['encpassword'],
@@ -115,7 +114,7 @@ class OtpController extends GetxController {
               "roleName": body['rolename'],
               "plantId": body['plantid'],
               "locationId": args[1],
-              "syncDate": DateFormat.yMMMEd(),
+              "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
               "syncBy": 0
             };
             await db.insert("users", map);
@@ -132,17 +131,11 @@ class OtpController extends GetxController {
         );
       }
     } catch (e) {
+      print(e);
       Get.dialog(
         const AlertDialog(
           title: Text("Warning"),
           content: Text("Catch Error."),
-        ),
-      );
-    } finally {
-      Get.dialog(
-        const AlertDialog(
-          title: Text("Warning"),
-          content: Text("Catch Finally."),
         ),
       );
     }

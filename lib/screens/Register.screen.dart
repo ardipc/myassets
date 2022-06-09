@@ -74,19 +74,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
               SizedBox(
                 height: 60,
                 width: MediaQuery.of(context).size.width,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 62, 81, 255),
-                  ),
-                  onPressed: () {
-                    registerController.toOtpScreen();
-                  },
-                  child: const Text(
-                    "Submit Registration",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
+                child: Obx(
+                  () => TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                     ),
+                    onPressed: () {
+                      registerController.toOtpScreen();
+                    },
+                    child: registerController.loaderButtonRegistration.value
+                        ? const CircularProgressIndicator(
+                            backgroundColor: Colors.white,
+                          )
+                        : const Text(
+                            "Submit Registration",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                          ),
                   ),
                 ),
               ),

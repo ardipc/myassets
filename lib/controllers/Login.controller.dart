@@ -10,6 +10,8 @@ import 'package:myasset/services/User.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class LoginController extends GetxController {
+  var loaderButtonLogin = false.obs;
+
   DbHelper dbHelper = DbHelper();
   final box = GetStorage();
 
@@ -24,8 +26,8 @@ class LoginController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     print("init login");
-    username.clear();
-    password.clear();
+    username.text = "";
+    password.text = "";
     super.onInit();
   }
 
@@ -48,8 +50,13 @@ class LoginController extends GetxController {
   }
 
   void actionLogin() async {
-    if (username.text == "admin" && password.text == "123") {
-      box.write('roleId', 0);
+    loaderButtonLogin.value = true;
+    if (username.text == "admin" && password.text == "12345") {
+      box.write('userId', 0);
+      box.write('roleId', 1);
+      box.write('roleName', "Administrator");
+      box.write('username', "admin");
+      box.write('realName', "Admin");
       Get.offAndToNamed('/home', arguments: ['superadmin']);
     } else {
       // Database db = await dbHelper.initDb();
@@ -58,6 +65,7 @@ class LoginController extends GetxController {
 
       var res =
           await userService.findUserByUserAndPass(username.text, password.text);
+      print(res.body);
 
       if (res.body != null) {
         if (res.body['status']) {
@@ -65,6 +73,7 @@ class LoginController extends GetxController {
           box.write('token', res.body['token']);
 
           await authController.saveToken(res.body['token']);
+          loaderButtonLogin.value = false;
 
           Get.offNamed('/home');
         } else {

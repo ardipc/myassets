@@ -28,18 +28,22 @@ void main() async {
   final box = GetStorage();
 
   // development purpose
-  box.write('registered', false);
   box.write('apiAddress', "https://api.sariroti.com");
-  box.write('locationId', 1798);
-  box.write('locationCode', "D70001990");
-  box.write('locationName', "PT ESSEI PERBAMA BEKASI UTARA");
-  // box.write('plantId', body['plantid']);
-  box.write('plantName', "CIKARANG");
-  box.write('roleId', 2);
-  box.write('userId', 286);
+  // box.write('registered', true);
+  // box.write('locationId', 1798);
+  // box.write('locationCode', "D70001990");
+  // box.write('locationName', "PT ESSEI PERBAMA BEKASI UTARA");
+  // box.write('plantId', 11);
+  // box.write('plantName', "CIKARANG");
+  // box.write('roleId', 2);
+  // box.write('userId', 286);
   // end development purpose
 
   final registered = box.read('registered');
+
+  // print(registered);
+  // print(registered.runtimeType);
+  // print((registered == null || registered == false) ? "ok" : "not");
 
   runApp(
     GetMaterialApp(
@@ -51,9 +55,9 @@ void main() async {
       ),
       enableLog: true,
       debugShowCheckedModeBanner: false,
-      home: (registered == "true" || registered != null)
-          ? MyApp()
-          : RegisterScreen(),
+      home: (registered == false || registered == null)
+          ? const RegisterScreen()
+          : MyApp(),
       getPages: [
         GetPage(
           name: '/',

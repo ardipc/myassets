@@ -49,7 +49,7 @@ class NavDrawerWidget extends StatelessWidget {
             title: Text('Upload'),
             onTap: () => {Get.toNamed('/upload')},
           ),
-          if (box.read('roleId') == 0) ...[
+          if (box.read('roleId') == 1) ...[
             ListTile(
               leading: const Icon(Icons.delete),
               title: Text('Clear Data'),

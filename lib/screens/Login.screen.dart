@@ -24,10 +24,10 @@ class LoginScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(
-                    "API : ${loginController.box.read('apiAddress') ?? "https://api.google.com"}",
-                    style: const TextStyle(color: Colors.white),
-                  ),
+                  // Text(
+                  //   "API : ${loginController.box.read('apiAddress') ?? "https://api.google.com"}",
+                  //   style: const TextStyle(color: Colors.white),
+                  // ),
                   Text(
                     "Location : ${loginController.box.read("locationName") ?? "-"}",
                     style: const TextStyle(color: Colors.white),
@@ -52,10 +52,11 @@ class LoginScreen extends StatelessWidget {
             ),
             Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 27), //apply padding horizontal or vertical only
-                child: Text(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 27,
+                ), //apply padding horizontal or vertical only
+                child: const Text(
                   "Fixed Assets Control System\nLogin Form",
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -116,22 +117,28 @@ class LoginScreen extends StatelessWidget {
               child: Container(
                 height: 60,
                 width: 600,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 62, 81, 255),
-                  ),
-                  onPressed: () {
-                    // Get.off(
-                    //   MyHomePage(title: "Asset Control"),
-                    // );
-                    loginController.actionLogin();
-                  },
-                  child: const Text(
-                    "LOGIN",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
+                child: Obx(
+                  () => TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                     ),
+                    onPressed: () {
+                      // Get.off(
+                      //   MyHomePage(title: "Asset Control"),
+                      // );
+                      loginController.actionLogin();
+                    },
+                    child: loginController.loaderButtonLogin.value
+                        ? const CircularProgressIndicator(
+                            backgroundColor: Colors.white,
+                          )
+                        : const Text(
+                            "LOGIN",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                          ),
                   ),
                 ),
               ),
