@@ -95,9 +95,9 @@ class OtpController extends GetxController {
             box.write('locationCode', body['locCode']);
             box.write('locationName', body['locName']);
 
-            box.write('instransitId', body['instransitId']);
-            box.write('instransitCode', body['instransitCode']);
-            box.write('instransitName', body['instransitName']);
+            box.write('intransitId', body['intransitId']);
+            box.write('intransitCode', body['intransitCode']);
+            box.write('intransitName', body['intransitName']);
 
             box.write('plantId', body['plantid']);
             box.write('plantName', body['plantName']);
