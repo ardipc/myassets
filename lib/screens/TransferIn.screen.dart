@@ -31,15 +31,23 @@ class _TransferInScreen extends State<TransferInScreen> {
   List _dropdownPeriods = [];
 
   void fetchSinglePeriod() async {
-    final periodService = PeriodService();
-    periodService.getNow().then((value) {
+    // final periodService = PeriodService();
+    // periodService.getNow().then((value) {
+    //   setState(() {
+    //     selectedValue = value.body['periodId'];
+    //   });
+    // });
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> p = await db.query('periods');
+    if (p.isNotEmpty) {
+      var getFirst = p.first;
       setState(() {
-        selectedValue = value.body['periodId'];
+        selectedValue = getFirst['periodId'];
       });
-    });
+    }
   }
 
-  Future<List<DataRow>> genData() async {
+  Future<List<DataRow>> genData(var periodId) async {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.query(
       "fatrans",
@@ -107,8 +115,18 @@ class _TransferInScreen extends State<TransferInScreen> {
 
   void fetchData() async {
     setState(() => _isLoading = true);
-    _rows = await genData();
-    setState(() => _isLoading = false);
+
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> p = await db.query('periods');
+    if (p.isNotEmpty) {
+      var getFirst = p.first;
+      var results = await genData(getFirst['periodId'] ?? 0);
+      setState(() {
+        selectedValue = getFirst['periodId'];
+        _rows = results;
+        _isLoading = false;
+      });
+    }
   }
 
   void fetchPeriod() async {
@@ -258,7 +276,7 @@ class _TransferInScreen extends State<TransferInScreen> {
               children: [
                 TextButton.icon(
                   onPressed: () {
-                    Get.toNamed('/transferinitem')
+                    Get.toNamed('/transferinitem', arguments: [selectedValue])
                         ?.whenComplete(() => fetchData());
                   },
                   icon: Icon(Icons.add),
@@ -288,7 +306,7 @@ class _TransferInScreen extends State<TransferInScreen> {
                       DataTable(
                         columnSpacing: 0.5,
                         dataRowHeight: 40,
-                        columns: [
+                        columns: const [
                           DataColumn(
                             label: Text(
                               'No.',

@@ -21,6 +21,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   final box = GetStorage();
   DbHelper dbHelper = DbHelper();
 
+  var isReadOnly = false;
+
   List _optionsPeriods = [];
   int? selectedValue = null;
 
@@ -49,12 +51,20 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   List _optionsOwnership = [];
 
   void fetchSinglePeriod() async {
-    final periodService = PeriodService();
-    periodService.getNow().then((value) {
+    // final periodService = PeriodService();
+    // periodService.getNow().then((value) {
+    //   setState(() {
+    //     selectedValue = value.body['periodId'] ?? 0;
+    //   });
+    // });
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> p = await db.query('periods');
+    if (p.isNotEmpty) {
+      var getFirst = p.first;
       setState(() {
-        selectedValue = value.body['periodId'] ?? 0;
+        selectedValue = getFirst['periodId'];
       });
-    });
+    }
   }
 
   void fetchPeriod() async {
@@ -128,6 +138,27 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         selectedUsage = maps[0]['usageStatCode'].toString();
         selectedCondition = maps[0]['conStatCode'].toString();
         selectedOwnership = maps[0]['ownStatCode'].toString();
+      });
+    }
+  }
+
+  Future<void> fetchDataConfirm(int id) async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> maps = await db.query(
+      'soconfirms',
+      where: "soConfirmId = ?",
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      var getFirst = maps.first;
+      var dateRow =
+          DateFormat('yyyy-MM-dd kk:mm').parse(getFirst['confirmDate']);
+      var dateNow = DateTime.now();
+
+      setState(() {
+        // ignore: unrelated_type_equality_checks
+        isReadOnly = dateRow.difference(dateNow).inSeconds <= 1 ? true : false;
       });
     }
   }
@@ -343,6 +374,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     fetchPeriod();
     if (Get.arguments != 0) {
       fetchData(Get.arguments[0]);
+      fetchDataConfirm(Get.arguments[0]);
     }
   }
 
@@ -455,6 +487,10 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   barcode = 'Error: $error';
                                 });
                               }
+                            } catch (e) {
+                              setState(() {
+                                barcode = '';
+                              });
                             }
                           },
                           child: Icon(Icons.qr_code),
@@ -732,54 +768,59 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
             ),
             Container(
               width: Get.width,
-              child: Column(
-                children: [
-                  Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                    height: 50,
-                    width: 600,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 62, 81, 255),
-                      ),
-                      onPressed: () {
-                        actionSave();
-                      },
-                      child: Text(
-                        "Save",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (idStockOpname != 0) ...[
-                    Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                      height: 50,
-                      width: 600,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 228, 11, 29),
-                        ),
-                        onPressed: () {
-                          actionConfirm();
-                        },
-                        child: Text(
-                          "Delete",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
+              child: isReadOnly == false
+                  ? Column(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 6.0, vertical: 3.0),
+                          height: 50,
+                          width: 600,
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                            ),
+                            onPressed: () {
+                              actionSave();
+                            },
+                            child: Text(
+                              "Save",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        if (idStockOpname != 0) ...[
+                          Container(
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 6.0, vertical: 3.0),
+                            height: 50,
+                            width: 600,
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                backgroundColor:
+                                    Color.fromARGB(255, 228, 11, 29),
+                              ),
+                              onPressed: () {
+                                actionConfirm();
+                              },
+                              child: Text(
+                                "Delete",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    )
+                  : const Center(
+                      child: Text("Confirmed"),
                     ),
-                  ],
-                ],
-              ),
             )
           ],
         ),

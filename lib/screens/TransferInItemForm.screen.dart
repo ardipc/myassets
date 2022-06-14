@@ -335,6 +335,10 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                                   tagNo.text = 'Error: $error';
                                 });
                               }
+                            } catch (e) {
+                              setState(() {
+                                barcode = '';
+                              });
                             }
                           },
                           child: Icon(Icons.qr_code),

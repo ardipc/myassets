@@ -57,6 +57,7 @@ class RegisterController extends GetxController {
           print(value.body);
           Map body = value.body;
           if (body['message'].toString().isNotEmpty) {
+            loaderButtonRegistration.value = false;
             Get.dialog(
               AlertDialog(
                 title: const Text("Warning"),
@@ -78,6 +79,7 @@ class RegisterController extends GetxController {
           }
         });
       } else {
+        loaderButtonRegistration.value = false;
         Get.dialog(
           const AlertDialog(
             title: Text("Warning"),

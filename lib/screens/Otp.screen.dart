@@ -28,7 +28,8 @@ class _OtpScreenState extends State<OtpScreen> {
             const SizedBox(
               height: 16,
             ),
-            const Text("Please enter your OTP Code then submit."),
+            Text(
+                "Please enter your OTP Code then submit with ${otpController.args[2]}."),
             const SizedBox(
               height: 60,
             ),
@@ -39,8 +40,12 @@ class _OtpScreenState extends State<OtpScreen> {
               style: const TextStyle(fontSize: 17),
               textFieldAlignment: MainAxisAlignment.spaceAround,
               fieldStyle: FieldStyle.box,
+              onChanged: (pin) {
+                // otpController.changePin(pin);
+                print(pin);
+              },
               onCompleted: (pin) {
-                otpController.changePin(pin);
+                otpController.pin.value = pin;
               },
             ),
             const SizedBox(

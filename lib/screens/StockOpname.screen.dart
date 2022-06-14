@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/services/Period.service.dart';
@@ -28,10 +29,13 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   int _currentPage = 1;
   bool _isLoading = true;
 
-  Future<List<DataRow>> genData() async {
+  Future<List<DataRow>> genData(var periodId) async {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.rawQuery(
-        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode");
+      "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode",
+    );
+
+    print(maps);
 
     List<DataRow> temps = [];
     var i = 1;
@@ -83,12 +87,21 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   }
 
   void fetchSinglePeriod() async {
-    final periodService = PeriodService();
-    periodService.getNow().then((value) {
+    // final periodService = PeriodService();
+    // periodService.getNow().then((value) {
+    //   setState(() {
+    //     selectedValue = value.body['periodId'];
+    //   });
+    // });
+
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> p = await db.query('periods');
+    if (p.isNotEmpty) {
+      var getFirst = p.first;
       setState(() {
-        selectedValue = value.body['periodId'];
+        selectedValue = getFirst['periodId'];
       });
-    });
+    }
   }
 
   void fetchPeriod() async {
@@ -105,6 +118,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   }
 
   void fetchData() async {
+    Database db = await dbHelper.initDb();
     setState(() => _isLoading = true);
     _headers = [
       DatatableHeader(text: "No.", value: "no", show: true),
@@ -114,8 +128,16 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
           text: "Closing Result", value: "closingResult", show: true),
       DatatableHeader(text: "Stock Opname", value: "stockOpname", show: true)
     ];
-    _rows = await genData();
-    setState(() => _isLoading = false);
+    List<Map<String, dynamic>> p = await db.query('periods');
+    if (p.isNotEmpty) {
+      var getFirst = p.first;
+      var results = await genData(getFirst['periodId'] ?? 0);
+      setState(() {
+        selectedValue = getFirst['periodId'];
+        _rows = results;
+        _isLoading = false;
+      });
+    }
   }
 
   void actionDownload() async {
@@ -261,6 +283,15 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     );
   }
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchSinglePeriod();
+    fetchPeriod();
+    fetchData();
+  }
+
   void confirmKonfirmasi() {
     Get.dialog(
       AlertDialog(
@@ -271,6 +302,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
             onPressed: () {
               // please add action in here
               // actionInsertToItems();
+              actionConfirmAllSO();
               Get.back();
             },
             child: Text("YES"),
@@ -282,6 +314,45 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
             child: Text("NO"),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> actionConfirmAllSO() async {
+    final box = GetStorage();
+    Database db = await dbHelper.initDb();
+
+    List<Map<String, dynamic>> mapsSO = await db.query("stockopnames");
+
+    for (var row in mapsSO) {
+      List<Map<String, dynamic>> checkRows = await db.query(
+        "soconfirms",
+        where: "soConfirmId = ?",
+        whereArgs: [row['id']],
+      );
+      if (checkRows.isEmpty) {
+        Map<String, dynamic> m = {};
+        m['soConfirmId'] = row['id'];
+        m['periodId'] = selectedValue;
+        m['locId'] = box.read('locationId');
+        m['confirmDate'] =
+            DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
+        m['confirmBy'] = box.read('username');
+        m['uploadDate'] = '';
+        m['uploadBy'] = 0;
+        m['uploadMessage'] = '';
+        await db.insert(
+          'soconfirms',
+          m,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    }
+
+    Get.dialog(
+      const AlertDialog(
+        title: Text("Message"),
+        content: Text("Confirm successfully."),
       ),
     );
   }
@@ -302,29 +373,10 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     print(maps);
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    fetchSinglePeriod();
-    fetchPeriod();
-    fetchData();
-  }
-
-  @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
-    fetchData();
-    print("didChangeDependencies");
-  }
-
-  @override
-  void didUpdateWidget(covariant StockOpnameScreen oldWidget) {
-    // TODO: implement didUpdateWidget
-    super.didUpdateWidget(oldWidget);
-    fetchData();
-    print("didUpdateWidget");
+  void setAndFindSO(value) async {
+    setState(() {
+      selectedValue = int.parse(value.toString());
+    });
   }
 
   @override
@@ -374,9 +426,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                         }).toList(),
                         value: selectedValue,
                         onChanged: (value) {
-                          setState(() {
-                            selectedValue = int.parse(value.toString());
-                          });
+                          setAndFindSO(value);
                         },
                       ),
                     ),

@@ -77,6 +77,8 @@ class LoginController extends GetxController {
 
           Get.offNamed('/home');
         } else {
+          loaderButtonLogin.value = false;
+
           Get.dialog(
             const AlertDialog(
               title: Text("Message"),
@@ -85,6 +87,8 @@ class LoginController extends GetxController {
           );
         }
       } else {
+        loaderButtonLogin.value = false;
+
         Get.dialog(
           const AlertDialog(
             title: Text("Message"),

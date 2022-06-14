@@ -14,7 +14,7 @@ class OtpController extends GetxController {
   RegisterService registerService = RegisterService();
 
   dynamic args = Get.arguments;
-  String pin = "";
+  var pin = "".obs;
 
   @override
   void onInit() {
@@ -28,8 +28,8 @@ class OtpController extends GetxController {
     super.onClose();
   }
 
-  void changePin(String v) {
-    pin = v;
+  void changePin(var v) {
+    pin.value = v;
   }
 
   void actionResendOtp() async {
@@ -67,7 +67,7 @@ class OtpController extends GetxController {
     Database db = await dbHelper.initDb();
 
     try {
-      if (args[2] == pin) {
+      if (args[2] == pin.value) {
         registerService
             .checkOtp(
                 args[0].toString(), args[1].toString(), args[2].toString())

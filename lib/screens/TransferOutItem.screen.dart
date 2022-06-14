@@ -576,49 +576,49 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         ),
                       ),
                     ),
+                    Container(
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      height: 50,
+                      width: 600,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 40, 165, 61),
+                        ),
+                        onPressed: () {
+                          confirmApprove();
+                        },
+                        child: Text(
+                          "Approve",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      height: 50,
+                      width: 600,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 116, 54, 173),
+                        ),
+                        onPressed: () {
+                          confirmUploadToServer();
+                        },
+                        child: Text(
+                          "Upload to Server",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
-                  Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                    height: 50,
-                    width: 600,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 40, 165, 61),
-                      ),
-                      onPressed: () {
-                        confirmApprove();
-                      },
-                      child: Text(
-                        "Approve",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                    height: 50,
-                    width: 600,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 116, 54, 173),
-                      ),
-                      onPressed: () {
-                        confirmUploadToServer();
-                      },
-                      child: Text(
-                        "Upload to Server",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
                   if (idFaTrans != 0) ...[
                     Container(
                       margin:
