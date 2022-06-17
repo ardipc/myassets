@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:myasset/controllers/Auth.controller.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -44,13 +45,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     locationCodeController.text = box.read('locationCode') ?? "";
   }
 
+  void actionUnregisterAndLogout() async {
+    final box = GetStorage();
+    box.write('registered', false);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // var authController = Get.put(AuthController());
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
         leading: IconButton(
-          icon: Icon(Icons.chevron_left),
+          icon: const Icon(Icons.chevron_left),
           onPressed: () {
             Get.offAllNamed('/home');
           },
@@ -58,23 +65,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: Card(
         elevation: 4,
-        margin: EdgeInsets.all(20),
+        margin: const EdgeInsets.all(20),
         shape: OutlineInputBorder(
           borderRadius: BorderRadius.circular(3),
-          borderSide: BorderSide(color: Colors.grey, width: 1),
+          borderSide: const BorderSide(color: Colors.grey, width: 1),
         ),
         color: Colors.white,
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
           child: Column(
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  Text("API Address     :  "),
+                  const Text("API Address     :  "),
                   Expanded(
-                    child: new TextField(
+                    child: TextField(
                       controller: apiAddressController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(10),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.blueAccent),
@@ -84,16 +91,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 14,
               ),
               Row(
                 children: <Widget>[
-                  new Text("Location Code :  "),
-                  new Expanded(
-                    child: new TextField(
+                  const Text("Location Code :  "),
+                  Expanded(
+                    child: TextField(
                       controller: locationCodeController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(10),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.blueAccent),
@@ -103,20 +110,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
-              Container(
+              SizedBox(
                 height: 50,
                 width: Get.width,
                 child: TextButton(
                   style: TextButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(44, 116, 180, 1),
+                    backgroundColor: const Color.fromRGBO(44, 116, 180, 1),
                   ),
                   onPressed: () {
                     actionSave();
                   },
-                  child: Text(
+                  child: const Text(
                     "Save Setting",
                     style: TextStyle(
                       color: Colors.white,

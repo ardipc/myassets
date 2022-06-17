@@ -18,7 +18,7 @@ class DownloadScreen extends StatelessWidget {
               onPressed: () {
                 downloadController.restart();
               },
-              icon: Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh),
             )
           ]
         ],
@@ -30,23 +30,23 @@ class DownloadScreen extends StatelessWidget {
                 margin: const EdgeInsets.all(12),
                 shape: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(3),
-                  borderSide: BorderSide(color: Colors.grey, width: 1),
+                  borderSide: const BorderSide(color: Colors.grey, width: 1),
                 ),
                 color: Colors.white,
                 child: Container(
-                  padding: EdgeInsets.all(6.0),
+                  padding: const EdgeInsets.all(6.0),
                   child: ListView(
                     children: downloadController.listProgress,
                   ),
                 ),
               )
             : Center(
-                child: Container(
+                child: SizedBox(
                   height: 50,
                   width: Get.width * 0.4,
                   child: TextButton(
                     style: TextButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(44, 116, 180, 1),
+                      backgroundColor: const Color.fromRGBO(44, 116, 180, 1),
                     ),
                     onPressed: () {
                       downloadController.confirmDownload();

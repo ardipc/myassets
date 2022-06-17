@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myasset/controllers/Login.controller.dart';
-import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/screens/HomePage.screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -12,14 +10,14 @@ class LoginScreen extends StatelessWidget {
     LoginController loginController = Get.put(LoginController());
 
     return Scaffold(
-      backgroundColor: Color.fromRGBO(48, 52, 156, 1),
+      backgroundColor: const Color.fromRGBO(48, 52, 156, 1),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              margin: EdgeInsets.only(top: 32, left: 12),
+              margin: const EdgeInsets.only(top: 32, left: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -42,27 +40,27 @@ class LoginScreen extends StatelessWidget {
             Center(
               child: Container(
                 margin: const EdgeInsets.only(top: 32),
-                child: const Image(
-                  image: AssetImage("assets/images/sariroti.png"),
+                child: Image(
+                  image: const AssetImage("assets/images/sariroti.png"),
                   fit: BoxFit.fill,
-                  width: 280,
-                  height: 300,
+                  width: Get.width * 0.4,
+                  height: Get.height * 0.25,
                 ),
               ),
             ),
-            Center(
+            const Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 27,
                 ), //apply padding horizontal or vertical only
-                child: const Text(
+                child: Text(
                   "Fixed Assets Control System\nLogin Form",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Color.fromRGBO(255, 234, 169, 1),
-                    fontSize: 30,
+                    fontSize: 22,
                     shadows: [
                       Shadow(
                           // bottomLeft
@@ -86,9 +84,10 @@ class LoginScreen extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 62),
-              child: TextField(
+              padding: const EdgeInsets.symmetric(horizontal: 64),
+              child: TextFormField(
                 controller: loginController.username,
+                textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   fillColor: Colors.white,
                   filled: true,
@@ -99,10 +98,14 @@ class LoginScreen extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 62, vertical: 10),
-              child: TextField(
+              padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 10),
+              child: TextFormField(
                 controller: loginController.password,
                 obscureText: true,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (v) {
+                  loginController.actionLogin();
+                },
                 decoration: const InputDecoration(
                   fillColor: Colors.white,
                   filled: true,

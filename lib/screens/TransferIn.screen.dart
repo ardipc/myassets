@@ -219,151 +219,153 @@ class _TransferInScreen extends State<TransferInScreen> {
       appBar: AppBar(
         title: const Text('Transfer In List'),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 12.0, right: 12, left: 12),
-            child: Row(
-              children: [
-                const Text("Period"),
-                const SizedBox(
-                  width: 40,
-                ),
-                SizedBox(
-                  width: Get.width * 0.6,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4.0),
-                      border: Border.all(
-                        style: BorderStyle.solid,
-                        width: 0.80,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0, right: 12, left: 12),
+              child: Row(
+                children: [
+                  const Text("Period"),
+                  const SizedBox(
+                    width: 40,
+                  ),
+                  SizedBox(
+                    width: Get.width * 0.6,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4.0),
+                        border: Border.all(
+                          style: BorderStyle.solid,
+                          width: 0.80,
+                        ),
                       ),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton(
-                        isExpanded: true,
-                        hint: const Text("Select Period"),
-                        items: _dropdownPeriods.map((item) {
-                          return DropdownMenuItem(
-                            child: Text(item['periodName']),
-                            value: item['periodId'],
-                          );
-                        }).toList(),
-                        value: selectedValue,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedValue = int.parse(value.toString());
-                          });
-                        },
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton(
+                          isExpanded: true,
+                          hint: const Text("Select Period"),
+                          items: _dropdownPeriods.map((item) {
+                            return DropdownMenuItem(
+                              child: Text(item['periodName']),
+                              value: item['periodId'],
+                            );
+                          }).toList(),
+                          value: selectedValue,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedValue = int.parse(value.toString());
+                            });
+                          },
+                        ),
                       ),
                     ),
                   ),
-                ),
-                TextButton.icon(
-                  onPressed: () {
-                    confirmDownload();
-                  },
-                  icon: Icon(Icons.download),
-                  label: Text("Download"),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            width: Get.width,
-            child: Row(
-              children: [
-                TextButton.icon(
-                  onPressed: () {
-                    Get.toNamed('/transferinitem', arguments: [selectedValue])
-                        ?.whenComplete(() => fetchData());
-                  },
-                  icon: Icon(Icons.add),
-                  label: Text("Add"),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-              ],
-              mainAxisAlignment: MainAxisAlignment.end,
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Container(
-                constraints: BoxConstraints(
-                  maxHeight: Get.height * 0.732,
-                ),
-                child: Card(
-                  elevation: 1,
-                  shadowColor: Colors.black,
-                  clipBehavior: Clip.none,
-                  child: ListView(
-                    children: [
-                      DataTable(
-                        columnSpacing: 0.5,
-                        dataRowHeight: 40,
-                        columns: const [
-                          DataColumn(
-                            label: Text(
-                              'No.',
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Date',
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Trans No',
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Manual Ref',
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Status',
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Action',
-                            ),
-                          ),
-                        ],
-                        rows: _rows,
-                      ),
-                    ],
+                  TextButton.icon(
+                    onPressed: () {
+                      confirmDownload();
+                    },
+                    icon: Icon(Icons.download),
+                    label: Text("Download"),
                   ),
-                ),
-              )
-            ],
-          ),
-          Container(
-            width: Get.width,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ],
+              ),
+            ),
+            Container(
+              width: Get.width,
+              child: Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: () {
+                      Get.toNamed('/transferinitem', arguments: [selectedValue])
+                          ?.whenComplete(() => fetchData());
+                    },
+                    icon: Icon(Icons.add),
+                    label: Text("Add"),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                ],
+                mainAxisAlignment: MainAxisAlignment.end,
+              ),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
               children: [
-                TextButton(
-                  onPressed: () {},
-                  child: Icon(Icons.chevron_left),
-                ),
-                Text("1 / 10 pages"),
-                TextButton(
-                  onPressed: () {},
-                  child: Icon(Icons.chevron_right),
-                ),
+                Container(
+                  constraints: BoxConstraints(
+                    maxHeight: Get.height * 0.732,
+                  ),
+                  child: Card(
+                    elevation: 1,
+                    shadowColor: Colors.black,
+                    clipBehavior: Clip.none,
+                    child: ListView(
+                      children: [
+                        DataTable(
+                          columnSpacing: 0.5,
+                          dataRowHeight: 40,
+                          columns: const [
+                            DataColumn(
+                              label: Text(
+                                'No.',
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Date',
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Trans No',
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Manual Ref',
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Status',
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Action',
+                              ),
+                            ),
+                          ],
+                          rows: _rows,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
               ],
             ),
-          ),
-        ],
+            Container(
+              width: Get.width,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {},
+                    child: Icon(Icons.chevron_left),
+                  ),
+                  Text("1 / 10 pages"),
+                  TextButton(
+                    onPressed: () {},
+                    child: Icon(Icons.chevron_right),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -29,7 +29,7 @@ class RegisterController extends GetxController {
       box.write('apiAddress', "https://api.sariroti.com");
     }
     apiAddress.text = box.read('apiAddress');
-    locationId.text = box.read('locationId') ?? "";
+    // locationId.text = box.read('locationId');
     super.onInit();
   }
 

@@ -393,10 +393,10 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                 children: [
                   const Text("Period"),
                   const SizedBox(
-                    width: 40,
+                    width: 20,
                   ),
                   SizedBox(
-                    width: Get.width * 0.8,
+                    width: Get.width * 0.5,
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 10.0),
                       decoration: BoxDecoration(

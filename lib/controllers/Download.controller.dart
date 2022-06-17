@@ -7,6 +7,7 @@ import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/services/FAItem.service.dart';
 import 'package:myasset/services/Period.service.dart';
 import 'package:myasset/services/Status.service.dart';
+import 'package:myasset/services/Stockopname.service.dart';
 import 'package:myasset/services/User.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
@@ -18,23 +19,27 @@ class DownloadController extends GetxController {
 
   @override
   void onInit() {
+    // ignore: todo
     // TODO: implement onInit
     super.onInit();
+    // ignore: avoid_print
     print("init download ${box.read('userId')}");
   }
 
   @override
   void onClose() {
+    // ignore: todo
     // TODO: implement onClose
     super.onClose();
+    // ignore: avoid_print
     print("close download");
   }
 
   void confirmDownload() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to clear data ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to download data ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -42,13 +47,13 @@ class DownloadController extends GetxController {
               startDownload();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -63,6 +68,8 @@ class DownloadController extends GetxController {
   Future<void> startDownload() async {
     isStart.value = true;
     Database db = await dbHelper.initDb();
+
+    listProgress.add(rowProgress("Downloading Master Data."));
 
     var statusService = StatusService();
     listProgress.add(rowProgress("Sync table status."));
@@ -86,6 +93,7 @@ class DownloadController extends GetxController {
     listProgress.add(rowProgress("Table status completed."));
 
     var periodService = PeriodService();
+    var soService = StockopnameService();
     listProgress.add(rowProgress("Sync table period."));
     await db.delete("periods", where: null);
     await periodService.getAll().then((value) async {
@@ -104,6 +112,51 @@ class DownloadController extends GetxController {
           "syncBy": box.read('userId')
         };
         await db.insert("periods", map);
+
+        // Process stockopanme by period id
+        soService.getAll(periods[i]['periodId']).then((value) async {
+          List lists = value.body['list'];
+          for (var row in lists) {
+            List<Map<String, dynamic>> rows = await db.query(
+              'stockopnames',
+              where: "stockOpnameId = ?",
+              whereArgs: [
+                row['stockOpnameId'],
+              ],
+            );
+
+            Map<String, dynamic> map = {};
+            if (rows.isNotEmpty) {
+              // action update
+              map['qty'] = row['qty'];
+              await db.update(
+                "stockopnames",
+                map,
+                where: "stockOpnameId = ?",
+                whereArgs: [
+                  row['stockOpnameId'],
+                ],
+              );
+              listProgress
+                  .add(rowProgress("ID ${row['stockOpnameId']} updated."));
+            } else {
+              // action insert
+              map['periodId'] = periods[i]['periodId'];
+              map['faId'] = row['faId'];
+              map['stockOpnameId'] = row['stockOpnameId'];
+              map['tagNo'] = row['tagNo'];
+              map['description'] = row['itemName'];
+              map['locationId'] = box.read('locationId');
+              map['qty'] = row['qty'];
+              var id = await db.insert(
+                "stockopnames",
+                map,
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+              listProgress.add(rowProgress("ID $id inserted."));
+            }
+          }
+        });
       }
     });
     listProgress.add(rowProgress("Table period completed."));

@@ -62,18 +62,24 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
 
   Future<void> actionDelete() async {
     Database db = await dbHelper.initDb();
-    int exec =
-        await db.delete("fatrans", where: "id = ?", whereArgs: [idFaTrans]);
+    await db.delete("fatrans", where: "id = ?", whereArgs: [idFaTrans]);
     Get.back();
   }
 
   Future<void> actionApprove() async {
     Database db = await dbHelper.initDb();
-    Map<String, dynamic> map = Map();
+    Map<String, dynamic> map = {};
     map['isApproved'] = 1;
-    int exec = await db
-        .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
-    Get.back();
+    map['saveDate'] = DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
+    int exec = await db.update(
+      "fatrans",
+      map,
+      where: "id = ?",
+      whereArgs: [idFaTrans],
+    );
+    if (exec > 0) {
+      Get.back();
+    }
   }
 
   Future<void> actionSave() async {

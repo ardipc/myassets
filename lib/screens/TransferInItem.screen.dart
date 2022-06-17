@@ -71,11 +71,18 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
   Future<void> actionApprove() async {
     Database db = await dbHelper.initDb();
-    Map<String, dynamic> map = Map();
+    Map<String, dynamic> map = {};
     map['isApproved'] = 1;
-    int exec = await db
-        .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
-    Get.back();
+    map['saveDate'] = DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
+    int exec = await db.update(
+      "fatrans",
+      map,
+      where: "id = ?",
+      whereArgs: [idFaTrans],
+    );
+    if (exec > 0) {
+      Get.back();
+    }
   }
 
   Future<void> actionSave() async {
@@ -321,8 +328,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   void confirmUploadToServer() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to upload data to server now ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to upload data to server now ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -330,13 +337,13 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
               actionUploadToServer();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -346,8 +353,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   void confirmApprove() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to approve this data now ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to approve this data now ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -356,13 +363,13 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
               actionApprove();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -391,6 +398,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     super.initState();
     if (Get.arguments != null) {
@@ -419,14 +427,14 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
           children: [
             Card(
               elevation: 4,
-              margin: EdgeInsets.all(12.0),
+              margin: const EdgeInsets.all(12.0),
               shape: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(3),
-                borderSide: BorderSide(color: Colors.grey, width: 1),
+                borderSide: const BorderSide(color: Colors.grey, width: 1),
               ),
               color: Colors.white,
               child: Container(
-                padding: EdgeInsets.all(14.0),
+                padding: const EdgeInsets.all(14.0),
                 child: Column(
                   children: [
                     Row(
@@ -454,8 +462,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Date/Time : "),
+                        SizedBox(
+                          child: const Text("Date/Time : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
@@ -473,7 +481,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                           onPressed: () {
                             _selectDate(context);
                           },
-                          child: Icon(Icons.date_range),
+                          child: const Icon(Icons.date_range),
                         ),
                       ],
                     ),
@@ -482,8 +490,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Manual Ref : "),
+                        SizedBox(
+                          child: const Text("Manual Ref : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
@@ -503,8 +511,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Other Ref : "),
+                        SizedBox(
+                          child: const Text("Other Ref : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
@@ -525,11 +533,11 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Loc. From : "),
+                        SizedBox(
+                          child: const Text("Loc. From : "),
                           width: Get.width * 0.14,
                         ),
-                        Container(
+                        SizedBox(
                           width: Get.width * 0.2,
                           child: Focus(
                             onFocusChange: (value) {

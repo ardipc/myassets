@@ -19,4 +19,10 @@ class UserService extends GetConnect {
     return get(
         "${box.read("apiAddress")}/Api/User/All?locationId=${box.read('locationId')}&lastSync=1900-01-01");
   }
+
+  Future<Response> unRegister(var email, var deviceId) async {
+    return post(
+        "${box.read("apiAddress")}/api/Register/Unreg?email=$email&deviceId=$deviceId",
+        {});
+  }
 }

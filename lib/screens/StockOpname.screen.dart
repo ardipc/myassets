@@ -393,194 +393,198 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(14.0),
-            child: Row(
-              children: [
-                const Text("Period"),
-                const SizedBox(
-                  width: 40,
-                ),
-                SizedBox(
-                  width: Get.width * 0.6,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4.0),
-                      border: Border.all(
-                        style: BorderStyle.solid,
-                        width: 0.80,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Row(
+                children: [
+                  const Text("Period"),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  SizedBox(
+                    width: Get.width * 0.5,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4.0),
+                        border: Border.all(
+                          style: BorderStyle.solid,
+                          width: 0.80,
+                        ),
                       ),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton(
-                        isExpanded: true,
-                        hint: const Text("Select Period"),
-                        items: _dropdownPeriods.map((item) {
-                          return DropdownMenuItem(
-                            child: Text(item['periodName']),
-                            value: item['periodId'],
-                          );
-                        }).toList(),
-                        value: selectedValue,
-                        onChanged: (value) {
-                          setAndFindSO(value);
-                        },
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton(
+                          isExpanded: true,
+                          hint: const Text("Select Period"),
+                          items: _dropdownPeriods.map((item) {
+                            return DropdownMenuItem(
+                              child: Text(item['periodName']),
+                              value: item['periodId'],
+                            );
+                          }).toList(),
+                          value: selectedValue,
+                          onChanged: (value) {
+                            setAndFindSO(value);
+                          },
+                        ),
                       ),
                     ),
                   ),
-                ),
-                TextButton.icon(
-                  onPressed: () {
-                    confirmDownload();
-                  },
-                  icon: Icon(Icons.download),
-                  label: Text("Download"),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Container(
-                constraints: BoxConstraints(
-                  maxHeight: Get.height * 0.6,
-                ),
-                child: Card(
-                  elevation: 1,
-                  shadowColor: Colors.black,
-                  clipBehavior: Clip.none,
-                  child: ListView(
-                    children: [
-                      DataTable(
-                        columnSpacing: 0.5,
-                        dataRowHeight: 110,
-                        columns: [
-                          DataColumn(
-                            label: Text(
-                              'No.',
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Tag No',
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Description',
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Closing Result',
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Stock Opname',
-                            ),
-                          ),
-                        ],
-                        rows: _rows,
-                      ),
-                    ],
+                  TextButton.icon(
+                    onPressed: () {
+                      confirmDownload();
+                    },
+                    icon: const Icon(Icons.download),
+                    label: const Text("Download"),
                   ),
-                ),
-              )
-            ],
-          ),
-          Container(
-            width: Get.width,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: () {},
-                  child: Icon(Icons.chevron_left),
-                ),
-                Text("1 / 10 pages"),
-                TextButton(
-                  onPressed: () {},
-                  child: Icon(Icons.chevron_right),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Container(
-            width: Get.width,
-            child: Column(
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
               children: [
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                  height: 50,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 62, 81, 255),
-                    ),
-                    onPressed: () {
-                      Get.toNamed('/stockopnameitem', arguments: [0])
-                          ?.whenComplete(() => fetchData());
-                    },
-                    child: Text(
-                      "Scan / Entry Asset",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
+                  constraints: BoxConstraints(
+                    maxHeight: Get.height * 0.6,
+                  ),
+                  child: Card(
+                    elevation: 1,
+                    shadowColor: Colors.black,
+                    clipBehavior: Clip.none,
+                    child: ListView(
+                      children: [
+                        DataTable(
+                          columnSpacing: 0.5,
+                          dataRowHeight: 110,
+                          columns: [
+                            DataColumn(
+                              label: Text(
+                                'No.',
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Tag No',
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Description',
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Closing Result',
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Stock Opname',
+                              ),
+                            ),
+                          ],
+                          rows: _rows,
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
-                  height: 50,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 85, 189, 90),
-                    ),
-                    onPressed: () {
-                      confirmKonfirmasi();
-                    },
-                    child: Text(
-                      "Confirm",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(
-                      left: 6.0, right: 6.0, bottom: 6.0, top: 3.0),
-                  height: 50,
-                  width: 600,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 108, 47, 207),
-                    ),
-                    onPressed: () {
-                      confirmUploadToServer();
-                    },
-                    child: Text(
-                      "Upload to Server",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
+                )
               ],
             ),
-          )
-        ],
+            Container(
+              width: Get.width,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {},
+                    child: Icon(Icons.chevron_left),
+                  ),
+                  Text("1 / 10 pages"),
+                  TextButton(
+                    onPressed: () {},
+                    child: Icon(Icons.chevron_right),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: Get.width,
+              child: Column(
+                children: [
+                  Container(
+                    margin:
+                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                    height: 50,
+                    width: 600,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                      ),
+                      onPressed: () {
+                        Get.toNamed('/stockopnameitem', arguments: [0])
+                            ?.whenComplete(() => fetchData());
+                      },
+                      child: Text(
+                        "Scan / Entry Asset",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin:
+                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                    height: 50,
+                    width: 600,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 85, 189, 90),
+                      ),
+                      onPressed: () {
+                        confirmKonfirmasi();
+                      },
+                      child: Text(
+                        "Confirm",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(
+                        left: 6.0, right: 6.0, bottom: 6.0, top: 3.0),
+                    height: 50,
+                    width: 600,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 108, 47, 207),
+                      ),
+                      onPressed: () {
+                        confirmUploadToServer();
+                      },
+                      child: Text(
+                        "Upload to Server",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

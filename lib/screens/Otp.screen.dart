@@ -19,80 +19,86 @@ class _OtpScreenState extends State<OtpScreen> {
       appBar: AppBar(
         title: const Text('OTP'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-                "OTP Code has been sent to your email (${otpController.args[0]})"),
-            const SizedBox(
-              height: 16,
-            ),
-            Text(
-                "Please enter your OTP Code then submit with ${otpController.args[2]}."),
-            const SizedBox(
-              height: 60,
-            ),
-            OTPTextField(
-              length: 5,
-              width: MediaQuery.of(context).size.width,
-              fieldWidth: 80,
-              style: const TextStyle(fontSize: 17),
-              textFieldAlignment: MainAxisAlignment.spaceAround,
-              fieldStyle: FieldStyle.box,
-              onChanged: (pin) {
-                // otpController.changePin(pin);
-                print(pin);
-              },
-              onCompleted: (pin) {
-                otpController.pin.value = pin;
-              },
-            ),
-            const SizedBox(
-              height: 60,
-            ),
-            SizedBox(
-              height: 60,
-              width: MediaQuery.of(context).size.width,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 62, 81, 255),
+      body: SingleChildScrollView(
+        child: SizedBox(
+          width: Get.width,
+          height: Get.height,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Text(
+                    "OTP Code has been sent to your email (${otpController.args[0]})"),
+                const SizedBox(
+                  height: 16,
                 ),
-                onPressed: () {
-                  otpController.actionSubmitOtp();
-                },
-                child: Text(
-                  "Submit OTP",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
+                Text(
+                    "Please enter your OTP Code then submit with ${otpController.args[2]}."),
+                const SizedBox(
+                  height: 60,
+                ),
+                OTPTextField(
+                  length: 5,
+                  width: MediaQuery.of(context).size.width,
+                  fieldWidth: 40,
+                  style: const TextStyle(fontSize: 17),
+                  textFieldAlignment: MainAxisAlignment.spaceAround,
+                  fieldStyle: FieldStyle.box,
+                  onChanged: (pin) {
+                    // otpController.changePin(pin);
+                    print(pin);
+                  },
+                  onCompleted: (pin) {
+                    otpController.pin.value = pin;
+                  },
+                ),
+                const SizedBox(
+                  height: 60,
+                ),
+                SizedBox(
+                  height: 60,
+                  width: MediaQuery.of(context).size.width,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                    ),
+                    onPressed: () {
+                      otpController.actionSubmitOtp();
+                    },
+                    child: const Text(
+                      "Submit OTP",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(
-              height: 60,
-            ),
-            SizedBox(
-              height: 60,
-              width: MediaQuery.of(context).size.width,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 45, 60, 197),
+                const SizedBox(
+                  height: 16,
                 ),
-                onPressed: () {
-                  otpController.actionResendOtp();
-                },
-                child: const Text(
-                  "Resend OTP",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
+                SizedBox(
+                  height: 60,
+                  width: MediaQuery.of(context).size.width,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 45, 60, 197),
+                    ),
+                    onPressed: () {
+                      otpController.actionResendOtp();
+                    },
+                    child: const Text(
+                      "Resend OTP",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

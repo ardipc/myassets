@@ -1,12 +1,30 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:myasset/helpers/cache.helper.dart';
+import 'package:myasset/services/User.service.dart';
+import 'package:platform_device_id/platform_device_id.dart';
 
 class AuthController extends GetxController with CacheManager {
   final isLogged = false.obs;
 
-  void actionLogOut() {
+  void actionUnregister() async {
     isLogged.value = false;
+
+    final box = GetStorage();
+    box.remove('userId');
+    box.remove('username');
+    box.remove('roleId');
+    box.remove('roleName');
+    box.remove('realName');
+
+    removeToken();
+
+    var userService = UserService();
+    var deviceId = (await PlatformDeviceId.getDeviceId)!;
+    userService.unRegister(box.read('email'), deviceId).then((value) {
+      // print(value.body.toString());
+      Get.offAllNamed('/register');
+    });
   }
 
   void actionLogin() {
@@ -23,12 +41,12 @@ class AuthController extends GetxController with CacheManager {
   void actionLogout() async {
     isLogged.value = false;
 
-    final box = GetStorage();
-    box.remove('userId');
-    box.remove('username');
-    box.remove('roleId');
-    box.remove('roleName');
-    box.remove('realName');
+    // final box = GetStorage();
+    // box.remove('userId');
+    // box.remove('username');
+    // box.remove('roleId');
+    // box.remove('roleName');
+    // box.remove('realName');
 
     removeToken();
 

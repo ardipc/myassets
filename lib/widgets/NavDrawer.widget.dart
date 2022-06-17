@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:myasset/controllers/Auth.controller.dart';
-import 'package:myasset/controllers/Login.controller.dart';
 
 class NavDrawerWidget extends StatelessWidget {
   final box = GetStorage();
+
+  NavDrawerWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,45 +26,50 @@ class NavDrawerWidget extends StatelessWidget {
             accountEmail: Text(box.read('roleName') ?? 'User'),
           ),
           ListTile(
-            leading: Icon(Icons.shopping_bag),
-            title: Text('Stock Opname'),
+            leading: const Icon(Icons.shopping_bag),
+            title: const Text('Stock Opname'),
             onTap: () => {Get.toNamed('/stockopname')},
           ),
           ListTile(
-            leading: Icon(Icons.inbox),
-            title: Text('Transfer In'),
+            leading: const Icon(Icons.inbox),
+            title: const Text('Transfer In'),
             onTap: () => {Get.toNamed('/transferin')},
           ),
           ListTile(
-            leading: Icon(Icons.outbox),
-            title: Text('Transfer Out'),
+            leading: const Icon(Icons.outbox),
+            title: const Text('Transfer Out'),
             onTap: () => {Get.toNamed('/transferout')},
           ),
           ListTile(
-            leading: Icon(Icons.download),
-            title: Text('Download'),
+            leading: const Icon(Icons.download),
+            title: const Text('Download'),
             onTap: () => {Get.toNamed('/download')},
           ),
           ListTile(
-            leading: Icon(Icons.file_upload_outlined),
-            title: Text('Upload'),
+            leading: const Icon(Icons.file_upload_outlined),
+            title: const Text('Upload'),
             onTap: () => {Get.toNamed('/upload')},
           ),
           if (box.read('roleId') == 1) ...[
             ListTile(
               leading: const Icon(Icons.delete),
-              title: Text('Clear Data'),
+              title: const Text('Clear Data'),
               onTap: () => {Get.toNamed('/clear')},
             ),
           ],
           ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
             onTap: () => {Get.toNamed('/settings')},
           ),
           ListTile(
-            leading: Icon(Icons.exit_to_app),
-            title: Text('Logout'),
+            leading: const Icon(Icons.extension_off),
+            title: const Text('Unregister Device'),
+            onTap: () => {authController.actionUnregister()},
+          ),
+          ListTile(
+            leading: const Icon(Icons.exit_to_app),
+            title: const Text('Logout'),
             onTap: () => {authController.actionLogout()},
           ),
         ],

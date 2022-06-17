@@ -8,7 +8,7 @@ class LocationService extends GetConnect with CacheManager {
   Future<Response> getByCode(String code) {
     var token = getToken();
     return get(
-      "${box.read("apiAddress")}/Api/Location?locationCode=${code}",
+      "${box.read("apiAddress")}/Api/Location?locationCode=$code",
       headers: {"Authorization": "Bearer $token"},
     );
   }
