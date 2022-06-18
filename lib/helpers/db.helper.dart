@@ -175,6 +175,39 @@ class DbHelper {
         uploadMessage TEXT
       )
     ''');
+
+    // locations
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS locations (
+        locationId INTEGER PRIMARY KEY AUTOINCREMENT,
+        locationCode TEXT,
+        description TEXT,
+        locTypeCode INTEGER,
+        intransitId INTEGER,
+        plantId INTEGER,
+        entityCode TEXT,
+        contactPerson TEXT,
+        address TEXT,
+        city TEXT,
+        state TEXT,
+        phones TEXT,
+        fax TEXT,
+        email TEXT,
+        insertDate TEXT,
+        insertBy INTEGER
+      )
+    ''');
+
+    // fa so head
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS fasohead (
+        soHeadId INTEGER PRIMARY KEY AUTOINCREMENT,
+        periodId INTEGER,
+        locationId INTEGER,
+        soStatusCode TEXT,
+        rejectNote TEXT
+      )
+    ''');
   }
 
   Future<List<Preferences>> initApp() async {

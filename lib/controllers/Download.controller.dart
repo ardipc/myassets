@@ -5,6 +5,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/services/FAItem.service.dart';
+import 'package:myasset/services/FASOHead.service.dart';
+import 'package:myasset/services/Location.service.dart';
 import 'package:myasset/services/Period.service.dart';
 import 'package:myasset/services/Status.service.dart';
 import 'package:myasset/services/Stockopname.service.dart';
@@ -92,75 +94,6 @@ class DownloadController extends GetxController {
     });
     listProgress.add(rowProgress("Table status completed."));
 
-    var periodService = PeriodService();
-    var soService = StockopnameService();
-    listProgress.add(rowProgress("Sync table period."));
-    await db.delete("periods", where: null);
-    await periodService.getAll().then((value) async {
-      List periods = value.body['periods'];
-      for (var i = 0; i < periods.length; i++) {
-        listProgress.add(rowProgress("ID ${periods[i]['periodId']} inserted."));
-        Map<String, dynamic> map = {
-          "periodId": periods[i]['periodId'],
-          "periodName": periods[i]['periodName'],
-          "startDate": periods[i]['startDate'],
-          "endDate": periods[i]['endDate'],
-          "closeActualDate": periods[i]['closeActualDate'],
-          "soStartDate": periods[i]['soStartDate'],
-          "soEndDate": periods[i]['soEndDate'],
-          "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
-          "syncBy": box.read('userId')
-        };
-        await db.insert("periods", map);
-
-        // Process stockopanme by period id
-        soService.getAll(periods[i]['periodId']).then((value) async {
-          List lists = value.body['list'];
-          for (var row in lists) {
-            List<Map<String, dynamic>> rows = await db.query(
-              'stockopnames',
-              where: "stockOpnameId = ?",
-              whereArgs: [
-                row['stockOpnameId'],
-              ],
-            );
-
-            Map<String, dynamic> map = {};
-            if (rows.isNotEmpty) {
-              // action update
-              map['qty'] = row['qty'];
-              await db.update(
-                "stockopnames",
-                map,
-                where: "stockOpnameId = ?",
-                whereArgs: [
-                  row['stockOpnameId'],
-                ],
-              );
-              listProgress
-                  .add(rowProgress("ID ${row['stockOpnameId']} updated."));
-            } else {
-              // action insert
-              map['periodId'] = periods[i]['periodId'];
-              map['faId'] = row['faId'];
-              map['stockOpnameId'] = row['stockOpnameId'];
-              map['tagNo'] = row['tagNo'];
-              map['description'] = row['itemName'];
-              map['locationId'] = box.read('locationId');
-              map['qty'] = row['qty'];
-              var id = await db.insert(
-                "stockopnames",
-                map,
-                conflictAlgorithm: ConflictAlgorithm.replace,
-              );
-              listProgress.add(rowProgress("ID $id inserted."));
-            }
-          }
-        });
-      }
-    });
-    listProgress.add(rowProgress("Table period completed."));
-
     var userService = UserService();
     listProgress.add(rowProgress("Sync table users."));
     await db.delete("users", where: null);
@@ -208,6 +141,125 @@ class DownloadController extends GetxController {
       }
     });
     listProgress.add(rowProgress("Table faitems completed."));
+
+    var periodService = PeriodService();
+    var soService = StockopnameService();
+    listProgress.add(rowProgress("Sync table period."));
+    await db.delete("periods", where: null);
+    await periodService.getAll().then((value) async {
+      List periods = value.body['periods'];
+      for (var i = 0; i < periods.length; i++) {
+        listProgress.add(rowProgress("ID ${periods[i]['periodId']} inserted."));
+        Map<String, dynamic> map = {
+          "periodId": periods[i]['periodId'],
+          "periodName": periods[i]['periodName'],
+          "startDate": periods[i]['startDate'],
+          "endDate": periods[i]['endDate'],
+          "closeActualDate": periods[i]['closeActualDate'],
+          "soStartDate": periods[i]['soStartDate'],
+          "soEndDate": periods[i]['soEndDate'],
+          "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
+          "syncBy": box.read('userId')
+        };
+        await db.insert("periods", map);
+
+        // Process stockopanme by period id
+        await soService.getAll(periods[i]['periodId']).then((value) async {
+          List lists = value.body['list'];
+          for (var row in lists) {
+            List<Map<String, dynamic>> rows = await db.query(
+              'stockopnames',
+              where: "stockOpnameId = ?",
+              whereArgs: [
+                row['stockOpnameId'],
+              ],
+            );
+
+            Map<String, dynamic> map = {};
+            if (rows.isNotEmpty) {
+              // action update
+              map['qty'] = row['qty'];
+              await db.update(
+                "stockopnames",
+                map,
+                where: "stockOpnameId = ?",
+                whereArgs: [
+                  row['stockOpnameId'],
+                ],
+              );
+              listProgress
+                  .add(rowProgress("ID ${row['stockOpnameId']} updated."));
+            } else {
+              // action insert
+              map['periodId'] = periods[i]['periodId'];
+              map['faId'] = row['faId'];
+              map['stockOpnameId'] = row['stockOpnameId'];
+              map['tagNo'] = row['tagNo'];
+              map['description'] = row['itemName'];
+              map['locationId'] = box.read('locationId');
+              map['qty'] = row['qty'];
+              var id = await db.insert(
+                "stockopnames",
+                map,
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+              listProgress.add(rowProgress("ID $id inserted."));
+            }
+          }
+        });
+      }
+    });
+    listProgress.add(rowProgress("Table period completed."));
+
+    var locService = LocationService();
+    listProgress.add(rowProgress("Sync table locations."));
+    await db.delete("locations", where: null);
+    await locService.getAll().then((value) async {
+      List periods = value.body['locs'];
+      for (var i = 0; i < periods.length; i++) {
+        listProgress
+            .add(rowProgress("ID ${periods[i]['locationId']} inserted."));
+        Map<String, dynamic> map = {
+          "locationId": periods[i]['locationId'],
+          "locationCode": periods[i]['locationCode'],
+          "description": periods[i]['description'],
+          "locTypeCode": periods[i]['locTypeCode'],
+          "intransitId": periods[i]['intransitId'],
+          "plantId": periods[i]['plantId'],
+          "entityCode": periods[i]['entityCode'],
+          "contactPerson": periods[i]['contactPerson'],
+          "address": periods[i]['address'],
+          "city": periods[i]['city'],
+          "state": periods[i]['state'],
+          "phones": periods[i]['phones'],
+          "fax": periods[i]['fax'],
+          "email": periods[i]['email'],
+          "insertDate": periods[i]['insertDate'],
+          "insertBy": periods[i]['insertBy']
+        };
+        await db.insert("locations", map);
+      }
+    });
+    listProgress.add(rowProgress("Table locations completed."));
+
+    var fasoheadService = FASOHeadService();
+    listProgress.add(rowProgress("Sync table fasohead."));
+    await db.delete("fasohead", where: null);
+    await fasoheadService.getAll().then((value) async {
+      List periods = value.body['locs'];
+      for (var i = 0; i < periods.length; i++) {
+        listProgress.add(rowProgress("ID ${periods[i]['soHeadId']} inserted."));
+        Map<String, dynamic> map = {
+          "soHeadId": periods[i]['soHeadId'],
+          "periodId": periods[i]['periodId'],
+          "locationId": periods[i]['locationId'],
+          "locTypeCode": periods[i]['locTypeCode'],
+          "intransitId": periods[i]['intransitId']
+        };
+        await db.insert("fasohead", map);
+      }
+    });
+    listProgress.add(rowProgress("Table fasohead completed."));
   }
 
   Widget rowProgress(String text) {

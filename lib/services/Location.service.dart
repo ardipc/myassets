@@ -12,4 +12,12 @@ class LocationService extends GetConnect with CacheManager {
       headers: {"Authorization": "Bearer $token"},
     );
   }
+
+  Future<Response> getAll() {
+    var token = getToken();
+    return get(
+      "${box.read("apiAddress")}/Api/Location/All?locationId=${box.read('locationId')}",
+      headers: {"Authorization": "Bearer $token"},
+    );
+  }
 }
