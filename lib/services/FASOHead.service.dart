@@ -6,6 +6,8 @@ class FASOHeadService extends GetConnect with CacheManager {
   final box = GetStorage();
 
   Future<Response> getAll() {
+    print(
+        "${box.read("apiAddress")}/Api/FASOHead/All?locationId=${box.read('locationId')}&lastSync=1990-01-01");
     var token = getToken();
     return get(
       "${box.read("apiAddress")}/Api/FASOHead/All?locationId=${box.read('locationId')}&lastSync=1990-01-01",

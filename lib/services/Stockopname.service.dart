@@ -6,9 +6,11 @@ class StockopnameService extends GetConnect with CacheManager {
   final box = GetStorage();
 
   Future<Response> createStockopname(Map<String, dynamic> map) async {
+    var token = getToken();
     return post(
-      "${box.read("apiAddress")}/Api/StockOpname?stockOpnameId=${map['stockOpnameId']}&periodId=${map['periodId']}&faId=${map['faId']}&locationId=${map['locationId']}&qty=${map['qty']}&existCode=${map['existStatCode']}&tagCode=${map['tagStatCode']}&usageCode=${map['usageStatCode']}&conCode=${map['conStatCode']}&ownCode=${map['ownStatCode']}&isDeleted=true&userId=${box.read('userId')}",
+      "${box.read("apiAddress")}/Api/StockOpname?stockOpnameId=${map['stockOpnameId']}&periodId=${map['periodId']}&faId=${map['faId']}&locationId=${map['locationId']}&qty=${map['qty']}&existCode=${map['existStatCode']}&tagCode=${map['tagStatCode']}&usageCode=${map['usageStatCode']}&conCode=${map['conStatCode']}&ownCode=${map['ownStatCode']}&isDeleted=false&userId=0",
       {},
+      headers: {"Authorization": "Bearer $token"},
     );
   }
 

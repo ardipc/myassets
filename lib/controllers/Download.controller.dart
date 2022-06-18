@@ -164,6 +164,8 @@ class DownloadController extends GetxController {
         await db.insert("periods", map);
 
         // Process stockopanme by period id
+        listProgress.add(rowProgress("Sync table stockopname."));
+        listProgress.add(rowProgress("ID ${periods[i]['periodId']} inserted."));
         await soService.getAll(periods[i]['periodId']).then((value) async {
           List lists = value.body['list'];
           for (var row in lists) {
@@ -207,6 +209,7 @@ class DownloadController extends GetxController {
             }
           }
         });
+        listProgress.add(rowProgress("Table stockopname completed."));
       }
     });
     listProgress.add(rowProgress("Table period completed."));
@@ -246,15 +249,15 @@ class DownloadController extends GetxController {
     listProgress.add(rowProgress("Sync table fasohead."));
     await db.delete("fasohead", where: null);
     await fasoheadService.getAll().then((value) async {
-      List periods = value.body['locs'];
+      List periods = value.body['list'];
       for (var i = 0; i < periods.length; i++) {
         listProgress.add(rowProgress("ID ${periods[i]['soHeadId']} inserted."));
         Map<String, dynamic> map = {
           "soHeadId": periods[i]['soHeadId'],
           "periodId": periods[i]['periodId'],
           "locationId": periods[i]['locationId'],
-          "locTypeCode": periods[i]['locTypeCode'],
-          "intransitId": periods[i]['intransitId']
+          "soStatusCode": periods[i]['soStatusCode'],
+          "rejectNote": periods[i]['rejectNote']
         };
         await db.insert("fasohead", map);
       }

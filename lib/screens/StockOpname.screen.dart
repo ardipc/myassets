@@ -260,8 +260,8 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   void confirmUploadToServer() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to upload data to server now ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to upload data to server now ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -270,13 +270,13 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
               actionUploadToServer();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -407,7 +407,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                   SizedBox(
                     width: Get.width * 0.5,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4.0),
                         border: Border.all(
@@ -529,7 +529,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                         Get.toNamed('/stockopnameitem', arguments: [0])
                             ?.whenComplete(() => fetchData());
                       },
-                      child: Text(
+                      child: const Text(
                         "Scan / Entry Asset",
                         style: TextStyle(
                           color: Colors.white,
@@ -539,18 +539,18 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                     ),
                   ),
                   Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 6.0, vertical: 3.0),
                     height: 50,
                     width: 600,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 85, 189, 90),
+                        backgroundColor: const Color.fromARGB(255, 85, 189, 90),
                       ),
                       onPressed: () {
                         confirmKonfirmasi();
                       },
-                      child: Text(
+                      child: const Text(
                         "Confirm",
                         style: TextStyle(
                           color: Colors.white,
@@ -560,18 +560,19 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.only(
+                    margin: const EdgeInsets.only(
                         left: 6.0, right: 6.0, bottom: 6.0, top: 3.0),
                     height: 50,
                     width: 600,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 108, 47, 207),
+                        backgroundColor:
+                            const Color.fromARGB(255, 108, 47, 207),
                       ),
                       onPressed: () {
                         confirmUploadToServer();
                       },
-                      child: Text(
+                      child: const Text(
                         "Upload to Server",
                         style: TextStyle(
                           color: Colors.white,
