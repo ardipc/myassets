@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/models/preferences.model.dart';
 import 'package:myasset/services/Register.service.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -16,18 +15,6 @@ class OtpController extends GetxController {
   dynamic args = Get.arguments;
   var pin = "".obs;
 
-  @override
-  void onInit() {
-    // TODO: implement onInit
-    super.onInit();
-  }
-
-  @override
-  void onClose() {
-    // TODO: implement onClose
-    super.onClose();
-  }
-
   void changePin(var v) {
     pin.value = v;
   }
@@ -35,6 +22,7 @@ class OtpController extends GetxController {
   void actionResendOtp() async {
     try {
       registerService.resendOtp(args[0], args[4]).then((value) {
+        // ignore: avoid_print
         print(value.body);
         Map body = value.body;
         if (body['message'].toString().isNotEmpty) {
@@ -72,6 +60,7 @@ class OtpController extends GetxController {
             .checkOtp(
                 args[0].toString(), args[1].toString(), args[2].toString())
             .then((value) async {
+          // ignore: avoid_print
           print(value.body);
           Map body = value.body;
           if (body['username'].toString() == "") {
@@ -131,6 +120,7 @@ class OtpController extends GetxController {
         );
       }
     } catch (e) {
+      // ignore: avoid_print
       print(e);
       Get.dialog(
         const AlertDialog(

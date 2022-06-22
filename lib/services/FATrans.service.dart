@@ -7,7 +7,7 @@ class FATransService extends GetConnect with CacheManager {
 
   Future<Response> create(Map<String, dynamic> map) {
     return post(
-      "${box.read("apiAddress")}/Api/FATrans?transId=${map['transId']}&plantId=${map['plantId']}&transDate=${map['transDate']}&manualRef=${map['manualRef']}&otherRef=${map['otherRef']}&transferType=${map['transferType']}&oldLocId=${map['oldLocId']}&newLocId=${map['newLocId']}&isApproved=${map['isApproved']}&isVoid=${map['isVoid']}&userId=${map['userId']}",
+      "${box.read("apiAddress")}/Api/FATrans?transId&plantId=${map['plantId']}&transDate=${map['transDate']}&manualRef=${map['manualRef']}&otherRef=${map['otherRef']}&transferType=${map['transferType']}&oldLocId=${map['oldLocId']}&newLocId=${map['newLocId']}&isApproved=${map['isApproved']}&isVoid=${map['isVoid']}&userId=${map['userId']}",
       {},
     );
   }

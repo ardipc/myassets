@@ -12,6 +12,7 @@ class HomeController extends GetxController {
 
   @override
   Future<void> onInit() async {
+    // ignore: todo
     // TODO: implement onInit
     super.onInit();
     getData();
@@ -19,6 +20,7 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {
+    // ignore: todo
     // TODO: implement onClose
     super.onClose();
   }

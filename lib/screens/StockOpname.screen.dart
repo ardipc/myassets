@@ -216,6 +216,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   Future<void> actionUploadToServer() async {
     Database db = await dbHelper.initDb();
     var stockopanemService = StockopnameService();
+    final box = GetStorage();
 
     List<Map<String, dynamic>> maps = await db.rawQuery(
         "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode");
@@ -237,6 +238,10 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
         if (res['message'].toString() != "") {
           Map<String, dynamic> m = {};
           m['stockOpnameId'] = res['stockOpnameId'];
+          m['uploadDate'] =
+              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+          m['uploadBy'] = box.read('username');
+          m['uploadMessage'] = res['message'];
           await db.update(
             "stockopnames",
             m,
@@ -295,8 +300,8 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   void confirmKonfirmasi() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to confirm data now ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to confirm data now ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -305,13 +310,13 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
               actionConfirmAllSO();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),

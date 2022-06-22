@@ -26,17 +26,17 @@ class User {
   );
 
   User.fromMap(Map<String, dynamic> map) {
-    this.userId = map['userId'];
-    this.username = map['username'];
-    this.password = map['password'];
-    this.empNo = map['empNo'];
-    this.realName = map['realName'];
-    this.roleId = map['roleId'];
-    this.roleName = map['roleName'];
-    this.plantId = map['plantId'];
-    this.locationId = map['locationId'];
-    this.syncDate = map['syncDate'];
-    this.syncBy = map['syncBy'];
+    userId = map['userId'];
+    username = map['username'];
+    password = map['password'];
+    empNo = map['empNo'];
+    realName = map['realName'];
+    roleId = map['roleId'];
+    roleName = map['roleName'];
+    plantId = map['plantId'];
+    locationId = map['locationId'];
+    syncDate = map['syncDate'];
+    syncBy = map['syncBy'];
   }
 
   Map<String, dynamic> toMap() {

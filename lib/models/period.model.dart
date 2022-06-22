@@ -11,8 +11,6 @@ class Period {
   late String? syncDate;
   late int? syncBy;
 
-  var late;
-
   Period({
     this.periodId,
     this.periodName,

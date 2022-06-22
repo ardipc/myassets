@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:myasset/helpers/db.helper.dart';
@@ -23,6 +22,7 @@ class RegisterController extends GetxController {
 
   @override
   void onInit() async {
+    // ignore: todo
     // TODO: implement onInit
     deviceId.text = (await PlatformDeviceId.getDeviceId)!;
     if (box.read('apiAddress') == null) {
@@ -31,12 +31,6 @@ class RegisterController extends GetxController {
     apiAddress.text = box.read('apiAddress');
     // locationId.text = box.read('locationId');
     super.onInit();
-  }
-
-  @override
-  void onClose() {
-    // TODO: implement onClose
-    super.onClose();
   }
 
   void writeToGetStorage(String value) {
@@ -54,6 +48,7 @@ class RegisterController extends GetxController {
     try {
       if (email.text.isNotEmpty) {
         registerService.register(email.text, deviceId.text).then((value) {
+          // ignore: avoid_print
           print(value.body);
           Map body = value.body;
           if (body['message'].toString().isNotEmpty) {

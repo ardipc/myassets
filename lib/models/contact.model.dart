@@ -8,14 +8,16 @@ class Contact {
 
   // konstruktor versi 2: konversi dari Map ke Contact
   Contact.fromMap(Map<String, dynamic> map) {
-    this._id = map['id'];
-    this._name = map['name'];
-    this._phone = map['phone'];
+    _id = map['id'];
+    _name = map['name'];
+    _phone = map['phone'];
   }
   //getter dan setter (mengambil dan mengisi data kedalam object)
   // getter
   int get id => _id;
+  // ignore: unnecessary_getters_setters
   String get name => _name;
+  // ignore: unnecessary_getters_setters
   String get phone => _phone;
 
   // setter
@@ -29,8 +31,8 @@ class Contact {
 
   // konversi dari Contact ke Map
   Map<String, dynamic> toMap() {
-    Map<String, dynamic> map = Map<String, dynamic>();
-    map['id'] = this._id;
+    Map<String, dynamic> map = {};
+    map['id'] = _id;
     map['name'] = name;
     map['phone'] = phone;
     return map;

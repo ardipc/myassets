@@ -129,7 +129,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         map['isApproved'] = 0;
         map['isVoid'] = 0;
         map['saveDate'] = formattedDate;
-        map['savedBy'] = box.read('userId');
+        map['savedBy'] = box.read('username');
         map['uploadDate'] = '';
         map['uploadBy'] = '';
         map['uploadMessage'] = '';
@@ -267,16 +267,23 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     map['newLocId'] = box.read('locationId');
     map['isApproved'] = false;
     map['isVoid'] = false;
-    map['userId'] = box.read('userId');
+    // development purpose use 0
+    map['userId'] = 0;
 
     final serviceFATrans = FATransService();
     final serviceFATransItem = FATransItemService();
 
     serviceFATrans.create(map).then((value) async {
+      print("FATrans ${value.body.toString()}");
       var res = value.body;
-      if (res['message'].toString() != "") {
+      if (res['message'].toString().isNotEmpty) {
         Map<String, dynamic> m = {};
         m['transId'] = res['transId'];
+        m['transNo'] = res['transNo'];
+        m['uploadDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+        m['uploadBy'] = box.read('username');
+        m['uploadMessage'] = res['message'];
+
         await db.update("fatrans", m, where: "id", whereArgs: [idFaTrans]);
 
         // looping fa trans item
@@ -295,13 +302,19 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
           mRow['conStat'] = row['conStatCode'];
           mRow['oldTag'] = '-';
           mRow['newTag'] = '-';
-          mRow['userId'] = box.read('userId');
+          // development purpose use 0
+          mRow['userId'] = 0;
 
           serviceFATransItem.create(mRow).then((value) async {
+            print("FATransItem ${value.body.toString()}");
             var res = value.body;
             if (res['message'].toString() != "") {
               Map<String, dynamic> mItem = {};
               mItem['transItemId'] = res['transItemId'];
+              mItem['uploadDate'] =
+                  DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+              mItem['uploadBy'] = box.read('username');
+              mItem['uploadMessage'] = res['message'];
 
               await db.update(
                 "fatransitem",
@@ -314,13 +327,6 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
             }
           });
         }
-      } else {
-        Get.dialog(
-          AlertDialog(
-            title: const Text("Message"),
-            content: Text(res['message']),
-          ),
-        );
       }
     });
   }

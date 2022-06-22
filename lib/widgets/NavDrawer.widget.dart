@@ -58,14 +58,9 @@ class NavDrawerWidget extends StatelessWidget {
             ),
           ],
           ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () => {Get.toNamed('/settings')},
-          ),
-          ListTile(
             leading: const Icon(Icons.extension_off),
             title: const Text('Unregister Device'),
-            onTap: () => {authController.actionUnregister()},
+            onTap: () => {authController.actionConfirmUnregister()},
           ),
           ListTile(
             leading: const Icon(Icons.exit_to_app),

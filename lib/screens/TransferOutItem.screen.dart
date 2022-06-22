@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
+import 'package:myasset/services/FATrans.service.dart';
+import 'package:myasset/services/FATransItem.service.dart';
 import 'package:myasset/services/Location.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
@@ -107,7 +109,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
 
-      Map<String, dynamic> map = Map();
+      Map<String, dynamic> map = {};
       if (idFaTrans == 0) {
         map['transId'] = 0;
         map['plantId'] = box.read('plantId');
@@ -126,7 +128,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         map['isApproved'] = 0;
         map['isVoid'] = 0;
         map['saveDate'] = formattedDate;
-        map['savedBy'] = box.read('userId');
+        map['savedBy'] = box.read('username');
         map['uploadDate'] = '';
         map['uploadBy'] = '';
         map['uploadMessage'] = '';
@@ -171,14 +173,14 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
 
         if (exec != 0) {
           Get.dialog(AlertDialog(
-            title: Text("Information"),
-            content: Text("Data has been updated."),
+            title: const Text("Information"),
+            content: const Text("Data has been updated."),
             actions: [
               TextButton(
                 onPressed: () {
                   Get.back();
                 },
-                child: Text("Close"),
+                child: const Text("Close"),
               ),
             ],
           ));
@@ -252,26 +254,108 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
   void confirmUploadToServer() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to upload data to server now ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to upload data to server now ?"),
         actions: [
           TextButton(
             onPressed: () {
               // please add action in here
-              // ex. actionUploadToServer();
+              actionUploadToServer();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
     );
+  }
+
+  void actionUploadToServer() async {
+    Database db = await dbHelper.initDb();
+
+    Map<String, dynamic> map = {};
+    map['idFaTrans'] = idFaTrans;
+    map['transId'] = 0;
+    map['plantId'] = box.read('plantId');
+    map['transDate'] = dateTime.text;
+    map['manualRef'] = manualRef.text;
+    map['otherRef'] = otherRef.text;
+    map['transferType'] = 'TO';
+    map['oldLocId'] = box.read('intransitId');
+    map['newLocId'] = box.read('locationId');
+    map['isApproved'] = false;
+    map['isVoid'] = false;
+
+    map['userId'] = 0;
+
+    final serviceFATrans = FATransService();
+    final serviceFATransItem = FATransItemService();
+
+    serviceFATrans.create(map).then((value) async {
+      var res = value.body;
+      if (res['message'].toString().isNotEmpty) {
+        Map<String, dynamic> m = {};
+        m['transId'] = res['transId'];
+        m['uploadDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+        m['uploadBy'] = box.read('username');
+        m['uploadMessage'] = res['message'];
+
+        await db.update("fatrans", m, where: "id", whereArgs: [idFaTrans]);
+
+        // looping fa trans item
+        List<Map<String, dynamic>> rows = await db.query(
+          "fatransitem",
+          where: "transId = ?",
+          whereArgs: [idFaTrans],
+        );
+
+        for (var row in rows) {
+          Map<String, dynamic> mRow = {};
+          mRow['transItemId'] = row['transItemId'];
+          mRow['transId'] = row['transId'];
+          mRow['faId'] = row['faId'];
+          mRow['remarks'] = row['remarks'];
+          mRow['conStat'] = row['conStatCode'];
+          mRow['oldTag'] = '-';
+          mRow['newTag'] = '-';
+          mRow['userId'] = 0;
+
+          serviceFATransItem.create(mRow).then((value) async {
+            var res = value.body;
+            if (res['message'].toString() != "") {
+              Map<String, dynamic> mItem = {};
+              mItem['transItemId'] = res['transItemId'];
+              mItem['uploadDate'] =
+                  DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+              mItem['uploadBy'] = box.read('username');
+              mItem['uploadMessage'] = res['message'];
+
+              await db.update(
+                "fatransitem",
+                mItem,
+                where: "id = ?",
+                whereArgs: [
+                  row['id'],
+                ],
+              );
+            }
+          });
+        }
+      } else {
+        Get.dialog(
+          AlertDialog(
+            title: const Text("Message"),
+            content: Text(res['message']),
+          ),
+        );
+      }
+    });
   }
 
   void confirmApprove() {

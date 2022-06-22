@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:myasset/controllers/Auth.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/models/preferences.model.dart';
-import 'package:myasset/models/user.model.dart';
 import 'package:myasset/services/User.service.dart';
-import 'package:sqflite/sqlite_api.dart';
 
 class LoginController extends GetxController {
   var loaderButtonLogin = false.obs;
@@ -24,7 +20,9 @@ class LoginController extends GetxController {
 
   @override
   void onInit() {
+    // ignore: todo
     // TODO: implement onInit
+    // ignore: avoid_print
     print("init login");
     username.text = "";
     password.text = "";
@@ -33,7 +31,9 @@ class LoginController extends GetxController {
 
   @override
   void onClose() {
+    // ignore: todo
     // TODO: implement onClose
+    // ignore: avoid_print
     print("close");
     username.text = "";
     password.text = "";
@@ -42,7 +42,9 @@ class LoginController extends GetxController {
 
   @override
   void dispose() {
+    // ignore: todo
     // TODO: implement dispose
+    // ignore: avoid_print
     print("dispose");
     username.dispose();
     password.dispose();
@@ -65,6 +67,7 @@ class LoginController extends GetxController {
 
       var res =
           await userService.findUserByUserAndPass(username.text, password.text);
+      // ignore: avoid_print
       print(res.body);
 
       if (res.body != null) {

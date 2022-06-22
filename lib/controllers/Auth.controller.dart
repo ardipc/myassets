@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:myasset/helpers/cache.helper.dart';
@@ -51,5 +52,29 @@ class AuthController extends GetxController with CacheManager {
     removeToken();
 
     Get.offAllNamed('/login');
+  }
+
+  void actionConfirmUnregister() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to unregister this device?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              actionUnregister();
+            },
+            child: const Text("YES"),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text("NO"),
+          ),
+        ],
+      ),
+    );
   }
 }

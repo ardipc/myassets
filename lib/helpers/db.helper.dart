@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DbHelper {
-  late Database _database;
+  // late Database _database;
 
   Future<Database> initDb() async {
     //untuk menentukan nama database dan lokasi yg dibuat
@@ -34,7 +34,7 @@ class DbHelper {
         soStartDate TEXT,
         soEndDate TEXT,
         syncDate TEXT,
-        syncBy INTEGER
+        syncBy TEXT
       )
     ''');
 
@@ -93,7 +93,7 @@ class DbHelper {
         confirmDate TEXT,
         confirmBy TEXT,
         uploadDate TEXT,
-        uploadBy INTEGER,
+        uploadBy TEXT,
         uploadMessage TEXT
       )
     ''');
@@ -116,9 +116,9 @@ class DbHelper {
         conStatCode TEXT,
         ownStatCode TEXT,
         syncDate TEXT,
-        syncBy INTEGER,
+        syncBy TEXT,
         uploadDate TEXT,
-        uploadBy INTEGER,
+        uploadBy TEXT,
         uploadMessage TEXT
       )
     ''');
@@ -149,7 +149,7 @@ class DbHelper {
         uploadBy TEXT,
         uploadMessage TEXT,
         syncDate TEXT,
-        syncBy INTEGER
+        syncBy TEXT
       )
     ''');
 
@@ -157,8 +157,8 @@ class DbHelper {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS fatransitem (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        transId INTEGER,
         transItemId INTEGER,
+        transId INTEGER,
         faItemId INTEGER,
         faId INTEGER,
         faNo TEXT,
@@ -169,9 +169,9 @@ class DbHelper {
         saveDate TEXT,
         saveBy INTEGER,
         syncDate TEXT,
-        syncBy INTEGER,
+        syncBy TEXT,
         uploadDate TEXT,
-        uploadBy INTEGER,
+        uploadBy TEXT,
         uploadMessage TEXT
       )
     ''');
@@ -262,7 +262,7 @@ class DbHelper {
     Database db = await initDb();
     final List<Map<String, dynamic>> maps =
         await db.query('contact', orderBy: 'name');
-    print(maps);
+    // print(maps);
     return List.generate(maps.length, (index) {
       return Contact(maps[index]['name'], maps[index]['phone']);
     });

@@ -24,30 +24,31 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   var isReadOnly = false;
 
   List _optionsPeriods = [];
-  int? selectedValue = null;
+  int? selectedValue;
 
   String barcode = "";
   int? faIdValue = 0;
 
   int idStockOpname = 0;
+  bool isAda = false;
 
   TextEditingController tagNoController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController faNoController = TextEditingController();
 
-  String? selectedExistence = null;
+  String? selectedExistence;
   List _optionsExistence = [];
 
-  String? selectedTagging = null;
+  String? selectedTagging;
   List _optionsTagging = [];
 
-  String? selectedUsage = null;
+  String? selectedUsage;
   List _optionsUsage = [];
 
-  String? selectedCondition = null;
+  String? selectedCondition;
   List _optionsCondition = [];
 
-  String? selectedOwnership = null;
+  String? selectedOwnership;
   List _optionsOwnership = [];
 
   void fetchSinglePeriod() async {
@@ -133,11 +134,22 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
             mapsItem.isNotEmpty ? mapsItem[0]['tagNo'].toString() : "0";
         descriptionController.text = maps[0]['description'];
         faNoController.text = maps[0]['faNo'];
-        selectedExistence = maps[0]['existStatCode'].toString();
-        selectedTagging = maps[0]['tagStatCode'].toString();
-        selectedUsage = maps[0]['usageStatCode'].toString();
-        selectedCondition = maps[0]['conStatCode'].toString();
-        selectedOwnership = maps[0]['ownStatCode'].toString();
+        // ignore: prefer_null_aware_operators
+        if (maps[0]['existStatCode'] != null) {
+          selectedExistence = maps[0]['existStatCode'].toString();
+        }
+        if (maps[0]['tagStatCode'] != null) {
+          selectedTagging = maps[0]['tagStatCode'].toString();
+        }
+        if (maps[0]['usageStatCode'] != null) {
+          selectedUsage = maps[0]['usageStatCode'].toString();
+        }
+        if (maps[0]['conStatCode'] != null) {
+          selectedCondition = maps[0]['conStatCode'].toString();
+        }
+        if (maps[0]['ownStatCode'] != null) {
+          selectedOwnership = maps[0]['ownStatCode'].toString();
+        }
       });
     }
   }
@@ -205,21 +217,21 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   void actionConfirm() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to delete data ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to delete data ?"),
         actions: [
           TextButton(
             onPressed: () {
               Get.back();
               actionDelete();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -230,7 +242,9 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     Database db = await dbHelper.initDb();
     int exec = await db
         .delete("stockopnames", where: "id = ?", whereArgs: [idStockOpname]);
-    Get.back();
+    if (exec > 0) {
+      Get.back();
+    }
   }
 
   Future<void> actionSave() async {
@@ -260,7 +274,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
       String formattedDate =
           DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
 
-      Map<String, dynamic> map = Map();
+      Map<String, dynamic> map = {};
       if (idStockOpname == 0) {
         map['stockOpnameId'] = 0;
         map['periodId'] = selectedValue;
@@ -269,16 +283,16 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         map['tagNo'] = tagNoController.text;
         map['description'] = descriptionController.text;
         map['locationId'] = box.read('locationId');
-        map['qty'] = 0;
+        map['qty'] = selectedExistence == "ex1" ? 1 : 0;
         map['existStatCode'] = selectedExistence;
         map['tagStatCode'] = selectedTagging;
         map['usageStatCode'] = selectedUsage;
         map['conStatCode'] = selectedCondition;
         map['ownStatCode'] = selectedOwnership;
         map['syncDate'] = formattedDate;
-        map['syncBy'] = box.read('userId');
+        map['syncBy'] = box.read('username');
         map['uploadDate'] = formattedDate;
-        map['uploadBy'] = box.read('userId');
+        map['uploadBy'] = box.read('username');
         map['uploadMessage'] = "";
 
         // print(map);
@@ -292,31 +306,33 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
           });
 
           Get.dialog(AlertDialog(
-            title: Text("Information"),
-            content: Text("Data has been saved."),
+            title: const Text("Information"),
+            content: const Text("Data has been saved."),
             actions: [
               TextButton(
                 onPressed: () {
                   Get.back();
                 },
-                child: Text("Close"),
+                child: const Text("Close"),
               ),
             ],
           ));
         } else {
           Get.dialog(AlertDialog(
-            title: Text("Information"),
-            content: Text("Error while saved."),
+            title: const Text("Information"),
+            content: const Text("Error while saved."),
             actions: [
               TextButton(
                 onPressed: () {
                   Get.back();
                 },
-                child: Text("Close"),
+                child: const Text("Close"),
               ),
             ],
           ));
         }
+
+        Get.back();
       } else {
         map['tagNo'] = tagNoController.text;
         map['faId'] = faIdValue;
@@ -327,22 +343,29 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         map['usageStatCode'] = selectedUsage;
         map['conStatCode'] = selectedCondition;
         map['ownStatCode'] = selectedOwnership;
+        map['qty'] = selectedExistence == "ex1" ? 1 : 0;
 
         int exec = await db.update("stockopnames", map,
             where: "id = ?", whereArgs: [idStockOpname]);
 
-        Get.dialog(AlertDialog(
-          title: Text("Information"),
-          content: Text("Data has been updated."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: Text("Close"),
+        if (exec > 0) {
+          Get.dialog(
+            AlertDialog(
+              title: const Text("Information"),
+              content: const Text("Data has been updated."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  child: const Text("Close"),
+                ),
+              ],
             ),
-          ],
-        ));
+          );
+        }
+
+        Get.back();
       }
     }
   }
@@ -364,6 +387,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     super.initState();
     fetchAllOptions();
@@ -382,7 +406,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Stock Opname Item'),
+        title: const Text('Stock Opname Item'),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -398,7 +422,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                   SizedBox(
                     width: Get.width * 0.5,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4.0),
                         border: Border.all(
@@ -431,20 +455,20 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
             ),
             Card(
               elevation: 4,
-              margin: EdgeInsets.all(12.0),
+              margin: const EdgeInsets.all(12.0),
               shape: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(3),
-                borderSide: BorderSide(color: Colors.grey, width: 1),
+                borderSide: const BorderSide(color: Colors.grey, width: 1),
               ),
               color: Colors.white,
               child: Container(
-                padding: EdgeInsets.all(14.0),
+                padding: const EdgeInsets.all(14.0),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        Container(
-                          child: Text("Tag No : "),
+                        SizedBox(
+                          child: const Text("Tag No : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
@@ -493,13 +517,13 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               });
                             }
                           },
-                          child: Icon(Icons.qr_code),
+                          child: const Icon(Icons.qr_code),
                         ),
                         TextButton(
                           onPressed: () {
                             confirmDownloadTag();
                           },
-                          child: Icon(Icons.download),
+                          child: const Icon(Icons.download),
                         ),
                       ],
                     ),
@@ -508,8 +532,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Description : "),
+                        SizedBox(
+                          child: const Text("Description : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
@@ -517,7 +541,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                             // enabled: false,
                             // readOnly: true,
                             controller: descriptionController,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
@@ -532,8 +556,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("FA No : "),
+                        SizedBox(
+                          child: const Text("FA No : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
@@ -547,7 +571,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               return null;
                             },
                             controller: faNoController,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                   borderSide:
@@ -562,13 +586,14 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Existence : "),
+                        SizedBox(
+                          child: const Text("Existence : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4.0),
                               border: Border.all(
@@ -590,6 +615,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 onChanged: (value) {
                                   setState(() {
                                     selectedExistence = value.toString();
+                                    isAda = value == "ex1" ? true : false;
                                   });
                                 },
                               ),
@@ -603,13 +629,14 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Tagging : "),
+                        SizedBox(
+                          child: const Text("Tagging : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4.0),
                               border: Border.all(
@@ -628,11 +655,13 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedTagging,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedTagging = value.toString();
-                                  });
-                                },
+                                onChanged: isAda
+                                    ? null
+                                    : (value) {
+                                        setState(() {
+                                          selectedTagging = value.toString();
+                                        });
+                                      },
                               ),
                             ),
                           ),
@@ -644,13 +673,14 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Usage : "),
+                        SizedBox(
+                          child: const Text("Usage : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4.0),
                               border: Border.all(
@@ -669,11 +699,13 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedUsage,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedUsage = value.toString();
-                                  });
-                                },
+                                onChanged: isAda
+                                    ? null
+                                    : (value) {
+                                        setState(() {
+                                          selectedUsage = value.toString();
+                                        });
+                                      },
                               ),
                             ),
                           ),
@@ -685,13 +717,14 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Condition : "),
+                        SizedBox(
+                          child: const Text("Condition : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4.0),
                               border: Border.all(
@@ -710,11 +743,13 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedCondition,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedCondition = value.toString();
-                                  });
-                                },
+                                onChanged: isAda
+                                    ? null
+                                    : (value) {
+                                        setState(() {
+                                          selectedCondition = value.toString();
+                                        });
+                                      },
                               ),
                             ),
                           ),
@@ -726,13 +761,14 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Ownership : "),
+                        SizedBox(
+                          child: const Text("Ownership : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4.0),
                               border: Border.all(
@@ -751,11 +787,13 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedOwnership,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedOwnership = value.toString();
-                                  });
-                                },
+                                onChanged: isAda
+                                    ? null
+                                    : (value) {
+                                        setState(() {
+                                          selectedOwnership = value.toString();
+                                        });
+                                      },
                               ),
                             ),
                           ),
@@ -766,24 +804,25 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                 ),
               ),
             ),
-            Container(
+            SizedBox(
               width: Get.width,
               child: isReadOnly == false
                   ? Column(
                       children: [
                         Container(
-                          margin: EdgeInsets.symmetric(
+                          margin: const EdgeInsets.symmetric(
                               horizontal: 6.0, vertical: 3.0),
                           height: 50,
                           width: 600,
                           child: TextButton(
                             style: TextButton.styleFrom(
-                              backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                              backgroundColor:
+                                  const Color.fromARGB(255, 62, 81, 255),
                             ),
                             onPressed: () {
                               actionSave();
                             },
-                            child: Text(
+                            child: const Text(
                               "Save",
                               style: TextStyle(
                                 color: Colors.white,
@@ -794,19 +833,19 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         ),
                         if (idStockOpname != 0) ...[
                           Container(
-                            margin: EdgeInsets.symmetric(
+                            margin: const EdgeInsets.symmetric(
                                 horizontal: 6.0, vertical: 3.0),
                             height: 50,
                             width: 600,
                             child: TextButton(
                               style: TextButton.styleFrom(
                                 backgroundColor:
-                                    Color.fromARGB(255, 228, 11, 29),
+                                    const Color.fromARGB(255, 228, 11, 29),
                               ),
                               onPressed: () {
                                 actionConfirm();
                               },
-                              child: Text(
+                              child: const Text(
                                 "Delete",
                                 style: TextStyle(
                                   color: Colors.white,

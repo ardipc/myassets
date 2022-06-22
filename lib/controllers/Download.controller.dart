@@ -25,7 +25,7 @@ class DownloadController extends GetxController {
     // TODO: implement onInit
     super.onInit();
     // ignore: avoid_print
-    print("init download ${box.read('userId')}");
+    print("init download ${box.read('username')}");
   }
 
   @override
@@ -87,7 +87,7 @@ class DownloadController extends GetxController {
           "genGroup": statuses[i]['genGroup'],
           "sort": statuses[i]['sort'],
           "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
-          "syncBy": box.read('userId')
+          "syncBy": box.read('username')
         };
         await db.insert("statuses", map);
       }
@@ -112,7 +112,7 @@ class DownloadController extends GetxController {
           "plantId": users[i]['plantId'],
           "locationId": users[i]['locationId'],
           "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
-          "syncBy": box.read('userId')
+          "syncBy": box.read('username')
         };
         await db.insert("users", map);
       }
@@ -135,7 +135,7 @@ class DownloadController extends GetxController {
           "added": users[i]['added'],
           "disposed": users[i]['disposed'],
           "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
-          "syncBy": box.read('userId')
+          "syncBy": box.read('username')
         };
         await db.insert("faitems", map);
       }
@@ -159,7 +159,7 @@ class DownloadController extends GetxController {
           "soStartDate": periods[i]['soStartDate'],
           "soEndDate": periods[i]['soEndDate'],
           "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
-          "syncBy": box.read('userId')
+          "syncBy": box.read('username')
         };
         await db.insert("periods", map);
 
