@@ -67,8 +67,8 @@ class _ClearScreen extends State<ClearScreen> {
   void confirmClear(ClearController controller) {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to clear data on period ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to clear data on period ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -76,13 +76,13 @@ class _ClearScreen extends State<ClearScreen> {
               controller.clearAllData(selectedPeriod ?? 0);
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -91,6 +91,7 @@ class _ClearScreen extends State<ClearScreen> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     super.initState();
     fetchPeriod();
@@ -106,22 +107,22 @@ class _ClearScreen extends State<ClearScreen> {
       ),
       body: Card(
         elevation: 4,
-        margin: EdgeInsets.all(20),
+        margin: const EdgeInsets.all(20),
         shape: OutlineInputBorder(
           borderRadius: BorderRadius.circular(3),
-          borderSide: BorderSide(color: Colors.grey, width: 1),
+          borderSide: const BorderSide(color: Colors.grey, width: 1),
         ),
         color: Colors.white,
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
           child: Column(
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  Text("Periode :  "),
+                  const Text("Periode :  "),
                   Expanded(
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4.0),
                         border: Border.all(
@@ -149,7 +150,7 @@ class _ClearScreen extends State<ClearScreen> {
                       ),
                     ),
                   ),
-                  Text(" "),
+                  const Text(" "),
                   TextButton(
                     onPressed: () {
                       _selectDate(context);
@@ -158,10 +159,10 @@ class _ClearScreen extends State<ClearScreen> {
                   ),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
-              Container(
+              SizedBox(
                 height: 50,
                 width: Get.width,
                 child: TextButton(
