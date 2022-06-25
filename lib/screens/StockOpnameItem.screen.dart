@@ -538,7 +538,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
-                            // enabled: false,
+                            enabled: false,
                             // readOnly: true,
                             controller: descriptionController,
                             decoration: const InputDecoration(
@@ -562,7 +562,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         ),
                         Expanded(
                           child: TextFormField(
-                            // enabled: false,
+                            enabled: false,
                             // readOnly: true,
                             validator: (value) {
                               if (value == null || value.isEmpty) {

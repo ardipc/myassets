@@ -110,6 +110,8 @@ class DbHelper {
         faNo TEXT,
         locationId INTEGER,
         qty INTEGER,
+        baseQty INTEGER,
+        baseConStateCode INTEGER,
         existStatCode TEXT,
         tagStatCode TEXT,
         usageStatCode TEXT,

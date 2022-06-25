@@ -219,7 +219,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     final box = GetStorage();
 
     List<Map<String, dynamic>> maps = await db.rawQuery(
-        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode");
+        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode WHERE s.uploadDate IS NULL OR s.uploadDate = ''");
     for (var data in maps) {
       Map<String, dynamic> map = {};
       map['stockOpnameId'] = data['stockOpnameId'];

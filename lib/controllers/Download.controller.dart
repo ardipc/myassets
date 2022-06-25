@@ -181,6 +181,8 @@ class DownloadController extends GetxController {
             if (rows.isNotEmpty) {
               // action update
               map['qty'] = row['qty'];
+              map['baseQty'] = row['baseQty'];
+              map['baseConStatQty'] = row['baseConStatQty'];
               await db.update(
                 "stockopnames",
                 map,
@@ -200,6 +202,8 @@ class DownloadController extends GetxController {
               map['description'] = row['itemName'];
               map['locationId'] = box.read('locationId');
               map['qty'] = row['qty'];
+              map['baseQty'] = row['baseQty'];
+              map['baseConStatQty'] = row['baseConStatQty'];
               var id = await db.insert(
                 "stockopnames",
                 map,

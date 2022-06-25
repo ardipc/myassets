@@ -1,38 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myasset/controllers/Upload.controller.dart';
 
-class UploadScreen extends StatefulWidget {
-  const UploadScreen({Key? key}) : super(key: key);
+class UploadScreen extends StatelessWidget {
+  final uploadController = Get.put(UploadController());
 
-  @override
-  State<UploadScreen> createState() => _UploadScreen();
-}
+  UploadScreen({Key? key}) : super(key: key);
 
-class _UploadScreen extends State<UploadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Upload'),
+        actions: [
+          if (uploadController.isStart.value) ...[
+            IconButton(
+              onPressed: () {
+                uploadController.restart();
+              },
+              icon: const Icon(Icons.refresh),
+            )
+          ]
+        ],
       ),
-      body: Center(
-        child: Container(
-          height: 50,
-          width: Get.width * 0.4,
-          child: TextButton(
-            style: TextButton.styleFrom(
-              backgroundColor: Color.fromRGBO(44, 116, 180, 1),
-            ),
-            onPressed: () {},
-            child: Text(
-              "Start Upload",
-              style: TextStyle(
+      body: Obx(
+        () => uploadController.isStart.value
+            ? Card(
+                elevation: 4,
+                margin: const EdgeInsets.all(12),
+                shape: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(3),
+                  borderSide: const BorderSide(color: Colors.grey, width: 1),
+                ),
                 color: Colors.white,
-                fontSize: 16,
+                child: Container(
+                  padding: const EdgeInsets.all(6.0),
+                  child: ListView(
+                    children: uploadController.listProgress,
+                  ),
+                ),
+              )
+            : Center(
+                child: SizedBox(
+                  height: 50,
+                  width: Get.width * 0.4,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color.fromRGBO(44, 116, 180, 1),
+                    ),
+                    onPressed: () {},
+                    child: const Text(
+                      "Start Upload",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ),
       ),
     );
   }
