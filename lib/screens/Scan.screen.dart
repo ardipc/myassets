@@ -1,3 +1,6 @@
+// ignore_for_file: deprecated_member_use
+
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,14 +19,14 @@ class _ScanScreen extends State<ScanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Barcode Scanner Example'),
+        title: const Text('Barcode Scanner Example'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             RaisedButton(
-              child: Text('Scan'),
+              child: const Text('Scan'),
               onPressed: () async {
                 try {
                   String barcode = await BarcodeScanner.scan();
@@ -33,12 +36,11 @@ class _ScanScreen extends State<ScanScreen> {
                 } on PlatformException catch (error) {
                   if (error.code == BarcodeScanner.CameraAccessDenied) {
                     setState(() {
-                      this.barcode =
-                          'Izin kamera tidak diizinkan oleh si pengguna';
+                      barcode = 'Izin kamera tidak diizinkan oleh si pengguna';
                     });
                   } else {
                     setState(() {
-                      this.barcode = 'Error: $error';
+                      barcode = 'Error: $error';
                     });
                   }
                 }

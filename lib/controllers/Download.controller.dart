@@ -203,7 +203,7 @@ class DownloadController extends GetxController {
               map['locationId'] = box.read('locationId');
               map['qty'] = row['qty'];
               map['baseQty'] = row['baseQty'];
-              map['baseConStatQty'] = row['baseConStatQty'];
+              map['baseConStateCode'] = row['baseConStat'];
               var id = await db.insert(
                 "stockopnames",
                 map,

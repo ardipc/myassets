@@ -15,7 +15,7 @@ class _ClearScreen extends State<ClearScreen> {
   final dbHelper = DbHelper();
   String date = "";
 
-  int? selectedPeriod = null;
+  int? selectedPeriod;
   List _dropdownPeriods = [];
 
   final dateTime = TextEditingController();
@@ -155,7 +155,7 @@ class _ClearScreen extends State<ClearScreen> {
                     onPressed: () {
                       _selectDate(context);
                     },
-                    child: Icon(Icons.date_range),
+                    child: const Icon(Icons.date_range),
                   ),
                 ],
               ),
@@ -167,12 +167,12 @@ class _ClearScreen extends State<ClearScreen> {
                 width: Get.width,
                 child: TextButton(
                   style: TextButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(44, 116, 180, 1),
+                    backgroundColor: const Color.fromRGBO(44, 116, 180, 1),
                   ),
                   onPressed: () {
                     confirmClear(clearController);
                   },
-                  child: Text(
+                  child: const Text(
                     "Clear",
                     style: TextStyle(
                       color: Colors.white,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:myasset/controllers/Auth.controller.dart';
+// import 'package:myasset/controllers/Auth.controller.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -20,7 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (apiAddressController.text.isEmpty &&
         locationCodeController.text.isEmpty) {
       Get.dialog(
-        AlertDialog(
+        const AlertDialog(
           title: Text("Information"),
           content: Text("There are still empty, please fill all field."),
         ),
@@ -29,7 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       box.write('apiAddress', apiAddressController.text);
       box.write('locationCode', locationCodeController.text);
       Get.dialog(
-        AlertDialog(
+        const AlertDialog(
           title: Text("Information"),
           content: Text("Data has been saved."),
         ),
@@ -39,6 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     super.initState();
     apiAddressController.text = box.read('apiAddress') ?? "";

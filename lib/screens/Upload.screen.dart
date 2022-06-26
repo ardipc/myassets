@@ -48,7 +48,9 @@ class UploadScreen extends StatelessWidget {
                     style: TextButton.styleFrom(
                       backgroundColor: const Color.fromRGBO(44, 116, 180, 1),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      uploadController.confirmDownload();
+                    },
                     child: const Text(
                       "Start Upload",
                       style: TextStyle(

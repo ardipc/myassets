@@ -69,8 +69,15 @@ class UploadController extends GetxController {
     listProgress.add(rowProgress("Starting upload data."));
 
     listProgress.add(rowProgress("Uploading Stock Opname data..."));
-    List<Map<String, dynamic>> soRows = await db.query('stockopnames',
-        where: "uploadDate IS NULL OR uploadDate = ''");
+    List<Map<String, dynamic>> soRows = await db.query(
+      'stockopnames',
+      where: "uploadDate IS NULL OR uploadDate = ?",
+      whereArgs: [''],
+    );
+
+    print(soRows.length);
+    print(soRows);
+
     var soService = StockopnameService();
     for (var data in soRows) {
       Map<String, dynamic> map = {};
@@ -86,7 +93,8 @@ class UploadController extends GetxController {
       map['ownStatCode'] = data['ownStatCode'];
       soService.createStockopname(map).then((value) async {
         var res = value.body;
-        if (res['message'].toString().isNotEmpty) {
+        print(res);
+        if (res['message'] == '') {
           Map<String, dynamic> m = {};
           m['stockOpnameId'] = res['stockOpnameId'];
           m['uploadDate'] =

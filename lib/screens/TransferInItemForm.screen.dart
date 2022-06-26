@@ -132,14 +132,14 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
         });
 
         Get.dialog(AlertDialog(
-          title: Text("Information"),
-          content: Text("Data has been saved."),
+          title: const Text("Information"),
+          content: const Text("Data has been saved."),
           actions: [
             TextButton(
               onPressed: () {
                 Get.back();
               },
-              child: Text("Close"),
+              child: const Text("Close"),
             ),
           ],
         ));
@@ -365,9 +365,11 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                             enabled: false,
                             readOnly: true,
                             controller: description,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                            decoration: InputDecoration(
+                              fillColor: Colors.blueGrey[200],
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.blueAccent),
                               ),
@@ -390,9 +392,11 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                             enabled: false,
                             readOnly: true,
                             controller: faNo,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                            decoration: InputDecoration(
+                              fillColor: Colors.blueGrey[200],
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),
                             ),

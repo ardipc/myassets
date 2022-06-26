@@ -46,6 +46,7 @@ class _OtpScreenState extends State<OtpScreen> {
                   fieldStyle: FieldStyle.box,
                   onChanged: (pin) {
                     // otpController.changePin(pin);
+                    // ignore: avoid_print
                     print(pin);
                   },
                   onCompleted: (pin) {
@@ -60,7 +61,7 @@ class _OtpScreenState extends State<OtpScreen> {
                   width: MediaQuery.of(context).size.width,
                   child: TextButton(
                     style: TextButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                      backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                     ),
                     onPressed: () {
                       otpController.actionSubmitOtp();

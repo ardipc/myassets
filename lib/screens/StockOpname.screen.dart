@@ -9,6 +9,7 @@ import 'package:responsive_table/responsive_table.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class StockOpnameScreen extends StatefulWidget {
+  // ignore: prefer_const_constructors_in_immutables
   StockOpnameScreen({Key? key}) : super(key: key);
 
   @override
@@ -18,15 +19,12 @@ class StockOpnameScreen extends StatefulWidget {
 class _StockOpnameScreenState extends State<StockOpnameScreen> {
   DbHelper dbHelper = DbHelper();
 
-  int? selectedValue = null;
+  int? selectedValue;
   List _dropdownPeriods = [];
 
-  late List<DatatableHeader> _headers;
-
-  List<Map<String, dynamic>> _sources = [];
   List<DataRow> _rows = [];
 
-  int _currentPage = 1;
+  // int _currentPage = 1;
   bool _isLoading = true;
 
   Future<List<DataRow>> genData(var periodId) async {
@@ -35,6 +33,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode",
     );
 
+    // ignore: avoid_print
     print(maps);
 
     List<DataRow> temps = [];
@@ -120,14 +119,6 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   void fetchData() async {
     Database db = await dbHelper.initDb();
     setState(() => _isLoading = true);
-    _headers = [
-      DatatableHeader(text: "No.", value: "no", show: true),
-      DatatableHeader(text: "Tag No", value: "tagNo", show: true),
-      DatatableHeader(text: "Description", value: "description", show: true),
-      DatatableHeader(
-          text: "Closing Result", value: "closingResult", show: true),
-      DatatableHeader(text: "Stock Opname", value: "stockOpname", show: true)
-    ];
     List<Map<String, dynamic>> p = await db.query('periods');
     if (p.isNotEmpty) {
       var getFirst = p.first;

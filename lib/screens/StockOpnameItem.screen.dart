@@ -89,8 +89,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   void confirmDownloadTag() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to sync now ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to sync now ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -98,13 +98,13 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
               // ex. actionUploadToServer();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -291,16 +291,12 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         map['ownStatCode'] = selectedOwnership;
         map['syncDate'] = formattedDate;
         map['syncBy'] = box.read('username');
-        map['uploadDate'] = formattedDate;
-        map['uploadBy'] = box.read('username');
-        map['uploadMessage'] = "";
 
         // print(map);
 
         int exec = await db.insert("stockopnames", map,
             conflictAlgorithm: ConflictAlgorithm.replace);
-
-        if (exec != 0) {
+        if (exec > 0) {
           setState(() {
             idStockOpname = exec;
           });
@@ -331,8 +327,6 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
             ],
           ));
         }
-
-        Get.back();
       } else {
         map['tagNo'] = tagNoController.text;
         map['faId'] = faIdValue;
@@ -364,8 +358,6 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
             ),
           );
         }
-
-        Get.back();
       }
     }
   }
@@ -541,9 +533,11 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                             enabled: false,
                             // readOnly: true,
                             controller: descriptionController,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                            decoration: InputDecoration(
+                              fillColor: Colors.blueGrey[200],
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),
                             ),
@@ -571,9 +565,11 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               return null;
                             },
                             controller: faNoController,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                            decoration: InputDecoration(
+                              fillColor: Colors.blueGrey[200],
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),
                             ),

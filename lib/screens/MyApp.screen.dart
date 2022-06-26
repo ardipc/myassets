@@ -5,9 +5,12 @@ import 'package:myasset/controllers/Auth.controller.dart';
 import 'package:myasset/screens/HomePage.screen.dart';
 import 'package:myasset/screens/Login.screen.dart';
 
+// ignore: must_be_immutable
 class MyApp extends StatelessWidget {
   final box = GetStorage();
   AuthController appController = Get.put(AuthController());
+
+  MyApp({Key? key}) : super(key: key);
 
   Future<void> initializeSettings() async {
     appController.checkLogin();
@@ -35,6 +38,7 @@ class MyApp extends StatelessWidget {
     );
   }
 
+  // ignore: non_constant_identifier_names
   Scaffold WaitingView() {
     return Scaffold(
         body: Center(
@@ -52,6 +56,7 @@ class MyApp extends StatelessWidget {
     ));
   }
 
+  // ignore: non_constant_identifier_names
   Scaffold ErrorView(AsyncSnapshot<Object?> snapshot) {
     return Scaffold(body: Center(child: Text('Error: ${snapshot.error}')));
   }

@@ -363,9 +363,11 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                             enabled: false,
                             readOnly: true,
                             controller: description,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                            decoration: InputDecoration(
+                              fillColor: Colors.blueGrey[200],
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.blueAccent),
                               ),
@@ -388,9 +390,11 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                             enabled: false,
                             readOnly: true,
                             controller: faNo,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                            decoration: InputDecoration(
+                              fillColor: Colors.blueGrey[200],
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),
                             ),

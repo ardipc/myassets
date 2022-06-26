@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:myasset/controllers/Register.controller.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -98,12 +97,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     focusNode: focusNode,
                     readOnly: true,
                     enabled: false,
-                    decoration: const InputDecoration(
-                      fillColor: Colors.white,
+                    decoration: InputDecoration(
+                      fillColor: Colors.blueGrey[200],
                       filled: true,
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                       labelText: "Device ID",
-                      labelStyle: TextStyle(color: Colors.black),
+                      labelStyle: const TextStyle(color: Colors.black),
                     ),
                   ),
                   const SizedBox(

@@ -553,9 +553,11 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                             },
                             child: TextField(
                               controller: oldLocFrom,
-                              decoration: const InputDecoration(
-                                contentPadding: EdgeInsets.all(10),
-                                border: OutlineInputBorder(
+                              decoration: InputDecoration(
+                                fillColor: Colors.blueGrey[200],
+                                filled: true,
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
                                     borderSide:
                                         BorderSide(color: Colors.blueAccent)),
                               ),
@@ -567,9 +569,11 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                             controller: detailOldLocFrom,
                             enabled: false,
                             readOnly: true,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                            decoration: InputDecoration(
+                              fillColor: Colors.blueGrey[200],
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),
                             ),
@@ -591,8 +595,10 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                           child: TextField(
                             controller: newLocFrom,
                             decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                              fillColor: Colors.blueGrey[200],
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),
                             ),
@@ -604,8 +610,10 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                             enabled: false,
                             readOnly: true,
                             decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                              fillColor: Colors.blueGrey[200],
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),
                             ),
