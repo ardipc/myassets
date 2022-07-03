@@ -343,20 +343,22 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
             where: "id = ?", whereArgs: [idStockOpname]);
 
         if (exec > 0) {
-          Get.dialog(
-            AlertDialog(
-              title: const Text("Information"),
-              content: const Text("Data has been updated."),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  child: const Text("Close"),
-                ),
-              ],
-            ),
-          );
+          // Get.dialog(
+          //   AlertDialog(
+          //     title: const Text("Information"),
+          //     content: const Text("Data has been updated."),
+          //     actions: [
+          //       TextButton(
+          //         onPressed: () {
+          //           Get.back();
+          //         },
+          //         child: const Text("Close"),
+          //       ),
+          //     ],
+          //   ),
+          // );
+          Get.snackbar("Information", "Data has been updated.");
+          Get.back();
         }
       }
     }
@@ -651,7 +653,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedTagging,
-                                onChanged: isAda
+                                onChanged: !isAda
                                     ? null
                                     : (value) {
                                         setState(() {
@@ -695,7 +697,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedUsage,
-                                onChanged: isAda
+                                onChanged: !isAda
                                     ? null
                                     : (value) {
                                         setState(() {
@@ -739,7 +741,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedCondition,
-                                onChanged: isAda
+                                onChanged: !isAda
                                     ? null
                                     : (value) {
                                         setState(() {
@@ -783,7 +785,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedOwnership,
-                                onChanged: isAda
+                                onChanged: !isAda
                                     ? null
                                     : (value) {
                                         setState(() {

@@ -26,6 +26,7 @@ class OtpController extends GetxController {
         print(value.body);
         Map body = value.body;
         if (body['message'].toString().isNotEmpty) {
+          pin.value = "";
           Get.dialog(
             AlertDialog(
               title: const Text("Warning"),
@@ -33,6 +34,7 @@ class OtpController extends GetxController {
             ),
           );
         } else {
+          pin.value = "";
           Get.dialog(
             const AlertDialog(
               title: Text("Information"),
@@ -42,6 +44,7 @@ class OtpController extends GetxController {
         }
       });
     } catch (e) {
+      pin.value = "";
       Get.dialog(
         const AlertDialog(
           title: Text("Warning"),
@@ -55,70 +58,60 @@ class OtpController extends GetxController {
     Database db = await dbHelper.initDb();
 
     try {
-      if (args[2] == pin.value) {
-        registerService
-            .checkOtp(
-                args[0].toString(), args[1].toString(), args[2].toString())
-            .then((value) async {
-          // ignore: avoid_print
-          print(value.body);
-          Map body = value.body;
-          if (body['username'].toString() == "") {
-            Get.dialog(
-              AlertDialog(
-                title: const Text("Warning"),
-                content: Text(body['message'].toString()),
-              ),
-            );
-          } else {
-            box.write('registered', true);
-            box.write('apiAddress', args[3]);
+      registerService
+          .checkOtp(args[0].toString(), args[1].toString(), args[2].toString())
+          .then((value) async {
+        // ignore: avoid_print
+        print(value.body);
+        Map body = value.body;
+        if (body['username'].toString() == "") {
+          Get.dialog(
+            AlertDialog(
+              title: const Text("Warning"),
+              content: Text(body['message'].toString()),
+            ),
+          );
+        } else {
+          box.write('registered', true);
+          box.write('apiAddress', args[3]);
 
-            box.write('email', args[0]);
-            box.write('username', body['username']);
-            box.write('encPassword', body['encpassword']);
-            box.write('empNo', body['empno']);
-            box.write('realName', body['realname']);
+          box.write('email', args[0]);
+          box.write('username', body['username']);
+          box.write('encPassword', body['encpassword']);
+          box.write('empNo', body['empno']);
+          box.write('realName', body['realname']);
 
-            box.write('locationId', args[1]);
-            box.write('locationCode', body['locCode']);
-            box.write('locationName', body['locName']);
+          box.write('locationId', args[1]);
+          box.write('locationCode', body['locCode']);
+          box.write('locationName', body['locName']);
 
-            box.write('intransitId', body['intransitId']);
-            box.write('intransitCode', body['intransitCode']);
-            box.write('intransitName', body['intransitName']);
+          box.write('intransitId', body['intransitId']);
+          box.write('intransitCode', body['intransitCode']);
+          box.write('intransitName', body['intransitName']);
 
-            box.write('plantId', body['plantid']);
-            box.write('plantName', body['plantName']);
+          box.write('plantId', body['plantid']);
+          box.write('plantName', body['plantName']);
 
-            box.write('roleId', body['roleid']);
-            box.write('roleName', body['rolename']);
+          box.write('roleId', body['roleid']);
+          box.write('roleName', body['rolename']);
 
-            Map<String, dynamic> map = {
-              "username": body['username'],
-              "password": body['encpassword'],
-              "empNo": body['empno'],
-              "realName": body['realname'],
-              "roleId": body['roleid'],
-              "roleName": body['rolename'],
-              "plantId": body['plantid'],
-              "locationId": args[1],
-              "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
-              "syncBy": 0
-            };
-            await db.insert("users", map);
+          Map<String, dynamic> map = {
+            "username": body['username'],
+            "password": body['encpassword'],
+            "empNo": body['empno'],
+            "realName": body['realname'],
+            "roleId": body['roleid'],
+            "roleName": body['rolename'],
+            "plantId": body['plantid'],
+            "locationId": args[1],
+            "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
+            "syncBy": 0
+          };
+          await db.insert("users", map);
 
-            Get.offAndToNamed('/login');
-          }
-        });
-      } else {
-        Get.dialog(
-          const AlertDialog(
-            title: Text("Warning"),
-            content: Text("OTP not match."),
-          ),
-        );
-      }
+          Get.offAndToNamed('/login');
+        }
+      });
     } catch (e) {
       // ignore: avoid_print
       print(e);
