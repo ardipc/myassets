@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:myasset/controllers/Auth.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/services/Register.service.dart';
 import 'package:sqflite/sqflite.dart';
@@ -11,6 +12,7 @@ class OtpController extends GetxController {
   DbHelper dbHelper = DbHelper();
 
   RegisterService registerService = RegisterService();
+  var authController = AuthController();
 
   dynamic args = Get.arguments;
   var pin = "".obs;
@@ -97,7 +99,7 @@ class OtpController extends GetxController {
 
           Map<String, dynamic> map = {
             "username": body['username'],
-            "password": body['encpassword'],
+            "password": body['password'],
             "empNo": body['empno'],
             "realName": body['realname'],
             "roleId": body['roleid'],
@@ -108,6 +110,8 @@ class OtpController extends GetxController {
             "syncBy": 0
           };
           await db.insert("users", map);
+
+          await authController.saveToken(body['token']);
 
           Get.offAndToNamed('/login');
         }

@@ -64,7 +64,8 @@ class LoginController extends GetxController {
       // Database db = await dbHelper.initDb();
       // List<User> users =
       // await dbHelper.selectUserToLogin(username.text, password.text);
-
+      print(username.text);
+      print(password.text);
       var res =
           await userService.findUserByUserAndPass(username.text, password.text);
       // ignore: avoid_print

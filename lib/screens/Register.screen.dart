@@ -75,6 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextFormField(
                     controller: registerController.email,
                     textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.emailAddress,
                     onFieldSubmitted: (v) {
                       registerController.toOtpScreen();
                     },
