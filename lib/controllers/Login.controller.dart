@@ -64,8 +64,8 @@ class LoginController extends GetxController {
       // Database db = await dbHelper.initDb();
       // List<User> users =
       // await dbHelper.selectUserToLogin(username.text, password.text);
-      print(username.text);
-      print(password.text);
+      // print(username.text);
+      // print(password.text);
       var res =
           await userService.findUserByUserAndPass(username.text, password.text);
       // ignore: avoid_print
@@ -75,6 +75,8 @@ class LoginController extends GetxController {
         if (res.body['status']) {
           box.write('roleId', res.body['roleId']);
           box.write('token', res.body['token']);
+          box.write('realName', res.body['realname']);
+          box.write('roleName', res.body['rolename']);
 
           await authController.saveToken(res.body['token']);
           loaderButtonLogin.value = false;

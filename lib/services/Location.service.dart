@@ -16,7 +16,7 @@ class LocationService extends GetConnect with CacheManager {
   Future<Response> getAll() {
     var token = getToken();
     return get(
-      "${box.read("apiAddress")}/Api/Location/All?locationId=${box.read('locationId')}",
+      "${box.read("apiAddress")}/Api/Location/All?locationId=${box.read('locationId')}&lastSync=1900-01-01",
       headers: {"Authorization": "Bearer $token"},
     );
   }

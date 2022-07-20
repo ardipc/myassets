@@ -357,8 +357,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
           //     ],
           //   ),
           // );
-          Get.snackbar("Information", "Data has been updated.");
           Get.back();
+          Get.snackbar("Information", "Data has been updated.");
         }
       }
     }
@@ -613,7 +613,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 onChanged: (value) {
                                   setState(() {
                                     selectedExistence = value.toString();
-                                    isAda = value == "ex1" ? true : false;
+                                    isAda = value == "ex1" ? false : true;
                                   });
                                 },
                               ),

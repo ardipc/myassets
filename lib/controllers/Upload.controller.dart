@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
+import 'package:myasset/services/FASOHead.service.dart';
 import 'package:myasset/services/FATrans.service.dart';
 import 'package:myasset/services/FATransItem.service.dart';
 import 'package:myasset/services/Stockopname.service.dart';
@@ -64,6 +65,7 @@ class UploadController extends GetxController {
   }
 
   Future<void> startDownload() async {
+    final box = GetStorage();
     isStart.value = true;
     Database db = await dbHelper.initDb();
     listProgress.add(rowProgress("Starting upload data."));
@@ -74,9 +76,6 @@ class UploadController extends GetxController {
       where: "uploadDate IS NULL OR uploadDate = ?",
       whereArgs: [''],
     );
-
-    print(soRows.length);
-    print(soRows);
 
     var soService = StockopnameService();
     for (var data in soRows) {
@@ -93,6 +92,7 @@ class UploadController extends GetxController {
       map['ownStatCode'] = data['ownStatCode'];
       soService.createStockopname(map).then((value) async {
         var res = value.body;
+        // ignore: avoid_print
         print(res);
         if (res['message'] == '') {
           Map<String, dynamic> m = {};
@@ -112,6 +112,31 @@ class UploadController extends GetxController {
           listProgress.add(
               rowProgress("ID ${res['stockOpnameId'].toString()} uploaded."));
         }
+      });
+    }
+
+    listProgress.add(rowProgress("Uploading FASOHead data..."));
+    List<Map<String, dynamic>> findUserId = await db.query(
+      'users',
+      where: "realName = ?",
+      whereArgs: [box.read('realName')],
+    );
+    var fasoheadService = FASOHeadService();
+    List<Map<String, dynamic>> fasoRows = await db.query('fasohead');
+    for (var data in fasoRows) {
+      listProgress
+          .add(rowProgress("Uploading FASOHead ID ${data['soHeadId']}..."));
+
+      Map<String, dynamic> map = {
+        "soHeadId": data['soHeadId'],
+        "statusCode": data['soStatusCode'],
+        "userId": findUserId.isNotEmpty ? findUserId[0]['userId'] : 0,
+      };
+      fasoheadService.create(map).then((value) async {
+        var res = value.body;
+        listProgress.add(rowProgress(res['message'] != ""
+            ? res['message']
+            : "FASOHeadID ${data['soHeadId']} uploaded..."));
       });
     }
 

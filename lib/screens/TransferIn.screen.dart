@@ -231,7 +231,7 @@ class _TransferInScreen extends State<TransferInScreen> {
                     width: 40,
                   ),
                   SizedBox(
-                    width: Get.width * 0.6,
+                    width: Get.width * 0.4,
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 10.0),
                       decoration: BoxDecoration(

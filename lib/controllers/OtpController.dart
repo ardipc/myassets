@@ -61,12 +61,12 @@ class OtpController extends GetxController {
 
     try {
       registerService
-          .checkOtp(args[0].toString(), args[1].toString(), args[2].toString())
+          .checkOtp(args[0].toString(), args[1].toString(), pin.value)
           .then((value) async {
         // ignore: avoid_print
         print(value.body);
         Map body = value.body;
-        if (body['username'].toString() == "") {
+        if (body['message'] != "") {
           Get.dialog(
             AlertDialog(
               title: const Text("Warning"),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:myasset/controllers/Home.controller.dart';
@@ -58,6 +59,13 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text("Welcome to Asset Control"),
             Text("${box.read('realName') ?? "-"}"),
             Text("${box.read('roleName') ?? "-"}"),
+            IconButton(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: box.read('token')));
+                Get.snackbar("Information", "Copy to Clipboard.");
+              },
+              icon: const Icon(Icons.copy),
+            )
           ],
         ),
       ),

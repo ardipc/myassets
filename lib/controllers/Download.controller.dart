@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/services/FAItem.service.dart';
 import 'package:myasset/services/FASOHead.service.dart';
+import 'package:myasset/services/FATrans.service.dart';
+import 'package:myasset/services/FATransItem.service.dart';
 import 'package:myasset/services/Location.service.dart';
 import 'package:myasset/services/Period.service.dart';
 import 'package:myasset/services/Status.service.dart';
@@ -143,7 +145,6 @@ class DownloadController extends GetxController {
     listProgress.add(rowProgress("Table faitems completed."));
 
     var periodService = PeriodService();
-    var soService = StockopnameService();
     listProgress.add(rowProgress("Sync table period."));
     await db.delete("periods", where: null);
     await periodService.getAll().then((value) async {
@@ -162,66 +163,72 @@ class DownloadController extends GetxController {
           "syncBy": box.read('username')
         };
         await db.insert("periods", map);
-
-        // Process stockopanme by period id
-        listProgress.add(rowProgress("Sync table stockopname."));
-        listProgress.add(rowProgress("ID ${periods[i]['periodId']} inserted."));
-        await soService.getAll(periods[i]['periodId']).then((value) async {
-          List lists = value.body['list'];
-          for (var row in lists) {
-            List<Map<String, dynamic>> rows = await db.query(
-              'stockopnames',
-              where: "stockOpnameId = ?",
-              whereArgs: [
-                row['stockOpnameId'],
-              ],
-            );
-
-            Map<String, dynamic> map = {};
-            if (rows.isNotEmpty) {
-              // action update
-              map['qty'] = row['qty'];
-              map['baseQty'] = row['baseQty'];
-              map['baseConStatQty'] = row['baseConStatQty'];
-              await db.update(
-                "stockopnames",
-                map,
-                where: "stockOpnameId = ?",
-                whereArgs: [
-                  row['stockOpnameId'],
-                ],
-              );
-              listProgress
-                  .add(rowProgress("ID ${row['stockOpnameId']} updated."));
-            } else {
-              // action insert
-              map['periodId'] = periods[i]['periodId'];
-              map['faId'] = row['faId'];
-              map['stockOpnameId'] = row['stockOpnameId'];
-              map['tagNo'] = row['tagNo'];
-              map['description'] = row['itemName'];
-              map['locationId'] = box.read('locationId');
-              map['qty'] = row['qty'];
-              map['baseQty'] = row['baseQty'];
-              map['baseConStateCode'] = row['baseConStat'];
-              var id = await db.insert(
-                "stockopnames",
-                map,
-                conflictAlgorithm: ConflictAlgorithm.replace,
-              );
-              listProgress.add(rowProgress("ID $id inserted."));
-            }
-          }
-        });
-        listProgress.add(rowProgress("Table stockopname completed."));
       }
     });
     listProgress.add(rowProgress("Table period completed."));
+
+    // Process stockopanme by period id
+    var soService = StockopnameService();
+    listProgress.add(rowProgress("Sync table stockopname."));
+    await soService.getAll().then((value) async {
+      List lists = value.body['list'];
+      for (var row in lists) {
+        List<Map<String, dynamic>> rows = await db.query(
+          'stockopnames',
+          where: "stockOpnameId = ?",
+          whereArgs: [
+            row['stockOpnameId'],
+          ],
+        );
+
+        Map<String, dynamic> map = {};
+        if (rows.isNotEmpty) {
+          // action update
+          map['qty'] = row['qty'];
+          map['baseQty'] = row['baseQty'];
+          map['baseConStatCode'] = row['baseConStat'];
+          await db.update(
+            "stockopnames",
+            map,
+            where: "stockOpnameId = ?",
+            whereArgs: [
+              row['stockOpnameId'],
+            ],
+          );
+          listProgress.add(rowProgress("ID ${row['stockOpnameId']} updated."));
+        } else {
+          // action insert
+          map['faId'] = row['faId'];
+          map['stockOpnameId'] = row['stockOpnameId'];
+          map['tagNo'] = row['tagNo'];
+          map['description'] = row['itemName'];
+          map['locationId'] = box.read('locationId');
+          map['qty'] = row['qty'];
+          map['baseQty'] = row['baseQty'];
+          map['baseConStatCode'] = row['baseConStat'];
+          map['existStatCode'] = row['existStat'];
+          map['tagStatCode'] = row['tagStat'];
+          map['usageStatCode'] = row['usageStat'];
+          map['conStatCode'] = row['conStat'];
+          map['ownStatCode'] = row['ownStat'];
+          map['rejectNote'] = row['rejectNote'];
+          var id = await db.insert(
+            "stockopnames",
+            map,
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+          listProgress.add(rowProgress("ID $id inserted."));
+        }
+      }
+    });
+    listProgress.add(rowProgress("Table stockopname completed."));
 
     var locService = LocationService();
     listProgress.add(rowProgress("Sync table locations."));
     await db.delete("locations", where: null);
     await locService.getAll().then((value) async {
+      // ignore: avoid_print
+      print(value.body);
       List periods = value.body['locs'];
       for (var i = 0; i < periods.length; i++) {
         listProgress
@@ -244,7 +251,8 @@ class DownloadController extends GetxController {
           "insertDate": periods[i]['insertDate'],
           "insertBy": periods[i]['insertBy']
         };
-        await db.insert("locations", map);
+        await db.insert("locations", map,
+            conflictAlgorithm: ConflictAlgorithm.replace);
       }
     });
     listProgress.add(rowProgress("Table locations completed."));
@@ -267,6 +275,68 @@ class DownloadController extends GetxController {
       }
     });
     listProgress.add(rowProgress("Table fasohead completed."));
+
+    var transService = FATransService();
+    listProgress.add(rowProgress("Sync table FA Trans."));
+    // await db.delete("fatrans", where: null);
+    await transService.getAll().then((value) async {
+      List periods = value.body['fatrans'];
+      for (var i = 0; i < periods.length; i++) {
+        listProgress.add(rowProgress("ID ${periods[i]['transId']} inserted."));
+        Map<String, dynamic> map = {
+          "transId": periods[i]['transId'],
+          "plantId": periods[i]['plantId'],
+          "transTypeCode": periods[i]['transTypeCode'],
+          "transDate": periods[i]['transDate'].toString().replaceAll('T', ' '),
+          "transNo": periods[i]['transNo'],
+          "manualRef": periods[i]['manualRef'],
+          "otherRef": periods[i]['otherRef'],
+          "transferTypeCode": periods[i]['transferTypeCode'],
+          "oldLocId": periods[i]['oldLocId'],
+          "oldLocCode": "",
+          "oldLocName": "",
+          "newLocId": periods[i]['newLocId'],
+          "newLocCode": "",
+          "newLocName": "",
+          "isApproved": periods[i]['isApproved'] ? 1 : 0,
+          "isVoid": periods[i]['isVoid'] ? 1 : 0,
+          "saveDate": periods[i]['insertDate'],
+          "savedBy": periods[i]['insertBy']
+        };
+        await db.insert(
+          "fatrans",
+          map,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
+    listProgress.add(rowProgress("Table FA Trans completed."));
+
+    var transItemService = FATransItemService();
+    listProgress.add(rowProgress("Sync table FA Trans Item."));
+    await db.delete("fatransitem", where: null);
+    await transItemService.getAll().then((value) async {
+      List periods = value.body['transitems'];
+      for (var i = 0; i < periods.length; i++) {
+        listProgress
+            .add(rowProgress("ID ${periods[i]['transItemId']} inserted."));
+        Map<String, dynamic> map = {
+          "transItemId": periods[i]['transItemId'],
+          "transId": periods[i]['transId'],
+          // "faItemId": INTEGER,
+          "faId": periods[i]['faId'],
+          // "faNo": INTEGER,
+          // "description": TEXT,
+          "remarks": periods[i]['remarks'],
+          "conStatCode": periods[i]['conStatCode'],
+          "tagNo": periods[i]['oldTagNo'],
+          "saveDate": periods[i]['insertDate'],
+          "saveBy": periods[i]['insertBy']
+        };
+        await db.insert("fatransitem", map);
+      }
+    });
+    listProgress.add(rowProgress("Table FA Trans Item completed."));
   }
 
   Widget rowProgress(String text) {

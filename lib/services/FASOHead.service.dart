@@ -14,4 +14,11 @@ class FASOHeadService extends GetConnect with CacheManager {
       headers: {"Authorization": "Bearer $token"},
     );
   }
+
+  Future<Response> create(Map<String, dynamic> map) {
+    return post(
+      "${box.read("apiAddress")}/api/FASOHead?soHeadId=${map['soHeadId']}&statusCode=${map['statusCode']}&userId=${map['userId']}",
+      {},
+    );
+  }
 }

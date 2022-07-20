@@ -228,7 +228,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                     width: 40,
                   ),
                   SizedBox(
-                    width: Get.width * 0.6,
+                    width: Get.width * 0.5,
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 10.0),
                       decoration: BoxDecoration(

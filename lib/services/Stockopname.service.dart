@@ -14,10 +14,18 @@ class StockopnameService extends GetConnect with CacheManager {
     );
   }
 
-  Future<Response> getAll(var periodId) {
+  Future<Response> getAllByPeriodId(var periodId) {
     var token = getToken();
     return get(
-      "${box.read("apiAddress")}/Api/StockOpname/All?periodId=$periodId&locationId=${box.read('locationId')}&lastSync=1900-01-01",
+      "${box.read("apiAddress")}/Api/StockOpname/ByPageNo?periodId=$periodId&locationId=${box.read('locationId')}&pageNo=1",
+      headers: {"Authorization": "Bearer $token"},
+    );
+  }
+
+  Future<Response> getAll() {
+    var token = getToken();
+    return get(
+      "${box.read("apiAddress")}/Api/StockOpname/All?locationId=${box.read('locationId')}&lastSync=1900-01-01",
       headers: {"Authorization": "Bearer $token"},
     );
   }

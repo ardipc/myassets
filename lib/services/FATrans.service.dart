@@ -11,4 +11,12 @@ class FATransService extends GetConnect with CacheManager {
       {},
     );
   }
+
+  Future<Response> getAll() {
+    var token = getToken();
+    return get(
+      "${box.read("apiAddress")}/Api/FATrans/All?locationId=${box.read('locationId')}&lastSync=1990-01-01",
+      headers: {"Authorization": "Bearer $token"},
+    );
+  }
 }
