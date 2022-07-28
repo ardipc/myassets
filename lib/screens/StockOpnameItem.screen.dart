@@ -52,18 +52,19 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   List _optionsOwnership = [];
 
   void fetchSinglePeriod() async {
-    // final periodService = PeriodService();
-    // periodService.getNow().then((value) {
-    //   setState(() {
-    //     selectedValue = value.body['periodId'] ?? 0;
-    //   });
-    // });
-    Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> p = await db.query('periods');
-    if (p.isNotEmpty) {
-      var getFirst = p.first;
+    if (Get.arguments[1] == 0) {
+      Database db = await dbHelper.initDb();
+      List<Map<String, dynamic>> p =
+          await db.query('periods', orderBy: 'periodId DESC');
+      if (p.isNotEmpty) {
+        var getFirst = p.first;
+        setState(() {
+          selectedValue = getFirst['periodId'];
+        });
+      }
+    } else {
       setState(() {
-        selectedValue = getFirst['periodId'];
+        selectedValue = Get.arguments[1];
       });
     }
   }
@@ -71,10 +72,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   void fetchPeriod() async {
     Database db = await dbHelper.initDb();
 
-    List<Map<String, dynamic>> maps = await db.query(
-      "periods",
-      columns: ["periodId", "periodName"],
-    );
+    List<Map<String, dynamic>> maps = await db.query("periods",
+        columns: ["periodId", "periodName"], orderBy: 'periodId DESC');
     List items = [];
 
     for (var row in maps) {
@@ -132,11 +131,12 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         faIdValue = maps[0]['faId'];
         tagNoController.text =
             mapsItem.isNotEmpty ? mapsItem[0]['tagNo'].toString() : "0";
-        descriptionController.text = maps[0]['description'];
-        faNoController.text = maps[0]['faNo'];
+        descriptionController.text = mapsItem[0]['assetName'];
+        faNoController.text = mapsItem[0]['faNo'];
         // ignore: prefer_null_aware_operators
         if (maps[0]['existStatCode'] != null) {
           selectedExistence = maps[0]['existStatCode'].toString();
+          isAda = maps[0]['existStatCode'].toString() == 'ex1' ? false : true;
         }
         if (maps[0]['tagStatCode'] != null) {
           selectedTagging = maps[0]['tagStatCode'].toString();

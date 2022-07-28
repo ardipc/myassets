@@ -139,7 +139,11 @@ class DownloadController extends GetxController {
           "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
           "syncBy": box.read('username')
         };
-        await db.insert("faitems", map);
+        await db.insert(
+          "faitems",
+          map,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
       }
     });
     listProgress.add(rowProgress("Table faitems completed."));
@@ -185,6 +189,7 @@ class DownloadController extends GetxController {
         if (rows.isNotEmpty) {
           // action update
           map['qty'] = row['qty'];
+          map['periodId'] = row['periodId'];
           map['baseQty'] = row['baseQty'];
           map['baseConStatCode'] = row['baseConStat'];
           await db.update(
@@ -199,6 +204,7 @@ class DownloadController extends GetxController {
         } else {
           // action insert
           map['faId'] = row['faId'];
+          map['periodId'] = row['periodId'];
           map['stockOpnameId'] = row['stockOpnameId'];
           map['tagNo'] = row['tagNo'];
           map['description'] = row['itemName'];
@@ -283,6 +289,10 @@ class DownloadController extends GetxController {
       List periods = value.body['fatrans'];
       for (var i = 0; i < periods.length; i++) {
         listProgress.add(rowProgress("ID ${periods[i]['transId']} inserted."));
+
+        List<Map<String, dynamic>> sFa = await db.query('fatrans',
+            where: "transId = ?", whereArgs: [periods[i]['transId']]);
+
         Map<String, dynamic> map = {
           "transId": periods[i]['transId'],
           "plantId": periods[i]['plantId'],
@@ -303,11 +313,22 @@ class DownloadController extends GetxController {
           "saveDate": periods[i]['insertDate'],
           "savedBy": periods[i]['insertBy']
         };
-        await db.insert(
-          "fatrans",
-          map,
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
+
+        if (sFa.length == 1) {
+          // action update
+          await db.update(
+            'fatrans',
+            map,
+            where: 'transId = ?',
+            whereArgs: [periods[i]['transId']],
+          );
+        } else {
+          await db.insert(
+            "fatrans",
+            map,
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
       }
     });
     listProgress.add(rowProgress("Table FA Trans completed."));

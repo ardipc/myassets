@@ -54,13 +54,12 @@ class _ClearScreen extends State<ClearScreen> {
   Future<void> fetchPeriod() async {
     Database db = await dbHelper.initDb();
 
-    List<Map<String, dynamic>> maps = await db.query(
-      "periods",
-      columns: ["periodId", "periodName"],
-    );
+    List<Map<String, dynamic>> maps = await db.query("periods",
+        columns: ["periodId", "periodName"], orderBy: "periodId DESC");
 
     setState(() {
       _dropdownPeriods = maps;
+      selectedPeriod = maps.isNotEmpty ? maps.first['periodId'] : 0;
     });
   }
 
@@ -150,13 +149,13 @@ class _ClearScreen extends State<ClearScreen> {
                       ),
                     ),
                   ),
-                  const Text(" "),
-                  TextButton(
-                    onPressed: () {
-                      _selectDate(context);
-                    },
-                    child: const Icon(Icons.date_range),
-                  ),
+                  // const Text(" "),
+                  // TextButton(
+                  //   onPressed: () {
+                  //     _selectDate(context);
+                  //   },
+                  //   child: const Icon(Icons.date_range),
+                  // ),
                 ],
               ),
               const SizedBox(

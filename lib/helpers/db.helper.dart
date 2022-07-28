@@ -111,7 +111,7 @@ class DbHelper {
         locationId INTEGER,
         qty INTEGER,
         baseQty INTEGER,
-        baseConStatCode INTEGER,
+        baseConStatCode TEXT,
         existStatCode TEXT,
         tagStatCode TEXT,
         usageStatCode TEXT,
@@ -130,6 +130,7 @@ class DbHelper {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS fatrans (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        periodId INTEGER,
         transId INTEGER,
         plantId INTEGER,
         transTypeCode TEXT,

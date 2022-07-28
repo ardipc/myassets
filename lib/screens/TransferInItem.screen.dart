@@ -41,8 +41,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   void actionConfirm() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to delete data ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to delete data ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -110,8 +110,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
 
-      Map<String, dynamic> map = Map();
+      Map<String, dynamic> map = {};
       if (idFaTrans == 0) {
+        map['periodId'] = Get.arguments[1] ?? 0;
         map['transId'] = 0;
         map['plantId'] = box.read('plantId');
         map['transTypeCode'] = 'T';
@@ -174,14 +175,14 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
         if (exec != 0) {
           Get.dialog(AlertDialog(
-            title: Text("Information"),
-            content: Text("Data has been updated."),
+            title: const Text("Information"),
+            content: const Text("Data has been updated."),
             actions: [
               TextButton(
                 onPressed: () {
                   Get.back();
                 },
-                child: Text("Close"),
+                child: const Text("Close"),
               ),
             ],
           ));
@@ -211,12 +212,16 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         manualRef.text = maps[0]['manualRef'];
         otherRef.text = maps[0]['otherRef'];
 
-        oldLocId = maps[0]['oldLocId'];
-        oldLocFrom.text = maps[0]['oldLocCode'].toString();
-        detailOldLocFrom.text = maps[0]['oldLocName'].toString();
+        // oldLocId = maps[0]['oldLocId'];
+        // oldLocFrom.text = maps[0]['oldLocCode'].toString();
+        // detailOldLocFrom.text = maps[0]['oldLocName'].toString();
+
+        oldLocId = box.read('intransitId');
+        oldLocFrom.text = box.read('intransitCode');
+        detailOldLocFrom.text = box.read('intransitName');
 
         newLocFrom.text = box.read('locationCode');
-        detailNewLocFrom.text = maps[0]['newLocName'].toString();
+        detailNewLocFrom.text = box.read('locationName');
       });
     }
   }
@@ -257,7 +262,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
     Map<String, dynamic> map = {};
     map['idFaTrans'] = idFaTrans;
-    map['transId'] = 0;
+    map['transId'] = "";
     map['plantId'] = box.read('plantId');
     map['transDate'] = dateTime.text;
     map['manualRef'] = manualRef.text;
@@ -276,58 +281,71 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     serviceFATrans.create(map).then((value) async {
       print("FATrans ${value.body.toString()}");
       var res = value.body;
-      if (res['message'].toString().isNotEmpty) {
-        Map<String, dynamic> m = {};
-        m['transId'] = res['transId'];
-        m['transNo'] = res['transNo'];
-        m['uploadDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-        m['uploadBy'] = box.read('username');
-        m['uploadMessage'] = res['message'];
+      // if (res['message'].toString().isNotEmpty) {
+      Map<String, dynamic> m = {};
+      m['transId'] = res['transId'];
+      m['transNo'] = res['transNo'];
+      m['uploadDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+      m['uploadBy'] = box.read('username');
+      m['uploadMessage'] = res['message'];
 
-        await db.update("fatrans", m, where: "id", whereArgs: [idFaTrans]);
+      await db.update("fatrans", m, where: "id = ?", whereArgs: [idFaTrans]);
 
-        // looping fa trans item
-        List<Map<String, dynamic>> rows = await db.query(
-          "fatransitem",
-          where: "transId = ?",
-          whereArgs: [idFaTrans],
+      if (res['message'] != "") {
+        Get.dialog(
+          AlertDialog(
+            title: const Text("Infomation"),
+            content: Text(res['message']),
+          ),
         );
-
-        for (var row in rows) {
-          Map<String, dynamic> mRow = {};
-          mRow['transItemId'] = row['transItemId'];
-          mRow['transId'] = row['transId'];
-          mRow['faId'] = row['faId'];
-          mRow['remarks'] = row['remarks'];
-          mRow['conStat'] = row['conStatCode'];
-          mRow['oldTag'] = '-';
-          mRow['newTag'] = '-';
-          // development purpose use 0
-          mRow['userId'] = 0;
-
-          serviceFATransItem.create(mRow).then((value) async {
-            print("FATransItem ${value.body.toString()}");
-            var res = value.body;
-            if (res['message'].toString() != "") {
-              Map<String, dynamic> mItem = {};
-              mItem['transItemId'] = res['transItemId'];
-              mItem['uploadDate'] =
-                  DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-              mItem['uploadBy'] = box.read('username');
-              mItem['uploadMessage'] = res['message'];
-
-              await db.update(
-                "fatransitem",
-                mItem,
-                where: "id = ?",
-                whereArgs: [
-                  row['id'],
-                ],
-              );
-            }
-          });
-        }
       }
+
+      setState(() {
+        transNo.text = res['transId'];
+      });
+
+      // looping fa trans item
+      List<Map<String, dynamic>> rows = await db.query(
+        "fatransitem",
+        where: "transId = ?",
+        whereArgs: [idFaTrans],
+      );
+
+      for (var row in rows) {
+        Map<String, dynamic> mRow = {};
+        mRow['transItemId'] = row['transItemId'];
+        mRow['transId'] = row['transId'];
+        mRow['faId'] = row['faId'];
+        mRow['remarks'] = row['remarks'];
+        mRow['conStat'] = row['conStatCode'];
+        mRow['oldTag'] = '-';
+        mRow['newTag'] = '-';
+        // development purpose use 0
+        mRow['userId'] = 0;
+
+        serviceFATransItem.create(mRow).then((value) async {
+          print("FATransItem ${value.body.toString()}");
+          var res = value.body;
+          if (res['message'].toString() != "") {
+            Map<String, dynamic> mItem = {};
+            mItem['transItemId'] = res['transItemId'];
+            mItem['uploadDate'] =
+                DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+            mItem['uploadBy'] = box.read('username');
+            mItem['uploadMessage'] = res['message'];
+
+            await db.update(
+              "fatransitem",
+              mItem,
+              where: "id = ?",
+              whereArgs: [
+                row['id'],
+              ],
+            );
+          }
+        });
+      }
+      // }
     });
   }
 
@@ -451,10 +469,14 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            enabled: false,
+                            readOnly: true,
                             controller: transNo,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                            decoration: InputDecoration(
+                              fillColor: Colors.blueGrey[200],
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.blueAccent),
                               ),
@@ -474,6 +496,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            enabled: false,
+                            readOnly: true,
                             controller: dateTime,
                             decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
@@ -630,18 +654,18 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
               child: Column(
                 children: [
                   Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 6.0, vertical: 3.0),
                     height: 50,
                     width: 600,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                        backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                       ),
                       onPressed: () {
                         actionSave();
                       },
-                      child: Text(
+                      child: const Text(
                         "Save as Draft",
                         style: TextStyle(
                           color: Colors.white,
@@ -652,19 +676,30 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                   ),
                   if (idFaTrans != 0) ...[
                     Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3.0),
                       height: 50,
                       width: 600,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 131, 142, 240),
+                          backgroundColor:
+                              const Color.fromARGB(255, 131, 142, 240),
                         ),
                         onPressed: () {
-                          Get.toNamed('/transferinitemlist',
-                              arguments: [idFaTrans, transNo.text]);
+                          if (transNo.text != "") {
+                            Get.toNamed('/transferinitemlist',
+                                arguments: [idFaTrans, transNo.text]);
+                          } else {
+                            Get.dialog(
+                              const AlertDialog(
+                                title: Text("Information"),
+                                content: Text(
+                                    "Trans No empty, please upload first."),
+                              ),
+                            );
+                          }
                         },
-                        child: Text(
+                        child: const Text(
                           "Open Item List",
                           style: TextStyle(
                             color: Colors.white,
@@ -674,18 +709,19 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       ),
                     ),
                     Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3.0),
                       height: 50,
                       width: 600,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 40, 165, 61),
+                          backgroundColor:
+                              const Color.fromARGB(255, 40, 165, 61),
                         ),
                         onPressed: () {
                           confirmApprove();
                         },
-                        child: Text(
+                        child: const Text(
                           "Approve",
                           style: TextStyle(
                             color: Colors.white,
@@ -695,18 +731,19 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                       ),
                     ),
                     Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3.0),
                       height: 50,
                       width: 600,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 116, 54, 173),
+                          backgroundColor:
+                              const Color.fromARGB(255, 116, 54, 173),
                         ),
                         onPressed: () {
                           confirmUploadToServer();
                         },
-                        child: Text(
+                        child: const Text(
                           "Upload to Server",
                           style: TextStyle(
                             color: Colors.white,
@@ -718,18 +755,19 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                   ],
                   if (idFaTrans != 0) ...[
                     Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3.0),
                       height: 50,
                       width: 600,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 228, 11, 29),
+                          backgroundColor:
+                              const Color.fromARGB(255, 228, 11, 29),
                         ),
                         onPressed: () {
                           actionConfirm();
                         },
-                        child: Text(
+                        child: const Text(
                           "Delete",
                           style: TextStyle(
                             color: Colors.white,

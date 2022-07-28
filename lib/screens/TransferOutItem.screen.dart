@@ -111,6 +111,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
 
       Map<String, dynamic> map = {};
       if (idFaTrans == 0) {
+        map['periodId'] = Get.arguments[1];
         map['transId'] = 0;
         map['plantId'] = box.read('plantId');
         map['transTypeCode'] = 'T';
@@ -144,14 +145,14 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
           });
 
           Get.dialog(AlertDialog(
-            title: Text("Information"),
-            content: Text("Data has been saved."),
+            title: const Text("Information"),
+            content: const Text("Data has been saved."),
             actions: [
               TextButton(
                 onPressed: () {
                   Get.back();
                 },
-                child: Text("Close"),
+                child: const Text("Close"),
               ),
             ],
           ));
@@ -452,10 +453,14 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            enabled: false,
+                            readOnly: true,
                             controller: transNo,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                            decoration: InputDecoration(
+                              fillColor: Colors.blueGrey[200],
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.blueAccent),
                               ),
@@ -475,6 +480,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            enabled: false,
+                            readOnly: true,
                             controller: dateTime,
                             decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(10),
@@ -488,7 +495,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                           onPressed: () {
                             _selectDate(context);
                           },
-                          child: Icon(Icons.date_range),
+                          child: const Icon(Icons.date_range),
                         ),
                       ],
                     ),
@@ -631,18 +638,18 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
               child: Column(
                 children: [
                   Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 6.0, vertical: 3.0),
                     height: 50,
                     width: 600,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                        backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                       ),
                       onPressed: () {
                         actionSave();
                       },
-                      child: Text(
+                      child: const Text(
                         "Save as Draft",
                         style: TextStyle(
                           color: Colors.white,
@@ -665,7 +672,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                           Get.toNamed('/transferoutitemlist',
                               arguments: [idFaTrans, transNo.text]);
                         },
-                        child: Text(
+                        child: const Text(
                           "Open Item List",
                           style: TextStyle(
                             color: Colors.white,

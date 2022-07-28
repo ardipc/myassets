@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
+import 'package:myasset/services/FASOHead.service.dart';
 import 'package:myasset/services/Period.service.dart';
 import 'package:myasset/services/Stockopname.service.dart';
 import 'package:responsive_table/responsive_table.dart';
@@ -24,17 +25,57 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
 
   List<DataRow> _rows = [];
 
+  bool isConfirmed = false;
+
+  int page = 1;
+  int pageCount = 1;
+  int itemsPerPage = 4;
+
   // int _currentPage = 1;
   bool _isLoading = true;
 
-  Future<List<DataRow>> genData(var periodId) async {
+  Future<List<DataRow>> genData(var periodId, var page) async {
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> maps = await db.rawQuery(
-      "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode",
-    );
+    List<Map<String, dynamic>> rows = [];
+    if (periodId == 0) {
+      rows = await db.rawQuery(
+        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode",
+      );
+    } else {
+      rows = await db.rawQuery(
+        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode WHERE s.periodId = '$periodId'",
+      );
+    }
+
+    int offset = (page - 1) * itemsPerPage;
+    if (rows.isEmpty) {
+      setState(() {
+        pageCount = 1;
+      });
+    } else {
+      setState(() {
+        pageCount = (rows.length / itemsPerPage).ceil();
+      });
+      if (page > pageCount) {
+        setState(() {
+          page = 1;
+        });
+      }
+    }
+
+    List<Map<String, dynamic>> maps = [];
+    if (periodId == 0) {
+      maps = await db.rawQuery(
+        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode LIMIT $offset, $itemsPerPage",
+      );
+    } else {
+      maps = await db.rawQuery(
+        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode WHERE s.periodId = '$periodId' LIMIT $offset, $itemsPerPage",
+      );
+    }
 
     // ignore: avoid_print
-    print(maps);
+    // print(maps);
 
     List<DataRow> temps = [];
     var i = 1;
@@ -62,7 +103,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
           Container(
             width: Get.width * 0.2,
             child: Text(
-                "qty = ${data['qty'].toString()}\ncondition = ${data['con'].toString()}"),
+                "qty = ${data['qty'].toString()}\ncondition = ${data['con'] == null ? data['conStatCode'].toString() : data['con'].toString()}"),
           ),
         ),
         DataCell(
@@ -71,10 +112,10 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
             child: InkWell(
               onTap: () => Get.toNamed(
                 '/stockopnameitem',
-                arguments: [data['id']],
+                arguments: [data['id'], periodId],
               )?.whenComplete(() => fetchData()),
               child: Text(
-                  "qty = ${data['qty'].toString()}\nexistence = ${data['existence'].toString()}\ntagging = ${data['tag'].toString()}\nusage = ${data['usagename'].toString()}\ncondition = ${data['con'].toString()}\nowner = ${data['own'].toString()}"),
+                  "qty = ${data['qty'].toString()}\nexistence = ${data['existence'].toString()}\ntagging = ${data['tag'].toString()}\nusage = ${data['usagename'].toString()}\ncondition = ${data['con'] == null ? data['conStatCode'].toString() : data['con'].toString()}\nowner = ${data['own'].toString()}"),
             ),
           ),
         ),
@@ -94,7 +135,10 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     // });
 
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> p = await db.query('periods');
+    List<Map<String, dynamic>> p = await db.query(
+      'periods',
+      orderBy: 'periodId DESC',
+    );
     if (p.isNotEmpty) {
       var getFirst = p.first;
       setState(() {
@@ -109,6 +153,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     List<Map<String, dynamic>> maps = await db.query(
       "periods",
       columns: ["periodId", "periodName"],
+      orderBy: 'periodId DESC',
     );
 
     setState(() {
@@ -119,10 +164,11 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   void fetchData() async {
     Database db = await dbHelper.initDb();
     setState(() => _isLoading = true);
-    List<Map<String, dynamic>> p = await db.query('periods');
+    List<Map<String, dynamic>> p =
+        await db.query('periods', orderBy: 'periodId DESC');
     if (p.isNotEmpty) {
       var getFirst = p.first;
-      var results = await genData(getFirst['periodId'] ?? 0);
+      var results = await genData(getFirst['periodId'] ?? 0, page);
       setState(() {
         selectedValue = getFirst['periodId'];
         _rows = results;
@@ -207,14 +253,17 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   Future<void> actionUploadToServer() async {
     Database db = await dbHelper.initDb();
     var stockopanemService = StockopnameService();
+    var fasoheadService = FASOHeadService();
     final box = GetStorage();
 
     List<Map<String, dynamic>> maps = await db.rawQuery(
-        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode WHERE s.uploadDate IS NULL OR s.uploadDate = ''");
+      "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode WHERE s.periodId = '$selectedValue' AND s.uploadDate IS NULL OR s.uploadDate = ''",
+    );
+    // print(maps);
     for (var data in maps) {
       Map<String, dynamic> map = {};
-      map['stockOpnameId'] = data['stockOpnameId'];
-      map['periodId'] = data['periodId'];
+      map['stockOpnameId'] = '';
+      map['periodId'] = data['periodId'] ?? 0;
       map['faId'] = data['faId'];
       map['locationId'] = data['locationId'];
       map['qty'] = data['qty'];
@@ -224,9 +273,13 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       map['conStatCode'] = data['conStatCode'];
       map['ownStatCode'] = data['ownStatCode'];
 
+      // print(map);
+
       stockopanemService.createStockopname(map).then((value) async {
         var res = value.body;
-        if (res['message'].toString() != "") {
+        // ignore: avoid_print
+        // print(res);
+        if (res['message'] != "") {
           Map<String, dynamic> m = {};
           m['stockOpnameId'] = res['stockOpnameId'];
           m['uploadDate'] =
@@ -243,6 +296,22 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
           );
         }
       });
+    }
+
+    List<Map<String, dynamic>> fasoHead = await db.query(
+      'fasohead',
+      where: 'periodId = ? AND locationId = ?',
+      whereArgs: [selectedValue, box.read('locationId')],
+    );
+
+    for (var row in fasoHead) {
+      Map<String, dynamic> map = {
+        "soHeadId": row['soHeadId'],
+        "statusCode": row['soStatusCode'],
+        "userId": row['userId'] ?? 0
+      };
+
+      await fasoheadService.create(map);
     }
 
     Get.dialog(
@@ -351,6 +420,10 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
         content: Text("Confirm successfully."),
       ),
     );
+
+    setState(() {
+      isConfirmed = true;
+    });
   }
 
   Future<void> actionInsertToItems() async {
@@ -370,7 +443,11 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   }
 
   void setAndFindSO(value) async {
+    print(value);
+    var results = await genData(value, page);
+    print(results.length);
     setState(() {
+      _rows = results;
       selectedValue = int.parse(value.toString());
     });
   }
@@ -380,14 +457,14 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Stock Opname'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              fetchData();
-            },
-            child: Icon(Icons.refresh, color: Colors.white),
-          ),
-        ],
+        // actions: [
+        //   TextButton(
+        //     onPressed: () {
+        //       fetchData();
+        //     },
+        //     child: Icon(Icons.refresh, color: Colors.white),
+        //   ),
+        // ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -497,32 +574,46 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
-                    onPressed: () {},
-                    child: Icon(Icons.chevron_left),
+                    onPressed: () {
+                      if (page > 1) {
+                        setState(() {
+                          page = page - 1;
+                        });
+                        fetchData();
+                      }
+                    },
+                    child: const Icon(Icons.chevron_left),
                   ),
-                  Text("1 / 10 pages"),
+                  Text("$page / $pageCount pages"),
                   TextButton(
-                    onPressed: () {},
-                    child: Icon(Icons.chevron_right),
+                    onPressed: () {
+                      if (page < pageCount) {
+                        setState(() {
+                          page = page + 1;
+                        });
+                        fetchData();
+                      }
+                    },
+                    child: const Icon(Icons.chevron_right),
                   ),
                 ],
               ),
             ),
-            Container(
+            SizedBox(
               width: Get.width,
               child: Column(
                 children: [
                   Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 6.0, vertical: 3.0),
                     height: 50,
                     width: 600,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                        backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                       ),
                       onPressed: () {
-                        Get.toNamed('/stockopnameitem', arguments: [0])
+                        Get.toNamed('/stockopnameitem', arguments: [0, 0])
                             ?.whenComplete(() => fetchData());
                       },
                       child: const Text(
@@ -541,10 +632,14 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                     width: 600,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 85, 189, 90),
+                        backgroundColor: isConfirmed
+                            ? const Color.fromARGB(255, 152, 159, 152)
+                            : const Color.fromARGB(255, 85, 189, 90),
                       ),
                       onPressed: () {
-                        confirmKonfirmasi();
+                        if (!isConfirmed) {
+                          confirmKonfirmasi();
+                        }
                       },
                       child: const Text(
                         "Confirm",

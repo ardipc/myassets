@@ -22,10 +22,14 @@ class _TransferOutScreen extends State<TransferOutScreen> {
   List<Map<String, dynamic>> _sources = [];
   List<DataRow> _rows = [];
 
-  int _currentPage = 1;
-  bool _isLoading = true;
+  // int _currentPage = 1;
+  // bool _isLoading = true;
 
-  int? selectedValue = null;
+  int page = 1;
+  int pageCount = 1;
+  int itemsPerPage = 1;
+
+  int? selectedValue;
   List _dropdownPeriods = [];
 
   void fetchSinglePeriod() async {
@@ -36,7 +40,8 @@ class _TransferOutScreen extends State<TransferOutScreen> {
     //   });
     // });
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> p = await db.query('periods');
+    List<Map<String, dynamic>> p =
+        await db.query('periods', orderBy: 'periodId DESC');
     if (p.isNotEmpty) {
       var getFirst = p.first;
       setState(() {
@@ -47,11 +52,59 @@ class _TransferOutScreen extends State<TransferOutScreen> {
 
   Future<List<DataRow>> genData(var periodId) async {
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> maps = await db.query(
-      "fatrans",
-      where: "transferTypeCode = ? AND isVoid = ?",
-      whereArgs: ["TO", 0],
-    );
+    // List<Map<String, dynamic>> maps = await db.query(
+    //   "fatrans",
+    //   where: "transferTypeCode = ? AND isVoid = ?",
+    //   whereArgs: ["TO", 0],
+    // );
+
+    List<Map<String, dynamic>> rows = [];
+    if (periodId == 0) {
+      rows = await db.query(
+        "fatrans",
+        where: "transferTypeCode = ? AND isVoid = ?",
+        whereArgs: ["TO", 0],
+      );
+    } else {
+      rows = await db.query(
+        "fatrans",
+        where: "transferTypeCode = ? AND isVoid = ? AND periodId = ?",
+        whereArgs: ["TO", 0, periodId],
+      );
+    }
+
+    int offset = (page - 1) * itemsPerPage;
+    if (rows.isEmpty) {
+      setState(() {
+        pageCount = 1;
+      });
+    } else {
+      setState(() {
+        pageCount = (rows.length / itemsPerPage).ceil();
+      });
+      if (page > pageCount) {
+        setState(() {
+          page = 1;
+        });
+      }
+    }
+
+    List<Map<String, dynamic>> maps = [];
+    if (periodId == 0) {
+      maps = await db.query(
+        "fatrans",
+        where:
+            "transferTypeCode = ? AND isVoid = ? LIMIT $offset, $itemsPerPage",
+        whereArgs: ["TO", 0],
+      );
+    } else {
+      maps = await db.query(
+        "fatrans",
+        where:
+            "transferTypeCode = ? AND isVoid = ? AND periodId = ? LIMIT $offset, $itemsPerPage",
+        whereArgs: ["TO", 0, periodId],
+      );
+    }
 
     List<DataRow> temps = [];
     var i = 1;
@@ -97,10 +150,11 @@ class _TransferOutScreen extends State<TransferOutScreen> {
             width: Get.width * 0.1,
             child: TextButton(
               onPressed: () {
-                Get.toNamed('/transferoutitem', arguments: [data['id']])
+                Get.toNamed('/transferoutitem',
+                        arguments: [data['id'], selectedValue])
                     ?.whenComplete(() => fetchData());
               },
-              child: Icon(Icons.edit_note),
+              child: const Icon(Icons.edit_note),
             ),
           ),
         ),
@@ -112,26 +166,23 @@ class _TransferOutScreen extends State<TransferOutScreen> {
   }
 
   void fetchData() async {
-    setState(() => _isLoading = true);
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> p = await db.query('periods');
+    List<Map<String, dynamic>> p =
+        await db.query('periods', orderBy: 'periodId DESC');
     if (p.isNotEmpty) {
       var getFirst = p.first;
       var results = await genData(getFirst['periodId'] ?? 0);
       setState(() {
         selectedValue = getFirst['periodId'];
         _rows = results;
-        _isLoading = false;
       });
     }
   }
 
   void fetchPeriod() async {
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> maps = await db.query(
-      "periods",
-      columns: ["periodId", "periodName"],
-    );
+    List<Map<String, dynamic>> maps = await db.query("periods",
+        columns: ["periodId", "periodName"], orderBy: 'periodId DESC');
     List items = [];
 
     for (var row in maps) {
@@ -146,21 +197,21 @@ class _TransferOutScreen extends State<TransferOutScreen> {
   void confirmDownload() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to sync data period now ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to sync data period now ?"),
         actions: [
           TextButton(
             onPressed: () {
               actionDownload();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -173,7 +224,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
 
-    Map<String, dynamic> map = Map();
+    Map<String, dynamic> map = {};
     map['transId'] = 1;
     map['plantId'] = 1;
     map['transTypeCode'] = "T";
@@ -351,13 +402,27 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
-                    onPressed: () {},
-                    child: Icon(Icons.chevron_left),
+                    onPressed: () {
+                      if (page > 1) {
+                        setState(() {
+                          page = page - 1;
+                        });
+                        fetchData();
+                      }
+                    },
+                    child: const Icon(Icons.chevron_left),
                   ),
-                  Text("1 / 10 pages"),
+                  Text("$page / $pageCount pages"),
                   TextButton(
-                    onPressed: () {},
-                    child: Icon(Icons.chevron_right),
+                    onPressed: () {
+                      if (page < pageCount) {
+                        setState(() {
+                          page = page + 1;
+                        });
+                        fetchData();
+                      }
+                    },
+                    child: const Icon(Icons.chevron_right),
                   ),
                 ],
               ),
