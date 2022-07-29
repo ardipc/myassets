@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -6,11 +8,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:myasset/controllers/Stockopname.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/services/Period.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class StockOpnameItemScreen extends StatefulWidget {
-  StockOpnameItemScreen({Key? key}) : super(key: key);
+  const StockOpnameItemScreen({Key? key}) : super(key: key);
 
   @override
   State<StockOpnameItemScreen> createState() => _StockOpnameItemScreenState();
@@ -22,6 +23,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   DbHelper dbHelper = DbHelper();
 
   var isReadOnly = false;
+  var isConfirmed = false;
 
   List _optionsPeriods = [];
   int? selectedValue;
@@ -51,24 +53,6 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   String? selectedOwnership;
   List _optionsOwnership = [];
 
-  void fetchSinglePeriod() async {
-    if (Get.arguments[1] == 0) {
-      Database db = await dbHelper.initDb();
-      List<Map<String, dynamic>> p =
-          await db.query('periods', orderBy: 'periodId DESC');
-      if (p.isNotEmpty) {
-        var getFirst = p.first;
-        setState(() {
-          selectedValue = getFirst['periodId'];
-        });
-      }
-    } else {
-      setState(() {
-        selectedValue = Get.arguments[1];
-      });
-    }
-  }
-
   void fetchPeriod() async {
     Database db = await dbHelper.initDb();
 
@@ -82,6 +66,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
 
     setState(() {
       _optionsPeriods = items;
+      selectedValue = Get.arguments[1];
+      isConfirmed = Get.arguments[2]['soStatusCode'] == "1" ? true : false;
     });
   }
 
@@ -385,10 +371,6 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     // TODO: implement initState
     super.initState();
     fetchAllOptions();
-    // tagNoController.addListener(() {
-    //   getInfoItem(tagNoController.text);
-    // });
-    fetchSinglePeriod();
     fetchPeriod();
     if (Get.arguments != 0) {
       fetchData(Get.arguments[0]);
@@ -413,8 +395,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                   const SizedBox(
                     width: 20,
                   ),
-                  SizedBox(
-                    width: Get.width * 0.5,
+                  Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       decoration: BoxDecoration(
@@ -435,11 +416,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                             );
                           }).toList(),
                           value: selectedValue,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedValue = int.parse(value.toString());
-                            });
-                          },
+                          onChanged: null,
                         ),
                       ),
                     ),
@@ -473,8 +450,10 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               }
                             },
                             child: TextField(
+                              enabled: isConfirmed ? false : true,
                               controller: tagNoController,
                               decoration: const InputDecoration(
+                                hintText: "ex. ARA140001580",
                                 contentPadding: EdgeInsets.all(10),
                                 border: OutlineInputBorder(
                                   borderSide:
@@ -610,12 +589,22 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedExistence,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedExistence = value.toString();
-                                    isAda = value == "ex1" ? false : true;
-                                  });
-                                },
+                                onChanged: isConfirmed
+                                    ? null
+                                    : (value) {
+                                        setState(() {
+                                          selectedExistence = value.toString();
+                                          if (value == "ex1") {
+                                            isAda = false;
+                                          } else {
+                                            isAda = true;
+                                            selectedTagging = null;
+                                            selectedUsage = null;
+                                            selectedCondition = null;
+                                            selectedOwnership = null;
+                                          }
+                                        });
+                                      },
                               ),
                             ),
                           ),
@@ -653,7 +642,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedTagging,
-                                onChanged: !isAda
+                                onChanged: isAda
                                     ? null
                                     : (value) {
                                         setState(() {
@@ -697,7 +686,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedUsage,
-                                onChanged: !isAda
+                                onChanged: isAda
                                     ? null
                                     : (value) {
                                         setState(() {
@@ -741,7 +730,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedCondition,
-                                onChanged: !isAda
+                                onChanged: isAda
                                     ? null
                                     : (value) {
                                         setState(() {
@@ -785,7 +774,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   );
                                 }).toList(),
                                 value: selectedOwnership,
-                                onChanged: !isAda
+                                onChanged: isAda
                                     ? null
                                     : (value) {
                                         setState(() {
@@ -814,11 +803,21 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                           width: 600,
                           child: TextButton(
                             style: TextButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 62, 81, 255),
+                              backgroundColor: isConfirmed
+                                  ? const Color.fromARGB(255, 152, 159, 152)
+                                  : const Color.fromARGB(255, 62, 81, 255),
                             ),
                             onPressed: () {
-                              actionSave();
+                              if (Get.arguments[2]['soStatusCode'] == "0") {
+                                actionSave();
+                              } else {
+                                Get.dialog(
+                                  const AlertDialog(
+                                    title: Text("Information"),
+                                    content: Text("FASOHead is confirmed."),
+                                  ),
+                                );
+                              }
                             },
                             child: const Text(
                               "Save",

@@ -6,7 +6,6 @@ import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/services/FASOHead.service.dart';
 import 'package:myasset/services/Period.service.dart';
 import 'package:myasset/services/Stockopname.service.dart';
-import 'package:responsive_table/responsive_table.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class StockOpnameScreen extends StatefulWidget {
@@ -22,6 +21,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
 
   int? selectedValue;
   List _dropdownPeriods = [];
+  Map<String, dynamic> fasohead = {};
 
   List<DataRow> _rows = [];
 
@@ -32,88 +32,50 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   int itemsPerPage = 4;
 
   // int _currentPage = 1;
-  bool _isLoading = true;
+  // bool _isLoading = true;
 
   Future<List<DataRow>> genData(var periodId, var page) async {
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> rows = [];
-    if (periodId == 0) {
-      rows = await db.rawQuery(
-        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode",
-      );
-    } else {
-      rows = await db.rawQuery(
-        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode WHERE s.periodId = '$periodId'",
-      );
-    }
-
-    int offset = (page - 1) * itemsPerPage;
-    if (rows.isEmpty) {
-      setState(() {
-        pageCount = 1;
-      });
-    } else {
-      setState(() {
-        pageCount = (rows.length / itemsPerPage).ceil();
-      });
-      if (page > pageCount) {
-        setState(() {
-          page = 1;
-        });
-      }
-    }
-
-    List<Map<String, dynamic>> maps = [];
-    if (periodId == 0) {
-      maps = await db.rawQuery(
-        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode LIMIT $offset, $itemsPerPage",
-      );
-    } else {
-      maps = await db.rawQuery(
-        "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode WHERE s.periodId = '$periodId' LIMIT $offset, $itemsPerPage",
-      );
-    }
-
-    // ignore: avoid_print
-    // print(maps);
-
+    List<Map<String, dynamic>> rows = await db.rawQuery(
+      "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own, cc.genName AS conBase FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode LEFT JOIN statuses cc ON cc.genCode = s.baseConStatCode WHERE s.periodId = '$periodId'",
+    );
     List<DataRow> temps = [];
     var i = 1;
-    for (var data in maps) {
+    for (var data in rows) {
       DataRow row = DataRow(cells: [
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.1,
             child: Text("$i"),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.12,
             child: Text(data['tagNo'].toString()),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.2,
             child: Text(data['assetName'].toString()),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.2,
             child: Text(
-                "qty = ${data['baseQty'].toString()}\ncondition = ${data['baseConStatCode'] == null ? data['baseConStatCode'].toString() : data['baseConStatCode'].toString()}"),
+                "qty = ${data['baseQty'].toString()}\ncondition = ${data['conBase'] == null ? data['baseConStatCode'].toString() : data['conBase'].toString()}"),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.31,
             child: InkWell(
               onTap: () => Get.toNamed(
                 '/stockopnameitem',
-                arguments: [data['id'], periodId],
-              )?.whenComplete(() => fetchData()),
+                arguments: [data['id'], periodId, fasohead],
+              )?.whenComplete(() => fetchData(selectedValue)),
               child: Text(
                   "qty = ${data['qty'].toString()}\nexistence = ${data['existence'].toString()}\ntagging = ${data['tag'].toString()}\nusage = ${data['usagename'].toString()}\ncondition = ${data['con'] == null ? data['conStatCode'].toString() : data['con'].toString()}\nowner = ${data['own'].toString()}"),
             ),
@@ -126,27 +88,6 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     return temps;
   }
 
-  void fetchSinglePeriod() async {
-    // final periodService = PeriodService();
-    // periodService.getNow().then((value) {
-    //   setState(() {
-    //     selectedValue = value.body['periodId'];
-    //   });
-    // });
-
-    Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> p = await db.query(
-      'periods',
-      orderBy: 'periodId DESC',
-    );
-    if (p.isNotEmpty) {
-      var getFirst = p.first;
-      setState(() {
-        selectedValue = getFirst['periodId'];
-      });
-    }
-  }
-
   void fetchPeriod() async {
     Database db = await dbHelper.initDb();
 
@@ -156,25 +97,44 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       orderBy: 'periodId DESC',
     );
 
-    setState(() {
-      _dropdownPeriods = maps;
-    });
-  }
-
-  void fetchData() async {
-    Database db = await dbHelper.initDb();
-    // setState(() => _isLoading = true);
-    List<Map<String, dynamic>> p =
-        await db.query('periods', orderBy: 'periodId DESC');
-    if (p.isNotEmpty) {
-      var getFirst = p.first;
-      var results = await genData(getFirst['periodId'], page);
+    if (maps.isNotEmpty) {
+      var getFirst = maps.first;
       setState(() {
         selectedValue = getFirst['periodId'];
-        _rows = results;
-        _isLoading = false;
+        _dropdownPeriods = maps;
+      });
+
+      fetchData(getFirst['periodId']);
+      fetchFASOHead(getFirst['periodId']);
+    }
+  }
+
+  void fetchFASOHead(var periodId) async {
+    Database db = await dbHelper.initDb();
+    final box = GetStorage();
+    List<Map<String, dynamic>> maps = await db.query(
+      'fasohead',
+      where: "periodId = ? AND locationId = ?",
+      whereArgs: [periodId, box.read('locationId')],
+    );
+    if (maps.isNotEmpty) {
+      setState(() {
+        fasohead = maps.first;
+        isConfirmed = maps.first['soStatusCode'] == "0" ? false : true;
+      });
+    } else {
+      setState(() {
+        fasohead = {"soStatusCode": "0"};
+        isConfirmed = false;
       });
     }
+  }
+
+  void fetchData(var periodId) async {
+    var results = await genData(periodId, page);
+    setState(() {
+      _rows = results;
+    });
   }
 
   void actionDownload() async {
@@ -220,21 +180,21 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   void confirmDownload() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to sync data period now ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to sync data period now ?"),
         actions: [
           TextButton(
             onPressed: () {
               actionDownload();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -247,6 +207,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     // print(maps);
     int exec =
         await db.delete("stockopnames", where: "id = ?", whereArgs: [id]);
+    // ignore: avoid_print
     print(exec);
   }
 
@@ -350,11 +311,10 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     super.initState();
-    fetchSinglePeriod();
     fetchPeriod();
-    fetchData();
   }
 
   void confirmKonfirmasi() {
@@ -387,43 +347,50 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     final box = GetStorage();
     Database db = await dbHelper.initDb();
 
-    List<Map<String, dynamic>> mapsSO = await db.query("stockopnames");
+    // List<Map<String, dynamic>> mapsSO = await db.query("stockopnames");
 
-    for (var row in mapsSO) {
-      List<Map<String, dynamic>> checkRows = await db.query(
-        "soconfirms",
-        where: "soConfirmId = ?",
-        whereArgs: [row['id']],
+    // for (var row in mapsSO) {
+    //   List<Map<String, dynamic>> checkRows = await db.query(
+    //     "soconfirms",
+    //     where: "soConfirmId = ?",
+    //     whereArgs: [row['id']],
+    //   );
+    //   if (checkRows.isEmpty) {
+    //     Map<String, dynamic> m = {};
+    //     m['soConfirmId'] = row['id'];
+    //     m['periodId'] = selectedValue;
+    //     m['locId'] = box.read('locationId');
+    //     m['confirmDate'] =
+    //         DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
+    //     m['confirmBy'] = box.read('username');
+    //     m['uploadDate'] = '';
+    //     m['uploadBy'] = 0;
+    //     m['uploadMessage'] = '';
+    //     await db.insert(
+    //       'soconfirms',
+    //       m,
+    //       conflictAlgorithm: ConflictAlgorithm.replace,
+    //     );
+    //   }
+    // }
+
+    Map<String, dynamic> map = {"soStatusCode": "1"};
+    int exec = await db.update('fasohead', map,
+        where: "periodId = ? AND locationId = ?",
+        whereArgs: [selectedValue, box.read('locationId')]);
+
+    if (exec > 0) {
+      Get.dialog(
+        const AlertDialog(
+          title: Text("Message"),
+          content: Text("Confirm successfully."),
+        ),
       );
-      if (checkRows.isEmpty) {
-        Map<String, dynamic> m = {};
-        m['soConfirmId'] = row['id'];
-        m['periodId'] = selectedValue;
-        m['locId'] = box.read('locationId');
-        m['confirmDate'] =
-            DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
-        m['confirmBy'] = box.read('username');
-        m['uploadDate'] = '';
-        m['uploadBy'] = 0;
-        m['uploadMessage'] = '';
-        await db.insert(
-          'soconfirms',
-          m,
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
+
+      setState(() {
+        isConfirmed = true;
+      });
     }
-
-    Get.dialog(
-      const AlertDialog(
-        title: Text("Message"),
-        content: Text("Confirm successfully."),
-      ),
-    );
-
-    setState(() {
-      isConfirmed = true;
-    });
   }
 
   Future<void> actionInsertToItems() async {
@@ -443,28 +410,20 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   }
 
   void setAndFindSO(value) async {
-    print(value);
-    var results = await genData(value, page);
-    print(results.length);
+    // ignore: avoid_print
     setState(() {
-      _rows = results;
-      selectedValue = int.parse(value.toString());
+      selectedValue = value;
     });
+    fetchData(value);
+    fetchFASOHead(value);
   }
 
   @override
   Widget build(BuildContext context) {
+    // ignore: avoid_print
     return Scaffold(
       appBar: AppBar(
         title: const Text('Stock Opname'),
-        // actions: [
-        //   TextButton(
-        //     onPressed: () {
-        //       fetchData();
-        //     },
-        //     child: Icon(Icons.refresh, color: Colors.white),
-        //   ),
-        // ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -477,8 +436,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                   const SizedBox(
                     width: 20,
                   ),
-                  SizedBox(
-                    width: Get.width * 0.5,
+                  Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       decoration: BoxDecoration(
@@ -568,44 +526,46 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                 )
               ],
             ),
-            Container(
-              width: Get.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      if (page > 1) {
-                        setState(() {
-                          page = page - 1;
-                        });
-                        fetchData();
-                      }
-                    },
-                    child: const Icon(Icons.chevron_left),
-                  ),
-                  Text("$page / $pageCount pages"),
-                  TextButton(
-                    onPressed: () {
-                      if (page < pageCount) {
-                        setState(() {
-                          page = page + 1;
-                        });
-                        fetchData();
-                      }
-                    },
-                    child: const Icon(Icons.chevron_right),
-                  ),
-                ],
-              ),
-            ),
+            // Container(
+            //   width: Get.width,
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       TextButton(
+            //         onPressed: () {
+            //           if (page > 1) {
+            //             setState(() {
+            //               page = page - 1;
+            //             });
+            //             fetchData(selectedValue);
+            //           }
+            //         },
+            //         child: const Icon(Icons.chevron_left),
+            //       ),
+            //       Text("$page / $pageCount pages"),
+            //       TextButton(
+            //         onPressed: () {
+            //           if (page < pageCount) {
+            //             setState(() {
+            //               page = page + 1;
+            //             });
+            //             fetchData(selectedValue);
+            //           }
+            //         },
+            //         child: const Icon(Icons.chevron_right),
+            //       ),
+            //     ],
+            //   ),
+            // ),
             SizedBox(
               width: Get.width,
               child: Column(
                 children: [
+                  const SizedBox(
+                    height: 8,
+                  ),
                   Container(
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 6.0, vertical: 3.0),
+                    margin: const EdgeInsets.all(6.0),
                     height: 50,
                     width: 600,
                     child: TextButton(
@@ -613,8 +573,9 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                         backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                       ),
                       onPressed: () {
-                        Get.toNamed('/stockopnameitem', arguments: [0, 0])
-                            ?.whenComplete(() => fetchData());
+                        Get.toNamed('/stockopnameitem',
+                                arguments: [0, selectedValue, fasohead])
+                            ?.whenComplete(() => fetchData(selectedValue));
                       },
                       child: const Text(
                         "Scan / Entry Asset",
@@ -626,8 +587,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 6.0, vertical: 3.0),
+                    margin: const EdgeInsets.all(6.0),
                     height: 50,
                     width: 600,
                     child: TextButton(
@@ -651,8 +611,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.only(
-                        left: 6.0, right: 6.0, bottom: 6.0, top: 3.0),
+                    margin: const EdgeInsets.all(6.0),
                     height: 50,
                     width: 600,
                     child: TextButton(
