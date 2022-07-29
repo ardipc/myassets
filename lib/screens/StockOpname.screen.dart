@@ -103,7 +103,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
           Container(
             width: Get.width * 0.2,
             child: Text(
-                "qty = ${data['qty'].toString()}\ncondition = ${data['con'] == null ? data['conStatCode'].toString() : data['con'].toString()}"),
+                "qty = ${data['baseQty'].toString()}\ncondition = ${data['baseConStatCode'] == null ? data['baseConStatCode'].toString() : data['baseConStatCode'].toString()}"),
           ),
         ),
         DataCell(
@@ -163,12 +163,12 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
 
   void fetchData() async {
     Database db = await dbHelper.initDb();
-    setState(() => _isLoading = true);
+    // setState(() => _isLoading = true);
     List<Map<String, dynamic>> p =
         await db.query('periods', orderBy: 'periodId DESC');
     if (p.isNotEmpty) {
       var getFirst = p.first;
-      var results = await genData(getFirst['periodId'] ?? 0, page);
+      var results = await genData(getFirst['periodId'], page);
       setState(() {
         selectedValue = getFirst['periodId'];
         _rows = results;

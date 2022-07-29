@@ -130,7 +130,7 @@ class DbHelper {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS fatrans (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        periodId INTEGER,
+        // periodId INTEGER,
         transId INTEGER,
         plantId INTEGER,
         transTypeCode TEXT,
@@ -209,7 +209,12 @@ class DbHelper {
         periodId INTEGER,
         locationId INTEGER,
         soStatusCode TEXT,
-        rejectNote TEXT
+        rejectNote TEXT,
+        uploadDate TEXT,
+        uploadBy TEXT,
+        uploadMessage TEXT,
+        syncDate TEXT,
+        syncBy TEXT
       )
     ''');
   }

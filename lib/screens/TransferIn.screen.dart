@@ -32,6 +32,7 @@ class _TransferInScreen extends State<TransferInScreen> {
   int itemsPerPage = 1;
 
   int? selectedValue;
+  String? sDate, eDate;
   List _dropdownPeriods = [];
 
   void fetchSinglePeriod() async {
@@ -46,7 +47,7 @@ class _TransferInScreen extends State<TransferInScreen> {
     }
   }
 
-  Future<List<DataRow>> genData(var periodId) async {
+  Future<List<DataRow>> genData(var startDate, var endDate, var page) async {
     Database db = await dbHelper.initDb();
     // List<Map<String, dynamic>> maps = await db.query(
     //   "fatrans",
@@ -55,19 +56,20 @@ class _TransferInScreen extends State<TransferInScreen> {
     // );
 
     List<Map<String, dynamic>> rows = [];
-    if (periodId == 0) {
-      rows = await db.query(
-        "fatrans",
-        where: "transferTypeCode = ? AND isVoid = ?",
-        whereArgs: ["TI", 0],
-      );
-    } else {
-      rows = await db.query(
-        "fatrans",
-        where: "transferTypeCode = ? AND isVoid = ? AND periodId = ?",
-        whereArgs: ["TI", 0, periodId],
-      );
-    }
+    // if (periodId == 0) {
+    //   rows = await db.query(
+    //     "fatrans",
+    //     where: "transferTypeCode = ? AND isVoid = ?",
+    //     whereArgs: ["TI", 0],
+    //   );
+    // } else {
+    rows = await db.query(
+      "fatrans",
+      where:
+          "transferTypeCode = ? AND isVoid = ? AND transDate BETWEEN ? AND ?",
+      whereArgs: ["TI", 0, startDate, endDate],
+    );
+    // }
 
     int offset = (page - 1) * itemsPerPage;
     if (rows.isEmpty) {
@@ -86,21 +88,21 @@ class _TransferInScreen extends State<TransferInScreen> {
     }
 
     List<Map<String, dynamic>> maps = [];
-    if (periodId == 0) {
-      maps = await db.query(
-        "fatrans",
-        where:
-            "transferTypeCode = ? AND isVoid = ? LIMIT $offset, $itemsPerPage",
-        whereArgs: ["TI", 0],
-      );
-    } else {
-      maps = await db.query(
-        "fatrans",
-        where:
-            "transferTypeCode = ? AND isVoid = ? AND periodId = ? LIMIT $offset, $itemsPerPage",
-        whereArgs: ["TI", 0, periodId],
-      );
-    }
+    // if (periodId == 0) {
+    //   maps = await db.query(
+    //     "fatrans",
+    //     where:
+    //         "transferTypeCode = ? AND isVoid = ? LIMIT $offset, $itemsPerPage",
+    //     whereArgs: ["TI", 0],
+    //   );
+    // } else {
+    maps = await db.query(
+      "fatrans",
+      where:
+          "transferTypeCode = ? AND isVoid = ? AND transDate BETWEEN ? AND ? LIMIT $offset, $itemsPerPage",
+      whereArgs: ["TI", 0, startDate, endDate],
+    );
+    // }
 
     List<DataRow> temps = [];
     var i = 1;
@@ -167,9 +169,18 @@ class _TransferInScreen extends State<TransferInScreen> {
         await db.query('periods', orderBy: "periodId DESC");
     if (p.isNotEmpty) {
       var getFirst = p.first;
-      var results = await genData(getFirst['periodId'] ?? 0);
+      // print(getFirst);
+      var sDateClean =
+          getFirst['startDate'].toString().substring(0, 10) + " 00:00";
+      var eDateClean =
+          getFirst['endDate'].toString().substring(0, 10) + " 23:59";
+      var results = await genData(sDateClean, eDateClean, page);
+      // print(sDateClean);
+      // print(eDateClean);
       setState(() {
-        selectedValue = getFirst['periodId'];
+        // selectedValue = selectedValue == 0 ? getFirst['periodId'] : 0;
+        sDate = sDateClean;
+        eDate = eDateClean;
         _rows = results;
       });
     }
@@ -248,14 +259,39 @@ class _TransferInScreen extends State<TransferInScreen> {
     fetchData();
   }
 
+  void setPeriodAndFind(var value) async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> rows = await db.query(
+      'periods',
+      columns: ['startDate, endDate'],
+      where: 'periodId = ?',
+      whereArgs: [value],
+    );
+
+    if (rows.isNotEmpty) {
+      var getFirst = rows.first;
+      var sDateClean =
+          getFirst['startDate'].toString().substring(0, 10) + " 00:00";
+      var eDateClean =
+          getFirst['endDate'].toString().substring(0, 10) + " 23:59";
+      var results = await genData(sDateClean, eDateClean, page);
+      setState(() {
+        _rows = results;
+        sDate = sDateClean;
+        eDate = eDateClean;
+        selectedValue = int.parse(value.toString());
+      });
+    }
+  }
+
   @override
   void initState() {
     // ignore: todo
     // TODO: implement initState
     super.initState();
-    fetchData();
     fetchPeriod();
     fetchSinglePeriod();
+    fetchData();
   }
 
   @override
@@ -298,9 +334,7 @@ class _TransferInScreen extends State<TransferInScreen> {
                           }).toList(),
                           value: selectedValue,
                           onChanged: (value) {
-                            setState(() {
-                              selectedValue = int.parse(value.toString());
-                            });
+                            setPeriodAndFind(value);
                           },
                         ),
                       ),

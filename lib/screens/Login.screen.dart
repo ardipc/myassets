@@ -31,7 +31,7 @@ class LoginScreen extends StatelessWidget {
                     style: const TextStyle(color: Colors.white),
                   ),
                   Text(
-                    "Plant : ${loginController.box.read("plantName") ?? "-"}",
+                    "Plant : ${loginController.box.read("plantIntransitName") ?? "-"}",
                     style: const TextStyle(color: Colors.white),
                   ),
                 ],

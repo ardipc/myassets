@@ -12,6 +12,7 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
+  final otpField = TextEditingController();
   @override
   Widget build(BuildContext context) {
     OtpController otpController = Get.put(OtpController());
@@ -37,21 +38,20 @@ class _OtpScreenState extends State<OtpScreen> {
                 const SizedBox(
                   height: 60,
                 ),
-                OTPTextField(
-                  length: 5,
-                  width: MediaQuery.of(context).size.width,
-                  fieldWidth: 40,
-                  style: const TextStyle(fontSize: 17),
-                  textFieldAlignment: MainAxisAlignment.spaceAround,
-                  fieldStyle: FieldStyle.box,
-                  onChanged: (pin) {
-                    // otpController.changePin(pin);
-                    // ignore: avoid_print
-                    print(pin);
-                  },
-                  onCompleted: (pin) {
-                    otpController.pin.value = pin;
-                  },
+                SizedBox(
+                  width: Get.width * 0.4,
+                  child: TextFormField(
+                    textAlign: TextAlign.center,
+                    controller: otpField,
+                    textInputAction: TextInputAction.next,
+                    onChanged: (value) {
+                      otpController.pin.value = value;
+                    },
+                    onFieldSubmitted: (value) {
+                      otpController.pin.value = value;
+                      otpController.actionSubmitOtp();
+                    },
+                  ),
                 ),
                 const SizedBox(
                   height: 60,
@@ -87,6 +87,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     ),
                     onPressed: () {
                       otpController.actionResendOtp();
+                      otpField.text = "";
                     },
                     child: const Text(
                       "Resend OTP",
