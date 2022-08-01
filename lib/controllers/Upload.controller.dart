@@ -73,7 +73,7 @@ class UploadController extends GetxController {
     listProgress.add(rowProgress("Uploading Stock Opname data..."));
     List<Map<String, dynamic>> soRows = await db.query(
       'stockopnames',
-      where: "uploadDate IS NULL OR uploadDate = ?",
+      where: "uploadDate IS NULL OR uploadDate = ? OR uploadDate <= syncDate",
       whereArgs: [''],
     );
 
@@ -93,7 +93,7 @@ class UploadController extends GetxController {
       soService.createStockopname(map).then((value) async {
         var res = value.body;
         // ignore: avoid_print
-        print(res);
+        // print(res);
         if (res['message'] == '') {
           Map<String, dynamic> m = {};
           m['stockOpnameId'] = res['stockOpnameId'];
@@ -116,11 +116,6 @@ class UploadController extends GetxController {
     }
 
     listProgress.add(rowProgress("Uploading FASOHead data..."));
-    List<Map<String, dynamic>> findUserId = await db.query(
-      'users',
-      where: "realName = ?",
-      whereArgs: [box.read('realName')],
-    );
     var fasoheadService = FASOHeadService();
     List<Map<String, dynamic>> fasoRows = await db.query('fasohead');
     for (var data in fasoRows) {
@@ -130,7 +125,7 @@ class UploadController extends GetxController {
       Map<String, dynamic> map = {
         "soHeadId": data['soHeadId'],
         "statusCode": data['soStatusCode'],
-        "userId": findUserId.isNotEmpty ? findUserId[0]['userId'] : 0,
+        "userId": box.read('userId'),
       };
       fasoheadService.create(map).then((value) async {
         var res = value.body;
@@ -142,7 +137,8 @@ class UploadController extends GetxController {
 
     listProgress.add(rowProgress("Uploading Transaction data..."));
     List<Map<String, dynamic>> transRows = await db.query('fatrans',
-        where: "uploadDate IS NULL OR uploadDate = ''");
+        where:
+            "uploadDate IS NULL OR uploadDate = '' OR uploadDate <= syncDate");
     var faTransService = FATransService();
     var faTransItemService = FATransItemService();
     for (var data in transRows) {

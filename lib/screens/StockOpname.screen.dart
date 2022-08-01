@@ -234,8 +234,6 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       map['conStatCode'] = data['conStatCode'];
       map['ownStatCode'] = data['ownStatCode'];
 
-      // print(map);
-
       stockopanemService.createStockopname(map).then((value) async {
         var res = value.body;
         // ignore: avoid_print
@@ -245,7 +243,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
           m['stockOpnameId'] = res['stockOpnameId'];
           m['uploadDate'] =
               DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-          m['uploadBy'] = box.read('username');
+          m['uploadBy'] = box.read('userId');
           m['uploadMessage'] = res['message'];
           await db.update(
             "stockopnames",
@@ -269,7 +267,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       Map<String, dynamic> map = {
         "soHeadId": row['soHeadId'],
         "statusCode": row['soStatusCode'],
-        "userId": row['userId'] ?? 0
+        "userId": box.read('userId') ?? 0
       };
 
       await fasoheadService.create(map);
@@ -373,11 +371,28 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     //     );
     //   }
     // }
-
-    Map<String, dynamic> map = {"soStatusCode": "1"};
-    int exec = await db.update('fasohead', map,
+    int exec = 0;
+    List<Map<String, dynamic>> findFASO = await db.query(
+      "fasohead",
+      where: "periodId = ? AND locationId = ?",
+      whereArgs: [selectedValue, box.read('locationId')],
+    );
+    if (findFASO.isNotEmpty) {
+      Map<String, dynamic> map = {"soStatusCode": "1"};
+      exec = await db.update(
+        'fasohead',
+        map,
         where: "periodId = ? AND locationId = ?",
-        whereArgs: [selectedValue, box.read('locationId')]);
+        whereArgs: [selectedValue, box.read('locationId')],
+      );
+    } else {
+      Get.dialog(
+        const AlertDialog(
+          title: Text("Information"),
+          content: Text("soHeadId not found."),
+        ),
+      );
+    }
 
     if (exec > 0) {
       Get.dialog(

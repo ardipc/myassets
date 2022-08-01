@@ -218,6 +218,9 @@ class DownloadController extends GetxController {
           map['conStatCode'] = row['conStat'];
           map['ownStatCode'] = row['ownStat'];
           map['rejectNote'] = row['rejectNote'];
+          map['syncDate'] =
+              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+          map['syncBy'] = box.read('userId');
           var id = await db.insert(
             "stockopnames",
             map,
@@ -275,9 +278,15 @@ class DownloadController extends GetxController {
           "periodId": periods[i]['periodId'],
           "locationId": periods[i]['locationId'],
           "soStatusCode": periods[i]['soStatusCode'],
-          "rejectNote": periods[i]['rejectNote']
+          "rejectNote": periods[i]['rejectNote'],
+          "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+          "syncBy": box.read('userId')
         };
-        await db.insert("fasohead", map);
+        await db.insert(
+          "fasohead",
+          map,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
       }
     });
     listProgress.add(rowProgress("Table fasohead completed."));
@@ -311,7 +320,9 @@ class DownloadController extends GetxController {
           "isApproved": periods[i]['isApproved'] ? 1 : 0,
           "isVoid": periods[i]['isVoid'] ? 1 : 0,
           "saveDate": periods[i]['insertDate'],
-          "savedBy": periods[i]['insertBy']
+          "savedBy": periods[i]['insertBy'],
+          "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+          "syncBy": box.read('userId')
         };
 
         if (sFa.length == 1) {
@@ -352,7 +363,9 @@ class DownloadController extends GetxController {
           "conStatCode": periods[i]['conStatCode'],
           "tagNo": periods[i]['oldTagNo'],
           "saveDate": periods[i]['insertDate'],
-          "saveBy": periods[i]['insertBy']
+          "saveBy": periods[i]['insertBy'],
+          "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+          "syncBy": box.read('userId')
         };
         await db.insert("fatransitem", map);
       }

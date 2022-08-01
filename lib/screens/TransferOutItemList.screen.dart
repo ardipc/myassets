@@ -218,23 +218,23 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
                 )
               ],
             ),
-            Container(
-              width: Get.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {},
-                    child: Icon(Icons.chevron_left),
-                  ),
-                  Text("1 / 10 pages"),
-                  TextButton(
-                    onPressed: () {},
-                    child: Icon(Icons.chevron_right),
-                  ),
-                ],
-              ),
-            ),
+            // Container(
+            //   width: Get.width,
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       TextButton(
+            //         onPressed: () {},
+            //         child: Icon(Icons.chevron_left),
+            //       ),
+            //       Text("1 / 10 pages"),
+            //       TextButton(
+            //         onPressed: () {},
+            //         child: Icon(Icons.chevron_right),
+            //       ),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),

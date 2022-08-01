@@ -86,7 +86,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                   arguments: [Get.arguments[0], Get.arguments[1], data['id']],
                 )?.whenComplete(() => fetchData());
               },
-              child: Icon(Icons.edit_note),
+              child: const Icon(Icons.edit_note),
             ),
           ),
         ),
@@ -125,7 +125,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                     child: TextField(
                       enabled: false,
                       controller: transNo,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(10),
                         border: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.blueAccent)),
@@ -135,7 +135,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                 ],
               ),
             ),
-            Container(
+            SizedBox(
               width: Get.width,
               child: Row(
                 children: [
@@ -146,10 +146,10 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                         arguments: [Get.arguments[0], Get.arguments[1], 0],
                       )?.whenComplete(() => fetchData());
                     },
-                    icon: Icon(Icons.add),
-                    label: Text("Add"),
+                    icon: const Icon(Icons.add),
+                    label: const Text("Add"),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 10,
                   ),
                 ],
@@ -213,23 +213,23 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                 )
               ],
             ),
-            Container(
-              width: Get.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {},
-                    child: Icon(Icons.chevron_left),
-                  ),
-                  Text("1 / 10 pages"),
-                  TextButton(
-                    onPressed: () {},
-                    child: Icon(Icons.chevron_right),
-                  ),
-                ],
-              ),
-            ),
+            // Container(
+            //   width: Get.width,
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       TextButton(
+            //         onPressed: () {},
+            //         child: Icon(Icons.chevron_left),
+            //       ),
+            //       Text("1 / 10 pages"),
+            //       TextButton(
+            //         onPressed: () {},
+            //         child: Icon(Icons.chevron_right),
+            //       ),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),

@@ -30,6 +30,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
   int itemsPerPage = 1;
 
   int? selectedValue;
+  String? sDate, eDate;
   List _dropdownPeriods = [];
 
   void fetchSinglePeriod() async {
@@ -50,28 +51,30 @@ class _TransferOutScreen extends State<TransferOutScreen> {
     }
   }
 
-  Future<List<DataRow>> genData(var periodId) async {
+  Future<List<DataRow>> genData(var startDate, var endDate, var page) async {
     Database db = await dbHelper.initDb();
-    // List<Map<String, dynamic>> maps = await db.query(
-    //   "fatrans",
-    //   where: "transferTypeCode = ? AND isVoid = ?",
-    //   whereArgs: ["TO", 0],
-    // );
+    List<Map<String, dynamic>> all = await db.query(
+      "fatrans",
+      where: "transferTypeCode = ?",
+      whereArgs: ['TO'],
+    );
+    print(all);
 
     List<Map<String, dynamic>> rows = [];
-    if (periodId == 0) {
-      rows = await db.query(
-        "fatrans",
-        where: "transferTypeCode = ? AND isVoid = ?",
-        whereArgs: ["TO", 0],
-      );
-    } else {
-      rows = await db.query(
-        "fatrans",
-        where: "transferTypeCode = ? AND isVoid = ? AND periodId = ?",
-        whereArgs: ["TO", 0, periodId],
-      );
-    }
+    // if (periodId == 0) {
+    //   rows = await db.query(
+    //     "fatrans",
+    //     where: "transferTypeCode = ? AND isVoid = ?",
+    //     whereArgs: ["TI", 0],
+    //   );
+    // } else {
+    rows = await db.query(
+      "fatrans",
+      where:
+          "transferTypeCode = ? AND isVoid = ? AND transDate BETWEEN ? AND ?",
+      whereArgs: ["TO", 0, startDate, endDate],
+    );
+    // }
 
     int offset = (page - 1) * itemsPerPage;
     if (rows.isEmpty) {
@@ -90,21 +93,21 @@ class _TransferOutScreen extends State<TransferOutScreen> {
     }
 
     List<Map<String, dynamic>> maps = [];
-    if (periodId == 0) {
-      maps = await db.query(
-        "fatrans",
-        where:
-            "transferTypeCode = ? AND isVoid = ? LIMIT $offset, $itemsPerPage",
-        whereArgs: ["TO", 0],
-      );
-    } else {
-      maps = await db.query(
-        "fatrans",
-        where:
-            "transferTypeCode = ? AND isVoid = ? AND periodId = ? LIMIT $offset, $itemsPerPage",
-        whereArgs: ["TO", 0, periodId],
-      );
-    }
+    // if (periodId == 0) {
+    //   maps = await db.query(
+    //     "fatrans",
+    //     where:
+    //         "transferTypeCode = ? AND isVoid = ? LIMIT $offset, $itemsPerPage",
+    //     whereArgs: ["TI", 0],
+    //   );
+    // } else {
+    maps = await db.query(
+      "fatrans",
+      where:
+          "transferTypeCode = ? AND isVoid = ? AND transDate BETWEEN ? AND ? LIMIT $offset, $itemsPerPage",
+      whereArgs: ["TO", 0, startDate, endDate],
+    );
+    // }
 
     List<DataRow> temps = [];
     var i = 1;
@@ -150,7 +153,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
             width: Get.width * 0.1,
             child: TextButton(
               onPressed: () {
-                Get.toNamed('/transferoutitem',
+                Get.toNamed('/transferinitem',
                         arguments: [data['id'], selectedValue])
                     ?.whenComplete(() => fetchData());
               },
@@ -171,9 +174,18 @@ class _TransferOutScreen extends State<TransferOutScreen> {
         await db.query('periods', orderBy: 'periodId DESC');
     if (p.isNotEmpty) {
       var getFirst = p.first;
-      var results = await genData(getFirst['periodId'] ?? 0);
+      // print(getFirst);
+      var sDateClean =
+          getFirst['startDate'].toString().substring(0, 10) + " 00:00";
+      var eDateClean =
+          getFirst['endDate'].toString().substring(0, 10) + " 23:59";
+      var results = await genData(sDateClean, eDateClean, page);
+      // print(sDateClean);
+      // print(eDateClean);
       setState(() {
-        selectedValue = getFirst['periodId'];
+        // selectedValue = selectedValue == 0 ? getFirst['periodId'] : 0;
+        sDate = sDateClean;
+        eDate = eDateClean;
         _rows = results;
       });
     }
@@ -278,10 +290,9 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                   const SizedBox(
                     width: 40,
                   ),
-                  SizedBox(
-                    width: Get.width * 0.5,
+                  Expanded(
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4.0),
                         border: Border.all(
@@ -313,13 +324,13 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                     onPressed: () {
                       confirmDownload();
                     },
-                    icon: Icon(Icons.download),
-                    label: Text("Download"),
+                    icon: const Icon(Icons.download),
+                    label: const Text("Download"),
                   ),
                 ],
               ),
             ),
-            Container(
+            SizedBox(
               width: Get.width,
               child: Row(
                 children: [
@@ -329,10 +340,10 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                               arguments: [selectedValue])
                           ?.whenComplete(() => fetchData());
                     },
-                    icon: Icon(Icons.add),
-                    label: Text("Add"),
+                    icon: const Icon(Icons.add),
+                    label: const Text("Add"),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 10,
                   ),
                 ],
@@ -396,37 +407,37 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                 )
               ],
             ),
-            Container(
-              width: Get.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      if (page > 1) {
-                        setState(() {
-                          page = page - 1;
-                        });
-                        fetchData();
-                      }
-                    },
-                    child: const Icon(Icons.chevron_left),
-                  ),
-                  Text("$page / $pageCount pages"),
-                  TextButton(
-                    onPressed: () {
-                      if (page < pageCount) {
-                        setState(() {
-                          page = page + 1;
-                        });
-                        fetchData();
-                      }
-                    },
-                    child: const Icon(Icons.chevron_right),
-                  ),
-                ],
-              ),
-            ),
+            // SizedBox(
+            //   width: Get.width,
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       TextButton(
+            //         onPressed: () {
+            //           if (page > 1) {
+            //             setState(() {
+            //               page = page - 1;
+            //             });
+            //             fetchData();
+            //           }
+            //         },
+            //         child: const Icon(Icons.chevron_left),
+            //       ),
+            //       Text("$page / $pageCount pages"),
+            //       TextButton(
+            //         onPressed: () {
+            //           if (page < pageCount) {
+            //             setState(() {
+            //               page = page + 1;
+            //             });
+            //             fetchData();
+            //           }
+            //         },
+            //         child: const Icon(Icons.chevron_right),
+            //       ),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),

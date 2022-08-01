@@ -77,11 +77,15 @@ class OtpController extends GetxController {
           box.write('registered', true);
           box.write('apiAddress', args[3]);
 
+          box.write('userId', body['userId']);
           box.write('email', args[0]);
           box.write('username', body['username']);
           box.write('encPassword', body['encpassword']);
           box.write('empNo', body['empno']);
           box.write('realName', body['realname']);
+
+          box.write('plantId', body['plantid']);
+          box.write('plantName', body['plantName']);
 
           box.write('locationId', args[1]);
           box.write('locationCode', body['locCode']);

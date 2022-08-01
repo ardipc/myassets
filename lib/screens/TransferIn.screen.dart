@@ -311,8 +311,7 @@ class _TransferInScreen extends State<TransferInScreen> {
                   const SizedBox(
                     width: 40,
                   ),
-                  SizedBox(
-                    width: Get.width * 0.4,
+                  Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       decoration: BoxDecoration(
@@ -427,37 +426,37 @@ class _TransferInScreen extends State<TransferInScreen> {
                 )
               ],
             ),
-            Container(
-              width: Get.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      if (page > 1) {
-                        setState(() {
-                          page = page - 1;
-                        });
-                        fetchData();
-                      }
-                    },
-                    child: const Icon(Icons.chevron_left),
-                  ),
-                  Text("$page / $pageCount pages"),
-                  TextButton(
-                    onPressed: () {
-                      if (page < pageCount) {
-                        setState(() {
-                          page = page + 1;
-                        });
-                        fetchData();
-                      }
-                    },
-                    child: const Icon(Icons.chevron_right),
-                  ),
-                ],
-              ),
-            ),
+            // SizedBox(
+            //   width: Get.width,
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       TextButton(
+            //         onPressed: () {
+            //           if (page > 1) {
+            //             setState(() {
+            //               page = page - 1;
+            //             });
+            //             fetchData();
+            //           }
+            //         },
+            //         child: const Icon(Icons.chevron_left),
+            //       ),
+            //       Text("$page / $pageCount pages"),
+            //       TextButton(
+            //         onPressed: () {
+            //           if (page < pageCount) {
+            //             setState(() {
+            //               page = page + 1;
+            //             });
+            //             fetchData();
+            //           }
+            //         },
+            //         child: const Icon(Icons.chevron_right),
+            //       ),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),

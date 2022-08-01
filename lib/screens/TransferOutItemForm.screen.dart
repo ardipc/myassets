@@ -448,8 +448,8 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Remarks : "),
+                        SizedBox(
+                          child: const Text("Remarks : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
@@ -470,23 +470,23 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                 ),
               ),
             ),
-            Container(
+            SizedBox(
               width: Get.width,
               child: Column(
                 children: [
                   Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 6.0, vertical: 3.0),
                     height: 50,
                     width: 600,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                        backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                       ),
                       onPressed: () {
                         actionSave();
                       },
-                      child: Text(
+                      child: const Text(
                         "Save",
                         style: TextStyle(
                           color: Colors.white,
@@ -497,18 +497,19 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                   ),
                   if (idTransItem != 0) ...[
                     Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3.0),
                       height: 50,
                       width: 600,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 228, 11, 29),
+                          backgroundColor:
+                              const Color.fromARGB(255, 228, 11, 29),
                         ),
                         onPressed: () {
                           actionConfirm();
                         },
-                        child: Text(
+                        child: const Text(
                           "Delete",
                           style: TextStyle(
                             color: Colors.white,

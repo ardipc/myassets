@@ -111,7 +111,6 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
 
       Map<String, dynamic> map = {};
       if (idFaTrans == 0) {
-        map['periodId'] = Get.arguments[1];
         map['transId'] = 0;
         map['plantId'] = box.read('plantId');
         map['transTypeCode'] = 'T';
@@ -211,9 +210,9 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         manualRef.text = maps[0]['manualRef'];
         otherRef.text = maps[0]['otherRef'];
 
-        oldLocId = maps[0]['newLocId'];
-        newLocFrom.text = maps[0]['newLocCode'].toString();
-        detailNewLocFrom.text = maps[0]['newLocName'].toString();
+        oldLocId = box.read('plantIntransitId');
+        newLocFrom.text = box.read('plantIntransitCode');
+        detailNewLocFrom.text = box.read('plantIntransitName');
 
         oldLocFrom.text = box.read('locationCode');
         detailOldLocFrom.text = box.read('locationName');
@@ -282,7 +281,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
 
     Map<String, dynamic> map = {};
     map['idFaTrans'] = idFaTrans;
-    map['transId'] = 0;
+    map['transId'] = "";
     map['plantId'] = box.read('plantId');
     map['transDate'] = dateTime.text;
     map['manualRef'] = manualRef.text;
@@ -293,77 +292,98 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     map['isApproved'] = false;
     map['isVoid'] = false;
 
-    map['userId'] = 0;
+    map['userId'] = box.read('userId');
 
     final serviceFATrans = FATransService();
     final serviceFATransItem = FATransItemService();
 
     serviceFATrans.create(map).then((value) async {
       var res = value.body;
-      if (res['message'].toString().isNotEmpty) {
-        Map<String, dynamic> m = {};
-        m['transId'] = res['transId'];
-        m['uploadDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-        m['uploadBy'] = box.read('username');
-        m['uploadMessage'] = res['message'];
+      // if (res['message'] != "") {
+      Map<String, dynamic> m = {};
+      m['transId'] = res['transId'];
+      m['transNo'] = res['transNo'];
+      m['uploadDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+      m['uploadBy'] = box.read('userId');
+      m['uploadMessage'] = res['message'];
 
-        await db.update("fatrans", m, where: "id", whereArgs: [idFaTrans]);
+      await db.update("fatrans", m, where: "id = ?", whereArgs: [idFaTrans]);
 
-        // looping fa trans item
-        List<Map<String, dynamic>> rows = await db.query(
-          "fatransitem",
-          where: "transId = ?",
-          whereArgs: [idFaTrans],
-        );
-
-        for (var row in rows) {
-          Map<String, dynamic> mRow = {};
-          mRow['transItemId'] = row['transItemId'];
-          mRow['transId'] = row['transId'];
-          mRow['faId'] = row['faId'];
-          mRow['remarks'] = row['remarks'];
-          mRow['conStat'] = row['conStatCode'];
-          mRow['oldTag'] = '-';
-          mRow['newTag'] = '-';
-          mRow['userId'] = 0;
-
-          serviceFATransItem.create(mRow).then((value) async {
-            var res = value.body;
-            if (res['message'].toString() != "") {
-              Map<String, dynamic> mItem = {};
-              mItem['transItemId'] = res['transItemId'];
-              mItem['uploadDate'] =
-                  DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-              mItem['uploadBy'] = box.read('username');
-              mItem['uploadMessage'] = res['message'];
-
-              await db.update(
-                "fatransitem",
-                mItem,
-                where: "id = ?",
-                whereArgs: [
-                  row['id'],
-                ],
-              );
-            }
-          });
-        }
-      } else {
+      if (res['message'] != "") {
         Get.dialog(
           AlertDialog(
-            title: const Text("Message"),
+            title: const Text("Infomation"),
             content: Text(res['message']),
           ),
         );
       }
+
+      setState(() {
+        transNo.text = res['transNo'];
+      });
+
+      // looping fa trans item
+      List<Map<String, dynamic>> rows = await db.query(
+        "fatransitem",
+        where: "transId = ?",
+        whereArgs: [idFaTrans],
+      );
+
+      for (var row in rows) {
+        Map<String, dynamic> mRow = {};
+        mRow['transItemId'] = row['transItemId'];
+        mRow['transId'] = row['transId'];
+        mRow['faId'] = row['faId'];
+        mRow['remarks'] = row['remarks'];
+        mRow['conStat'] = row['conStatCode'];
+        mRow['oldTag'] = '-';
+        mRow['newTag'] = '-';
+        mRow['userId'] = box.read('userId');
+
+        serviceFATransItem.create(mRow).then((value) async {
+          var res = value.body;
+          // if (res['message'] != "") {
+          Map<String, dynamic> mItem = {};
+          mItem['transItemId'] = res['transItemId'];
+          mItem['uploadDate'] =
+              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+          mItem['uploadBy'] = box.read('username');
+          mItem['uploadMessage'] = res['message'];
+
+          await db.update(
+            "fatransitem",
+            mItem,
+            where: "id = ?",
+            whereArgs: [
+              row['id'],
+            ],
+          );
+
+          Get.dialog(
+            AlertDialog(
+              title: const Text("Information"),
+              content: Text(res['message']),
+            ),
+          );
+          // }
+        });
+      }
+      // } else {
+      //   Get.dialog(
+      //     AlertDialog(
+      //       title: const Text("Message"),
+      //       content: Text(res['message']),
+      //     ),
+      //   );
+      // }
     });
   }
 
   void confirmApprove() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to approve this data now ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to approve this data now ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -372,13 +392,13 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
               actionApprove();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -407,6 +427,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     super.initState();
     if (Get.arguments != null) {
@@ -419,9 +440,9 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     oldLocFrom.text = box.read('locationCode');
     detailOldLocFrom.text = box.read('locationName');
 
-    oldLocId = box.read('intransitId');
-    newLocFrom.text = box.read('intransitCode');
-    detailNewLocFrom.text = box.read('intransitName');
+    oldLocId = box.read('plantIntransitId');
+    newLocFrom.text = box.read('plantIntransitCode');
+    detailNewLocFrom.text = box.read('plantIntransitName');
   }
 
   @override
@@ -435,14 +456,14 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
           children: [
             Card(
               elevation: 4,
-              margin: EdgeInsets.all(12.0),
+              margin: const EdgeInsets.all(12.0),
               shape: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(3),
-                borderSide: BorderSide(color: Colors.grey, width: 1),
+                borderSide: const BorderSide(color: Colors.grey, width: 1),
               ),
               color: Colors.white,
               child: Container(
-                padding: EdgeInsets.all(14.0),
+                padding: const EdgeInsets.all(14.0),
                 child: Column(
                   children: [
                     Row(
@@ -474,8 +495,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Date/Time : "),
+                        SizedBox(
+                          child: const Text("Date/Time : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
@@ -504,8 +525,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Manual Ref : "),
+                        SizedBox(
+                          child: const Text("Manual Ref : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
@@ -525,8 +546,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Other Ref : "),
+                        SizedBox(
+                          child: const Text("Other Ref : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
@@ -547,11 +568,11 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Loc. From : "),
+                        SizedBox(
+                          child: const Text("Loc. From : "),
                           width: Get.width * 0.14,
                         ),
-                        Container(
+                        SizedBox(
                           width: Get.width * 0.2,
                           child: TextField(
                             controller: oldLocFrom,
@@ -587,11 +608,11 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Loc. To : "),
+                        SizedBox(
+                          child: const Text("Loc. To : "),
                           width: Get.width * 0.14,
                         ),
-                        Container(
+                        SizedBox(
                           width: Get.width * 0.2,
                           child: Focus(
                             onFocusChange: (value) {
@@ -633,7 +654,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                 ),
               ),
             ),
-            Container(
+            SizedBox(
               width: Get.width,
               child: Column(
                 children: [
@@ -660,17 +681,27 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                   ),
                   if (idFaTrans != 0) ...[
                     Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3.0),
                       height: 50,
                       width: 600,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 131, 142, 240),
+                          backgroundColor:
+                              const Color.fromARGB(255, 131, 142, 240),
                         ),
                         onPressed: () {
-                          Get.toNamed('/transferoutitemlist',
-                              arguments: [idFaTrans, transNo.text]);
+                          if (transNo.text != "") {
+                            Get.toNamed('/transferoutitemlist',
+                                arguments: [idFaTrans, transNo.text]);
+                          } else {
+                            Get.dialog(
+                              const AlertDialog(
+                                title: Text("Information"),
+                                content: Text("Transaksi tidak memiliki item."),
+                              ),
+                            );
+                          }
                         },
                         child: const Text(
                           "Open Item List",
@@ -682,18 +713,19 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                       ),
                     ),
                     Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3.0),
                       height: 50,
                       width: 600,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 40, 165, 61),
+                          backgroundColor:
+                              const Color.fromARGB(255, 40, 165, 61),
                         ),
                         onPressed: () {
                           confirmApprove();
                         },
-                        child: Text(
+                        child: const Text(
                           "Approve",
                           style: TextStyle(
                             color: Colors.white,
@@ -703,18 +735,19 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                       ),
                     ),
                     Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3.0),
                       height: 50,
                       width: 600,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 116, 54, 173),
+                          backgroundColor:
+                              const Color.fromARGB(255, 116, 54, 173),
                         ),
                         onPressed: () {
                           confirmUploadToServer();
                         },
-                        child: Text(
+                        child: const Text(
                           "Upload to Server",
                           style: TextStyle(
                             color: Colors.white,
@@ -726,18 +759,19 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                   ],
                   if (idFaTrans != 0) ...[
                     Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3.0),
                       height: 50,
                       width: 600,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 228, 11, 29),
+                          backgroundColor:
+                              const Color.fromARGB(255, 228, 11, 29),
                         ),
                         onPressed: () {
                           actionConfirm();
                         },
-                        child: Text(
+                        child: const Text(
                           "Delete",
                           style: TextStyle(
                             color: Colors.white,
@@ -754,15 +788,5 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         ),
       ),
     );
-  }
-
-  List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("USA"), value: "USA"),
-      DropdownMenuItem(child: Text("Canada"), value: "Canada"),
-      DropdownMenuItem(child: Text("Brazil"), value: "Brazil"),
-      DropdownMenuItem(child: Text("England"), value: "England"),
-    ];
-    return menuItems;
   }
 }

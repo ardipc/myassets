@@ -112,7 +112,6 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
       Map<String, dynamic> map = {};
       if (idFaTrans == 0) {
-        map['periodId'] = Get.arguments[1] ?? 0;
         map['transId'] = 0;
         map['plantId'] = box.read('plantId');
         map['transTypeCode'] = 'T';
@@ -273,20 +272,22 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     map['isApproved'] = false;
     map['isVoid'] = false;
     // development purpose use 0
-    map['userId'] = 0;
+    map['userId'] = box.read('userId');
 
     final serviceFATrans = FATransService();
     final serviceFATransItem = FATransItemService();
 
+    // print(map);
+
     serviceFATrans.create(map).then((value) async {
-      print("FATrans ${value.body.toString()}");
+      // print("FATrans ${value.body}");
       var res = value.body;
       // if (res['message'].toString().isNotEmpty) {
       Map<String, dynamic> m = {};
       m['transId'] = res['transId'];
       m['transNo'] = res['transNo'];
       m['uploadDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-      m['uploadBy'] = box.read('username');
+      m['uploadBy'] = box.read('userId');
       m['uploadMessage'] = res['message'];
 
       await db.update("fatrans", m, where: "id = ?", whereArgs: [idFaTrans]);
@@ -301,7 +302,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       }
 
       setState(() {
-        transNo.text = res['transId'];
+        transNo.text = res['transNo'];
       });
 
       // looping fa trans item
@@ -321,28 +322,35 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         mRow['oldTag'] = '-';
         mRow['newTag'] = '-';
         // development purpose use 0
-        mRow['userId'] = 0;
+        mRow['userId'] = box.read('userId');
 
         serviceFATransItem.create(mRow).then((value) async {
-          print("FATransItem ${value.body.toString()}");
+          // print("FATransItem ${value.body.toString()}");
           var res = value.body;
-          if (res['message'].toString() != "") {
-            Map<String, dynamic> mItem = {};
-            mItem['transItemId'] = res['transItemId'];
-            mItem['uploadDate'] =
-                DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-            mItem['uploadBy'] = box.read('username');
-            mItem['uploadMessage'] = res['message'];
+          // if (res['message'] != "") {
+          Map<String, dynamic> mItem = {};
+          mItem['transItemId'] = res['transItemId'];
+          mItem['uploadDate'] =
+              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+          mItem['uploadBy'] = box.read('userId');
+          mItem['uploadMessage'] = res['message'];
 
-            await db.update(
-              "fatransitem",
-              mItem,
-              where: "id = ?",
-              whereArgs: [
-                row['id'],
-              ],
-            );
-          }
+          await db.update(
+            "fatransitem",
+            mItem,
+            where: "id = ?",
+            whereArgs: [
+              row['id'],
+            ],
+          );
+
+          Get.dialog(
+            AlertDialog(
+              title: const Text("Information"),
+              content: Text(res['message']),
+            ),
+          );
+          // }
         });
       }
       // }
@@ -693,8 +701,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                             Get.dialog(
                               const AlertDialog(
                                 title: Text("Information"),
-                                content: Text(
-                                    "Trans No empty, please upload first."),
+                                content: Text("Transaksi tidak memiliki item."),
                               ),
                             );
                           }
