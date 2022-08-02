@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:myasset/controllers/OtpController.dart';
 import 'package:otp_text_field/otp_field.dart';
@@ -39,9 +40,14 @@ class _OtpScreenState extends State<OtpScreen> {
                   height: 60,
                 ),
                 SizedBox(
-                  width: Get.width * 0.4,
+                  width: Get.width * 0.2,
                   child: TextFormField(
                     textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(5),
+                      FilteringTextInputFormatter.digitsOnly
+                    ],
                     controller: otpField,
                     textInputAction: TextInputAction.next,
                     onChanged: (value) {
