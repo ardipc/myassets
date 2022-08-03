@@ -20,6 +20,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   DbHelper dbHelper = DbHelper();
 
   int? selectedValue;
+  String? selectedName;
   List _dropdownPeriods = [];
   Map<String, dynamic> fasohead = {};
 
@@ -74,7 +75,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
             child: InkWell(
               onTap: () => Get.toNamed(
                 '/stockopnameitem',
-                arguments: [data['id'], periodId, fasohead],
+                arguments: [data['id'], periodId, fasohead, selectedName],
               )?.whenComplete(() => fetchData(selectedValue)),
               child: Text(
                   "qty = ${data['qty'].toString()}\nexistence = ${data['existence'].toString()}\ntagging = ${data['tag'].toString()}\nusage = ${data['usagename'].toString()}\ncondition = ${data['con'] == null ? data['conStatCode'].toString() : data['con'].toString()}\nowner = ${data['own'].toString()}"),
@@ -97,12 +98,12 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     //   orderBy: 'periodId DESC',
     // );
     List<Map<String, dynamic>> maps = await db.rawQuery(
-        "SELECT p.*, f.soHeadId, f.soStatusCode FROM periods p JOIN fasohead f ON f.periodId = p.periodId");
-
+        "SELECT p.*, p.periodName, f.soHeadId, f.soStatusCode FROM periods p JOIN fasohead f ON f.periodId = p.periodId ORDER BY p.periodId DESC");
     if (maps.isNotEmpty) {
       var getFirst = maps.first;
       setState(() {
         selectedValue = getFirst['periodId'];
+        selectedName = getFirst['periodName'];
         _dropdownPeriods = maps;
       });
 
@@ -119,6 +120,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       where: "periodId = ? AND locationId = ?",
       whereArgs: [periodId, box.read('locationId')],
     );
+    // print(maps);
     if (maps.isNotEmpty) {
       setState(() {
         fasohead = maps.first;
@@ -427,9 +429,16 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   }
 
   void setAndFindSO(value) async {
-    // ignore: avoid_print
+    var filtered = _dropdownPeriods
+        .where((element) => element['periodId'] == value)
+        .toList();
+    // print(filtered);
+    var filteredFirst = filtered.length == 1
+        ? filtered.first
+        : {"periodId": 0, "periodName": "Unknown"};
     setState(() {
       selectedValue = value;
+      selectedName = filteredFirst['periodName'];
     });
     fetchData(value);
     fetchFASOHead(value);
@@ -590,9 +599,12 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                         backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                       ),
                       onPressed: () {
-                        Get.toNamed('/stockopnameitem',
-                                arguments: [0, selectedValue, fasohead])
-                            ?.whenComplete(() => fetchData(selectedValue));
+                        Get.toNamed('/stockopnameitem', arguments: [
+                          0,
+                          selectedValue,
+                          fasohead,
+                          selectedName
+                        ])?.whenComplete(() => fetchData(selectedValue));
                       },
                       child: const Text(
                         "Scan / Entry Asset",

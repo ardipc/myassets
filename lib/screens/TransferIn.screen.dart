@@ -32,20 +32,9 @@ class _TransferInScreen extends State<TransferInScreen> {
   int itemsPerPage = 1;
 
   int? selectedValue;
+  Map<String, dynamic> selectedMap = {};
   String? sDate, eDate;
-  List _dropdownPeriods = [];
-
-  void fetchSinglePeriod() async {
-    Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> p =
-        await db.query('periods', orderBy: "periodId DESC");
-    if (p.isNotEmpty) {
-      var getFirst = p.first;
-      setState(() {
-        selectedValue = getFirst['periodId'];
-      });
-    }
-  }
+  List<Map<String, dynamic>> _dropdownPeriods = [];
 
   Future<List<DataRow>> genData(var startDate, var endDate, var page) async {
     Database db = await dbHelper.initDb();
@@ -138,6 +127,7 @@ class _TransferInScreen extends State<TransferInScreen> {
             child: Text(
               data['isApproved'] == 0 ? "Not Yet" : "Approved",
               style: TextStyle(
+                fontSize: 12,
                 color: data['isApproved'] == 0 ? Colors.red : Colors.green,
               ),
             ),
@@ -150,7 +140,7 @@ class _TransferInScreen extends State<TransferInScreen> {
               onPressed: () {
                 Get.toNamed('/transferinitem',
                         arguments: [data['id'], selectedValue])
-                    ?.whenComplete(() => fetchData());
+                    ?.whenComplete(() => fetchData(selectedMap));
               },
               child: const Icon(Icons.edit_note),
             ),
@@ -163,42 +153,34 @@ class _TransferInScreen extends State<TransferInScreen> {
     return temps;
   }
 
-  void fetchData() async {
-    Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> p =
-        await db.query('periods', orderBy: "periodId DESC");
-    if (p.isNotEmpty) {
-      var getFirst = p.first;
-      // print(getFirst);
-      var sDateClean =
-          getFirst['startDate'].toString().substring(0, 10) + " 00:00";
-      var eDateClean =
-          getFirst['endDate'].toString().substring(0, 10) + " 23:59";
-      var results = await genData(sDateClean, eDateClean, page);
-      // print(sDateClean);
-      // print(eDateClean);
-      setState(() {
-        // selectedValue = selectedValue == 0 ? getFirst['periodId'] : 0;
-        sDate = sDateClean;
-        eDate = eDateClean;
-        _rows = results;
-      });
-    }
+  void fetchData(Map<String, dynamic> p) async {
+    // print(getFirst);
+    var sDateClean = p['startDate'].toString().substring(0, 10) + " 00:00";
+    var eDateClean = p['endDate'].toString().substring(0, 10) + " 23:59";
+    var results = await genData(sDateClean, eDateClean, page);
+    setState(() {
+      selectedValue = p['periodId'];
+      sDate = sDateClean;
+      eDate = eDateClean;
+      _rows = results;
+    });
   }
 
   void fetchPeriod() async {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.query("periods",
-        columns: ["periodId", "periodName"], orderBy: "periodId DESC");
-    List items = [];
-
-    for (var row in maps) {
-      items.add(row);
-    }
+        columns: ["periodId", "periodName", "startDate", "endDate"],
+        orderBy: "periodId DESC");
+    // List<Map<String, dynamic>> maps = await db.rawQuery(
+    //     "SELECT p.periodId, p.periodName, p.startDate, p.endDate FROM periods p JOIN fasohead f ON f.periodId = p.periodId ORDER BY p.periodId DESC");
 
     setState(() {
-      _dropdownPeriods = items;
+      selectedValue = maps.isNotEmpty ? maps.first['periodId'] : null;
+      selectedMap = maps.first;
+      _dropdownPeriods = maps;
     });
+
+    fetchData(maps.first);
   }
 
   void confirmDownload() {
@@ -256,14 +238,14 @@ class _TransferInScreen extends State<TransferInScreen> {
         conflictAlgorithm: ConflictAlgorithm.replace);
     Get.snackbar("Information", insertId.toString());
 
-    fetchData();
+    fetchData(selectedMap);
   }
 
   void setPeriodAndFind(var value) async {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> rows = await db.query(
       'periods',
-      columns: ['startDate, endDate'],
+      columns: ['periodId', 'periodName', 'startDate, endDate'],
       where: 'periodId = ?',
       whereArgs: [value],
     );
@@ -280,6 +262,7 @@ class _TransferInScreen extends State<TransferInScreen> {
         sDate = sDateClean;
         eDate = eDateClean;
         selectedValue = int.parse(value.toString());
+        selectedMap = rows.first;
       });
     }
   }
@@ -290,8 +273,6 @@ class _TransferInScreen extends State<TransferInScreen> {
     // TODO: implement initState
     super.initState();
     fetchPeriod();
-    fetchSinglePeriod();
-    fetchData();
   }
 
   @override
@@ -357,7 +338,7 @@ class _TransferInScreen extends State<TransferInScreen> {
                     onPressed: () {
                       Get.toNamed('/transferinitem',
                               arguments: [selectedValue, selectedValue])
-                          ?.whenComplete(() => fetchData());
+                          ?.whenComplete(() => fetchData(selectedMap));
                     },
                     icon: const Icon(Icons.add),
                     label: const Text("Add"),

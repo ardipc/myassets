@@ -107,8 +107,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
       Map<String, dynamic> map = Map();
 
       if (idTransItem == 0) {
-        map['transId'] = Get.arguments[0];
-        map['transItemId'] = 0;
+        map['transLocalId'] = Get.arguments[0];
+        map['transItemId'] = "";
+        map['transId'] = "";
         map['faItemId'] = 0;
         map['faId'] = faIdValue;
         map['faNo'] = faNo.text;
@@ -155,14 +156,14 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
             where: "id = ?", whereArgs: [idTransItem]);
 
         Get.dialog(AlertDialog(
-          title: Text("Information"),
-          content: Text("Data has been updated."),
+          title: const Text("Information"),
+          content: const Text("Data has been updated."),
           actions: [
             TextButton(
               onPressed: () {
                 Get.back();
               },
-              child: Text("Close"),
+              child: const Text("Close"),
             ),
           ],
         ));
@@ -207,8 +208,8 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
   void confirmDownloadItems() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to sync data items now ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to sync data items now ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -216,13 +217,13 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
               // ex. actionUploadToServer();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -231,7 +232,12 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
+    // arguments
+    // 0 id fatrans local
+    // 1 trans no
+    // 2 id local item fatrans
     super.initState();
     transNo.text = Get.arguments[1];
     // tagNo.addListener(() {
@@ -266,7 +272,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                     child: TextField(
                       enabled: false,
                       controller: transNo,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(10),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.blueAccent),

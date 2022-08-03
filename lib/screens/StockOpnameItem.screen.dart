@@ -37,6 +37,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   TextEditingController tagNoController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController faNoController = TextEditingController();
+  TextEditingController periodController = TextEditingController();
 
   String? selectedExistence;
   List _optionsExistence = [];
@@ -234,12 +235,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   }
 
   Future<void> actionSave() async {
-    if (tagNoController.text.isEmpty &&
-        selectedExistence == null &&
-        selectedTagging == null &&
-        selectedUsage == null &&
-        selectedCondition == null &&
-        selectedOwnership == null) {
+    if (tagNoController.text.isEmpty) {
       Get.dialog(
         AlertDialog(
           title: const Text("Information"),
@@ -257,9 +253,6 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     } else {
       Database db = await dbHelper.initDb();
 
-      String formattedDate =
-          DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
-
       Map<String, dynamic> map = {};
       if (idStockOpname == 0) {
         map['stockOpnameId'] = 0;
@@ -275,10 +268,6 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         map['usageStatCode'] = selectedUsage;
         map['conStatCode'] = selectedCondition;
         map['ownStatCode'] = selectedOwnership;
-        map['syncDate'] = formattedDate;
-        map['syncBy'] = box.read('username');
-
-        // print(map);
 
         int exec = await db.insert("stockopnames", map,
             conflictAlgorithm: ConflictAlgorithm.replace);
@@ -329,20 +318,6 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
             where: "id = ?", whereArgs: [idStockOpname]);
 
         if (exec > 0) {
-          // Get.dialog(
-          //   AlertDialog(
-          //     title: const Text("Information"),
-          //     content: const Text("Data has been updated."),
-          //     actions: [
-          //       TextButton(
-          //         onPressed: () {
-          //           Get.back();
-          //         },
-          //         child: const Text("Close"),
-          //       ),
-          //     ],
-          //   ),
-          // );
           Get.back();
           Get.snackbar("Information", "Data has been updated.");
         }
@@ -372,6 +347,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     super.initState();
     fetchAllOptions();
     fetchPeriod();
+    periodController.text = Get.arguments[3];
     if (Get.arguments != 0) {
       fetchData(Get.arguments[0]);
       fetchDataConfirm(Get.arguments[0]);
@@ -397,28 +373,31 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                   ),
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4.0),
-                        border: Border.all(
-                          style: BorderStyle.solid,
-                          width: 0.80,
+                      child: TextFormField(
+                        controller: periodController,
+                        enabled: false,
+                        decoration: const InputDecoration(
+                          hintText: "ex. Juni 2022",
+                          contentPadding: EdgeInsets.all(10),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
                         ),
                       ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton(
-                          isExpanded: true,
-                          hint: const Text("Select Period"),
-                          items: _optionsPeriods.map((item) {
-                            return DropdownMenuItem(
-                              child: Text(item['periodName']),
-                              value: item['periodId'],
-                            );
-                          }).toList(),
-                          value: selectedValue,
-                          onChanged: null,
-                        ),
-                      ),
+                      // DropdownButtonHideUnderline(
+                      //   child: DropdownButton(
+                      //     isExpanded: true,
+                      //     hint: const Text("Select Period"),
+                      //     items: _optionsPeriods.map((item) {
+                      //       return DropdownMenuItem(
+                      //         child: Text(item['periodName']),
+                      //         value: item['periodId'],
+                      //       );
+                      //     }).toList(),
+                      //     value: selectedValue,
+                      //     onChanged: null,
+                      //   ),
+                      // ),
                     ),
                   ),
                 ],
@@ -449,7 +428,10 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                 getInfoItem(tagNoController.text);
                               }
                             },
-                            child: TextField(
+                            child: TextFormField(
+                              validator: (value) {
+                                print(value);
+                              },
                               enabled: isConfirmed ? false : true,
                               controller: tagNoController,
                               decoration: const InputDecoration(
@@ -798,7 +780,9 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                       children: [
                         Container(
                           margin: const EdgeInsets.symmetric(
-                              horizontal: 6.0, vertical: 3.0),
+                            horizontal: 12.0,
+                            vertical: 3.0,
+                          ),
                           height: 50,
                           width: 600,
                           child: TextButton(
@@ -831,7 +815,9 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                         if (idStockOpname != 0) ...[
                           Container(
                             margin: const EdgeInsets.symmetric(
-                                horizontal: 6.0, vertical: 3.0),
+                              horizontal: 6.0,
+                              vertical: 3.0,
+                            ),
                             height: 50,
                             width: 600,
                             child: TextButton(

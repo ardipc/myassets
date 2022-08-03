@@ -26,8 +26,6 @@ class DownloadController extends GetxController {
     // ignore: todo
     // TODO: implement onInit
     super.onInit();
-    // ignore: avoid_print
-    print("init download ${box.read('username')}");
   }
 
   @override
@@ -35,8 +33,6 @@ class DownloadController extends GetxController {
     // ignore: todo
     // TODO: implement onClose
     super.onClose();
-    // ignore: avoid_print
-    print("close download");
   }
 
   void confirmDownload() {
@@ -188,10 +184,25 @@ class DownloadController extends GetxController {
         Map<String, dynamic> map = {};
         if (rows.isNotEmpty) {
           // action update
+          map['faId'] = row['faId'];
+          map['periodId'] = row['periodId'];
+          map['stockOpnameId'] = row['stockOpnameId'];
+          map['tagNo'] = row['tagNo'];
+          map['description'] = row['itemName'];
+          map['locationId'] = box.read('locationId');
           map['qty'] = row['qty'];
           map['periodId'] = row['periodId'];
           map['baseQty'] = row['baseQty'];
           map['baseConStatCode'] = row['baseConStat'];
+          map['existStatCode'] = row['existStat'];
+          map['tagStatCode'] = row['tagStat'];
+          map['usageStatCode'] = row['usageStat'];
+          map['conStatCode'] = row['conStat'];
+          map['ownStatCode'] = row['ownStat'];
+          map['rejectNote'] = row['rejectNote'];
+          map['syncDate'] =
+              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+          map['syncBy'] = box.read('userId');
           await db.update(
             "stockopnames",
             map,
@@ -236,8 +247,6 @@ class DownloadController extends GetxController {
     listProgress.add(rowProgress("Sync table locations."));
     await db.delete("locations", where: null);
     await locService.getAll().then((value) async {
-      // ignore: avoid_print
-      print(value.body);
       List periods = value.body['locs'];
       for (var i = 0; i < periods.length; i++) {
         listProgress
@@ -292,6 +301,7 @@ class DownloadController extends GetxController {
     listProgress.add(rowProgress("Table fasohead completed."));
 
     var transService = FATransService();
+    var transItemService = FATransItemService();
     listProgress.add(rowProgress("Sync table FA Trans."));
     // await db.delete("fatrans", where: null);
     await transService.getAll().then((value) async {
@@ -301,6 +311,9 @@ class DownloadController extends GetxController {
 
         List<Map<String, dynamic>> sFa = await db.query('fatrans',
             where: "transId = ?", whereArgs: [periods[i]['transId']]);
+
+        var response = await transItemService.getAll();
+        var responseBody = response.body;
 
         Map<String, dynamic> map = {
           "transId": periods[i]['transId'],
@@ -327,50 +340,134 @@ class DownloadController extends GetxController {
 
         if (sFa.length == 1) {
           // action update
+          var getTransId = sFa.first['transId'];
           await db.update(
             'fatrans',
             map,
             where: 'transId = ?',
             whereArgs: [periods[i]['transId']],
           );
+
+          List<dynamic> getTransItems = responseBody['transitems'];
+          List filtered = getTransItems
+              .where((element) => element['transId'] == getTransId)
+              .toList();
+          for (var item in filtered) {
+            List<Map<String, dynamic>> getFaTransItems = await db.query(
+              'fatransitem',
+              where: 'transId = ?',
+              whereArgs: [item['transId']],
+            );
+            Map<String, dynamic> map = {
+              "transItemId": item['transItemId'],
+              "transId": item['transId'],
+              "faId": item['faId'],
+              "qty": item['qty'],
+              "remarks": item['remarks'],
+              "conStatCode": item['conStatCode'],
+              "tagNo": item['oldTagNo'],
+              "oldTagNo": item['oldTagNo'],
+              "newTagNo": item['newTagNo'],
+              "saveDate": item['insertDate'],
+              "saveBy": item['insertBy'],
+              "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+              "syncBy": box.read('userId')
+            };
+            if (getFaTransItems.isNotEmpty) {
+              map['transLocalId'] = getFaTransItems.first['transLocalId'];
+              await db.update(
+                'fatransitem',
+                map,
+                where: 'transId = ?',
+                whereArgs: [item['transId']],
+              );
+            } else {
+              await db.insert(
+                'fatransitem',
+                map,
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+            }
+          }
         } else {
-          await db.insert(
+          var getTransId = await db.insert(
             "fatrans",
             map,
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
+
+          List<dynamic> getTransItems = response.body['transitems'];
+          List<dynamic> filtered = getTransItems
+              .where((element) => element['transId'] == getTransId)
+              .toList();
+          for (var item in filtered) {
+            List<Map<String, dynamic>> getFaTransItems = await db.query(
+              'fatransitem',
+              where: 'transId = ?',
+              whereArgs: [item['transId']],
+            );
+            Map<String, dynamic> map = {
+              "transItemId": item['transItemId'],
+              "transId": item['transId'],
+              "faId": item['faId'],
+              "qty": item['qty'],
+              "remarks": item['remarks'],
+              "conStatCode": item['conStatCode'],
+              "tagNo": item['oldTagNo'],
+              "oldTagNo": item['oldTagNo'],
+              "newTagNo": item['newTagNo'],
+              "saveDate": item['insertDate'],
+              "saveBy": item['insertBy'],
+              "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+              "syncBy": box.read('userId')
+            };
+            if (getFaTransItems.isNotEmpty) {
+              map['transLocalId'] = getFaTransItems.first['transLocalId'];
+              await db.update(
+                'fatransitem',
+                map,
+                where: 'transId = ?',
+                whereArgs: [item['transId']],
+              );
+            } else {
+              await db.insert(
+                'fatransitem',
+                map,
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+            }
+          }
         }
       }
     });
     listProgress.add(rowProgress("Table FA Trans completed."));
 
-    var transItemService = FATransItemService();
-    listProgress.add(rowProgress("Sync table FA Trans Item."));
-    await db.delete("fatransitem", where: null);
-    await transItemService.getAll().then((value) async {
-      List periods = value.body['transitems'];
-      for (var i = 0; i < periods.length; i++) {
-        listProgress
-            .add(rowProgress("ID ${periods[i]['transItemId']} inserted."));
-        Map<String, dynamic> map = {
-          "transItemId": periods[i]['transItemId'],
-          "transId": periods[i]['transId'],
-          // "faItemId": INTEGER,
-          "faId": periods[i]['faId'],
-          // "faNo": INTEGER,
-          // "description": TEXT,
-          "remarks": periods[i]['remarks'],
-          "conStatCode": periods[i]['conStatCode'],
-          "tagNo": periods[i]['oldTagNo'],
-          "saveDate": periods[i]['insertDate'],
-          "saveBy": periods[i]['insertBy'],
-          "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
-          "syncBy": box.read('userId')
-        };
-        await db.insert("fatransitem", map);
-      }
-    });
-    listProgress.add(rowProgress("Table FA Trans Item completed."));
+    // listProgress.add(rowProgress("Sync table FA Trans Item."));
+    // await db.delete("fatransitem", where: null);
+    // await transItemService.getAll().then((value) async {
+    //   List periods = value.body['transitems'];
+    //   for (var i = 0; i < periods.length; i++) {
+    //     listProgress
+    //         .add(rowProgress("ID ${periods[i]['transItemId']} inserted."));
+    //     Map<String, dynamic> map = {
+    //       "transItemId": periods[i]['transItemId'],
+    //       "transId": periods[i]['transId'],
+    //       // "faItemId": INTEGER,
+    //       "faId": periods[i]['faId'],
+    //       // "faNo": INTEGER,
+    //       // "description": TEXT,
+    //       "remarks": periods[i]['remarks'],
+    //       "conStatCode": periods[i]['conStatCode'],
+    //       "tagNo": periods[i]['oldTagNo'],
+    //       "saveDate": periods[i]['insertDate'],
+    //       "saveBy": periods[i]['insertBy'],
+    //       "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+    //       "syncBy": box.read('userId')
+    //     };
+    //     await db.insert("fatransitem", map);
+    //   }
+    // });
+    // listProgress.add(rowProgress("Table FA Trans Item completed."));
   }
 
   Widget rowProgress(String text) {

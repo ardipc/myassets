@@ -73,7 +73,6 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     Database db = await dbHelper.initDb();
     Map<String, dynamic> map = {};
     map['isApproved'] = 1;
-    map['saveDate'] = DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
     int exec = await db.update(
       "fatrans",
       map,
@@ -145,14 +144,14 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
           });
 
           Get.dialog(AlertDialog(
-            title: Text("Information"),
-            content: Text("Data has been saved."),
+            title: const Text("Information"),
+            content: const Text("Data has been saved."),
             actions: [
               TextButton(
                 onPressed: () {
                   Get.back();
                 },
-                child: Text("Close"),
+                child: const Text("Close"),
               ),
             ],
           ));
@@ -291,6 +290,12 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       m['uploadMessage'] = res['message'];
 
       await db.update("fatrans", m, where: "id = ?", whereArgs: [idFaTrans]);
+      await db.update(
+        "fatransitem",
+        {"transId": res['transId']},
+        where: "transLocalId = ?",
+        whereArgs: [idFaTrans],
+      );
 
       if (res['message'] != "") {
         Get.dialog(
@@ -308,13 +313,14 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       // looping fa trans item
       List<Map<String, dynamic>> rows = await db.query(
         "fatransitem",
-        where: "transId = ?",
+        where: "transLocalId = ?",
         whereArgs: [idFaTrans],
       );
 
       for (var row in rows) {
         Map<String, dynamic> mRow = {};
-        mRow['transItemId'] = row['transItemId'];
+        mRow['transLocalId'] = row['transLocalId'];
+        mRow['transItemId'] = 0;
         mRow['transId'] = row['transId'];
         mRow['faId'] = row['faId'];
         mRow['remarks'] = row['remarks'];
@@ -327,30 +333,29 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         serviceFATransItem.create(mRow).then((value) async {
           // print("FATransItem ${value.body.toString()}");
           var res = value.body;
-          // if (res['message'] != "") {
-          Map<String, dynamic> mItem = {};
-          mItem['transItemId'] = res['transItemId'];
-          mItem['uploadDate'] =
-              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-          mItem['uploadBy'] = box.read('userId');
-          mItem['uploadMessage'] = res['message'];
-
-          await db.update(
-            "fatransitem",
-            mItem,
-            where: "id = ?",
-            whereArgs: [
-              row['id'],
-            ],
-          );
-
           Get.dialog(
             AlertDialog(
               title: const Text("Information"),
               content: Text(res['message']),
             ),
           );
-          // }
+          if (res['message'] != "") {
+            Map<String, dynamic> mItem = {};
+            mItem['transItemId'] = res['transItemId'] ?? 0;
+            mItem['uploadDate'] =
+                DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+            mItem['uploadBy'] = box.read('userId');
+            mItem['uploadMessage'] = res['message'];
+
+            await db.update(
+              "fatransitem",
+              mItem,
+              where: "id = ?",
+              whereArgs: [
+                row['id'],
+              ],
+            );
+          }
         });
       }
       // }
@@ -382,30 +387,49 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     );
   }
 
-  void confirmApprove() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text("Confirmation"),
-        content: const Text("Are you sure to approve this data now ?"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // please add action in here
-              // ex. actionUploadToServer();
-              actionApprove();
-              Get.back();
-            },
-            child: const Text("YES"),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text("NO"),
-          ),
-        ],
-      ),
+  void confirmApprove() async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> getItems = await db.query(
+      'fatransitem',
+      where: "transLocalId = ?",
+      whereArgs: [idFaTrans],
     );
+    // ignore: avoid_print
+    print(idFaTrans);
+    // ignore: avoid_print
+    print(getItems);
+    if (getItems.isNotEmpty) {
+      Get.dialog(
+        AlertDialog(
+          title: const Text("Confirmation"),
+          content: const Text("Are you sure to approve this data now ?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // please add action in here
+                // ex. actionUploadToServer();
+                actionApprove();
+                Get.back();
+              },
+              child: const Text("YES"),
+            ),
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text("NO"),
+            ),
+          ],
+        ),
+      );
+    } else {
+      Get.dialog(
+        const AlertDialog(
+          title: Text("Information"),
+          content: Text("Transfer tidak memiliki item."),
+        ),
+      );
+    }
   }
 
   Future<void> getLocationByCoce(String code) async {
@@ -694,17 +718,17 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                               const Color.fromARGB(255, 131, 142, 240),
                         ),
                         onPressed: () {
-                          if (transNo.text != "") {
-                            Get.toNamed('/transferinitemlist',
-                                arguments: [idFaTrans, transNo.text]);
-                          } else {
-                            Get.dialog(
-                              const AlertDialog(
-                                title: Text("Information"),
-                                content: Text("Transaksi tidak memiliki item."),
-                              ),
-                            );
-                          }
+                          // if (transNo.text != "") {
+                          Get.toNamed('/transferinitemlist',
+                              arguments: [idFaTrans, transNo.text]);
+                          // } else {
+                          //   Get.dialog(
+                          //     const AlertDialog(
+                          //       title: Text("Information"),
+                          //       content: Text("Transaksi tidak memiliki item."),
+                          //     ),
+                          //   );
+                          // }
                         },
                         child: const Text(
                           "Open Item List",
