@@ -91,11 +91,13 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   void fetchPeriod() async {
     Database db = await dbHelper.initDb();
 
-    List<Map<String, dynamic>> maps = await db.query(
-      "periods",
-      columns: ["periodId", "periodName"],
-      orderBy: 'periodId DESC',
-    );
+    // List<Map<String, dynamic>> maps = await db.query(
+    //   "periods",
+    //   columns: ["periodId", "periodName"],
+    //   orderBy: 'periodId DESC',
+    // );
+    List<Map<String, dynamic>> maps = await db.rawQuery(
+        "SELECT p.*, f.soHeadId, f.soStatusCode FROM periods p JOIN fasohead f ON f.periodId = p.periodId");
 
     if (maps.isNotEmpty) {
       var getFirst = maps.first;
