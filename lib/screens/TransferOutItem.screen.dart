@@ -41,8 +41,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
   void actionConfirm() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to delete data ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to delete data ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -64,7 +64,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
 
   Future<void> actionDelete() async {
     Database db = await dbHelper.initDb();
-    await db.delete("fatrans", where: "id = ?", whereArgs: [idFaTrans]);
+    int exec =
+        await db.delete("fatrans", where: "id = ?", whereArgs: [idFaTrans]);
     Get.back();
   }
 
@@ -72,7 +73,6 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     Database db = await dbHelper.initDb();
     Map<String, dynamic> map = {};
     map['isApproved'] = 1;
-    map['saveDate'] = DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
     int exec = await db.update(
       "fatrans",
       map,
@@ -119,12 +119,12 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         map['manualRef'] = manualRef.text;
         map['otherRef'] = otherRef.text;
         map['transferTypeCode'] = transferTypeCode;
-        map['newLocId'] = oldLocId;
-        map['newLocCode'] = newLocFrom.text;
-        map['newLocName'] = detailNewLocFrom.text;
-        map['oldLocId'] = box.read('locationId');
-        map['oldLocCode'] = box.read('locationCode');
-        map['oldLocName'] = box.read('locationName');
+        map['oldLocId'] = oldLocId;
+        map['oldLocCode'] = oldLocFrom.text;
+        map['oldLocName'] = detailOldLocFrom.text;
+        map['newLocId'] = box.read('locationId');
+        map['newLocCode'] = box.read('locationCode');
+        map['newLocName'] = box.read('locationName');
         map['isApproved'] = 0;
         map['isVoid'] = 0;
         map['saveDate'] = formattedDate;
@@ -161,12 +161,12 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         map['transNo'] = transNo.text;
         map['manualRef'] = manualRef.text;
         map['otherRef'] = otherRef.text;
-        map['newLocId'] = oldLocId;
-        map['newLocCode'] = newLocFrom.text;
-        map['newLocName'] = detailNewLocFrom.text;
-        map['oldLocId'] = box.read('locationId');
-        map['oldLocCode'] = box.read('locationCode');
-        map['oldLocName'] = box.read('locationName');
+        map['oldLocId'] = oldLocId;
+        map['oldLocCode'] = oldLocFrom.text;
+        map['oldLocName'] = detailOldLocFrom.text;
+        map['newLocId'] = box.read('locationId');
+        map['newLocCode'] = box.read('locationCode');
+        map['newLocName'] = box.read('locationName');
 
         int exec = await db
             .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
@@ -210,12 +210,16 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         manualRef.text = maps[0]['manualRef'];
         otherRef.text = maps[0]['otherRef'];
 
-        oldLocId = box.read('plantIntransitId');
-        newLocFrom.text = box.read('plantIntransitCode');
-        detailNewLocFrom.text = box.read('plantIntransitName');
+        // oldLocId = maps[0]['oldLocId'];
+        // oldLocFrom.text = maps[0]['oldLocCode'].toString();
+        // detailOldLocFrom.text = maps[0]['oldLocName'].toString();
 
+        oldLocId = box.read('plantIntransitId');
         oldLocFrom.text = box.read('locationCode');
         detailOldLocFrom.text = box.read('locationName');
+
+        newLocFrom.text = box.read('plantIntransitCode');
+        detailNewLocFrom.text = box.read('plantIntransitName');
       });
     }
   }
@@ -251,6 +255,113 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     }
   }
 
+  void actionUploadToServer() async {
+    Database db = await dbHelper.initDb();
+
+    Map<String, dynamic> map = {};
+    map['idFaTrans'] = idFaTrans;
+    map['transId'] = "";
+    map['plantId'] = box.read('plantId');
+    map['transDate'] = dateTime.text;
+    map['manualRef'] = manualRef.text;
+    map['otherRef'] = otherRef.text;
+    map['transferType'] = 'TO';
+    map['oldLocId'] = box.read('intransitId');
+    map['newLocId'] = box.read('locationId');
+    map['isApproved'] = false;
+    map['isVoid'] = false;
+    // development purpose use 0
+    map['userId'] = box.read('userId');
+
+    final serviceFATrans = FATransService();
+    final serviceFATransItem = FATransItemService();
+
+    // print(map);
+
+    serviceFATrans.create(map).then((value) async {
+      // print("FATrans ${value.body}");
+      var res = value.body;
+      // if (res['message'].toString().isNotEmpty) {
+      Map<String, dynamic> m = {};
+      m['transId'] = res['transId'];
+      m['transNo'] = res['transNo'];
+      m['uploadDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+      m['uploadBy'] = box.read('userId');
+      m['uploadMessage'] = res['message'];
+
+      await db.update("fatrans", m, where: "id = ?", whereArgs: [idFaTrans]);
+      await db.update(
+        "fatransitem",
+        {"transId": res['transId']},
+        where: "transLocalId = ?",
+        whereArgs: [idFaTrans],
+      );
+
+      if (res['message'] != "") {
+        Get.dialog(
+          AlertDialog(
+            title: const Text("Infomation"),
+            content: Text(res['message']),
+          ),
+        );
+      }
+
+      setState(() {
+        transNo.text = res['transNo'];
+      });
+
+      // looping fa trans item
+      List<Map<String, dynamic>> rows = await db.query(
+        "fatransitem",
+        where: "transLocalId = ?",
+        whereArgs: [idFaTrans],
+      );
+
+      for (var row in rows) {
+        Map<String, dynamic> mRow = {};
+        mRow['transLocalId'] = row['transLocalId'];
+        mRow['transItemId'] = 0;
+        mRow['transId'] = row['transId'];
+        mRow['faId'] = row['faId'];
+        mRow['remarks'] = row['remarks'];
+        mRow['conStat'] = row['conStatCode'];
+        mRow['oldTag'] = '-';
+        mRow['newTag'] = '-';
+        // development purpose use 0
+        mRow['userId'] = box.read('userId');
+
+        serviceFATransItem.create(mRow).then((value) async {
+          // print("FATransItem ${value.body.toString()}");
+          var res = value.body;
+          Get.dialog(
+            AlertDialog(
+              title: const Text("Information"),
+              content: Text(res['message']),
+            ),
+          );
+          if (res['message'] != "") {
+            Map<String, dynamic> mItem = {};
+            mItem['transItemId'] = res['transItemId'] ?? 0;
+            mItem['uploadDate'] =
+                DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+            mItem['uploadBy'] = box.read('userId');
+            mItem['uploadMessage'] = res['message'];
+
+            await db.update(
+              "fatransitem",
+              mItem,
+              where: "id = ?",
+              whereArgs: [
+                row['id'],
+              ],
+            );
+          }
+        });
+      }
+      // }
+    });
+  }
+
   void confirmUploadToServer() {
     Get.dialog(
       AlertDialog(
@@ -276,133 +387,49 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     );
   }
 
-  void actionUploadToServer() async {
+  void confirmApprove() async {
     Database db = await dbHelper.initDb();
-
-    Map<String, dynamic> map = {};
-    map['idFaTrans'] = idFaTrans;
-    map['transId'] = "";
-    map['plantId'] = box.read('plantId');
-    map['transDate'] = dateTime.text;
-    map['manualRef'] = manualRef.text;
-    map['otherRef'] = otherRef.text;
-    map['transferType'] = 'TO';
-    map['oldLocId'] = box.read('intransitId');
-    map['newLocId'] = box.read('locationId');
-    map['isApproved'] = false;
-    map['isVoid'] = false;
-
-    map['userId'] = box.read('userId');
-
-    final serviceFATrans = FATransService();
-    final serviceFATransItem = FATransItemService();
-
-    serviceFATrans.create(map).then((value) async {
-      var res = value.body;
-      // if (res['message'] != "") {
-      Map<String, dynamic> m = {};
-      m['transId'] = res['transId'];
-      m['transNo'] = res['transNo'];
-      m['uploadDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-      m['uploadBy'] = box.read('userId');
-      m['uploadMessage'] = res['message'];
-
-      await db.update("fatrans", m, where: "id = ?", whereArgs: [idFaTrans]);
-
-      if (res['message'] != "") {
-        Get.dialog(
-          AlertDialog(
-            title: const Text("Infomation"),
-            content: Text(res['message']),
-          ),
-        );
-      }
-
-      setState(() {
-        transNo.text = res['transNo'];
-      });
-
-      // looping fa trans item
-      List<Map<String, dynamic>> rows = await db.query(
-        "fatransitem",
-        where: "transId = ?",
-        whereArgs: [idFaTrans],
-      );
-
-      for (var row in rows) {
-        Map<String, dynamic> mRow = {};
-        mRow['transItemId'] = row['transItemId'];
-        mRow['transId'] = row['transId'];
-        mRow['faId'] = row['faId'];
-        mRow['remarks'] = row['remarks'];
-        mRow['conStat'] = row['conStatCode'];
-        mRow['oldTag'] = '-';
-        mRow['newTag'] = '-';
-        mRow['userId'] = box.read('userId');
-
-        serviceFATransItem.create(mRow).then((value) async {
-          var res = value.body;
-          // if (res['message'] != "") {
-          Map<String, dynamic> mItem = {};
-          mItem['transItemId'] = res['transItemId'];
-          mItem['uploadDate'] =
-              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-          mItem['uploadBy'] = box.read('username');
-          mItem['uploadMessage'] = res['message'];
-
-          await db.update(
-            "fatransitem",
-            mItem,
-            where: "id = ?",
-            whereArgs: [
-              row['id'],
-            ],
-          );
-
-          Get.dialog(
-            AlertDialog(
-              title: const Text("Information"),
-              content: Text(res['message']),
-            ),
-          );
-          // }
-        });
-      }
-      // } else {
-      //   Get.dialog(
-      //     AlertDialog(
-      //       title: const Text("Message"),
-      //       content: Text(res['message']),
-      //     ),
-      //   );
-      // }
-    });
-  }
-
-  void confirmApprove() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text("Confirmation"),
-        content: const Text("Are you sure to approve this data now ?"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // please add action in here
-              // ex. actionUploadToServer();
-              actionApprove();
-              Get.back();
-            },
-            child: const Text("YES"),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text("NO"),
-          ),
-        ],
-      ),
+    List<Map<String, dynamic>> getItems = await db.query(
+      'fatransitem',
+      where: "transLocalId = ?",
+      whereArgs: [idFaTrans],
     );
+    // ignore: avoid_print
+    print(idFaTrans);
+    // ignore: avoid_print
+    print(getItems);
+    if (getItems.isNotEmpty) {
+      Get.dialog(
+        AlertDialog(
+          title: const Text("Confirmation"),
+          content: const Text("Are you sure to approve this data now ?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // please add action in here
+                // ex. actionUploadToServer();
+                actionApprove();
+                Get.back();
+              },
+              child: const Text("YES"),
+            ),
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text("NO"),
+            ),
+          ],
+        ),
+      );
+    } else {
+      Get.dialog(
+        const AlertDialog(
+          title: Text("Information"),
+          content: Text("Transfer tidak memiliki item."),
+        ),
+      );
+    }
   }
 
   Future<void> getLocationByCoce(String code) async {
@@ -411,10 +438,10 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       int locationId = value.body['locationId'];
       if (locationId != 0) {
         oldLocId = locationId;
-        detailNewLocFrom.text = value.body['locationName'];
+        detailOldLocFrom.text = value.body['locationName'];
       } else {
         oldLocId = 0;
-        detailNewLocFrom.text = "";
+        detailOldLocFrom.text = "";
         Get.dialog(
           const AlertDialog(
             title: Text("Information"),
@@ -437,12 +464,12 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
       dateTime.text = formattedDate;
     }
-    oldLocFrom.text = box.read('locationCode');
-    detailOldLocFrom.text = box.read('locationName');
-
-    oldLocId = box.read('plantIntransitId');
     newLocFrom.text = box.read('plantIntransitCode');
     detailNewLocFrom.text = box.read('plantIntransitName');
+
+    oldLocId = box.read('plantIntransitId');
+    oldLocFrom.text = box.read('locationCode');
+    detailOldLocFrom.text = box.read('locationName');
   }
 
   @override
@@ -691,17 +718,17 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                               const Color.fromARGB(255, 131, 142, 240),
                         ),
                         onPressed: () {
-                          if (transNo.text != "") {
-                            Get.toNamed('/transferoutitemlist',
-                                arguments: [idFaTrans, transNo.text]);
-                          } else {
-                            Get.dialog(
-                              const AlertDialog(
-                                title: Text("Information"),
-                                content: Text("Transaksi tidak memiliki item."),
-                              ),
-                            );
-                          }
+                          // if (transNo.text != "") {
+                          Get.toNamed('/transferoutitemlist',
+                              arguments: [idFaTrans, transNo.text]);
+                          // } else {
+                          //   Get.dialog(
+                          //     const AlertDialog(
+                          //       title: Text("Information"),
+                          //       content: Text("Transaksi tidak memiliki item."),
+                          //     ),
+                          //   );
+                          // }
                         },
                         child: const Text(
                           "Open Item List",

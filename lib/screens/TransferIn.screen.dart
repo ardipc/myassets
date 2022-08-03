@@ -1,12 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/services/Period.service.dart';
-import 'package:responsive_table/responsive_table.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferInScreen extends StatefulWidget {
@@ -95,7 +91,7 @@ class _TransferInScreen extends State<TransferInScreen> {
 
     List<DataRow> temps = [];
     var i = 1;
-    for (var data in maps) {
+    for (var data in rows) {
       DataRow row = DataRow(cells: [
         DataCell(
           Container(

@@ -108,8 +108,8 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
 
       if (idTransItem == 0) {
         map['transLocalId'] = Get.arguments[0];
-        map['transItemId'] = "";
-        map['transId'] = "";
+        map['transItemId'] = 0;
+        map['transId'] = 0;
         map['faItemId'] = 0;
         map['faId'] = faIdValue;
         map['faNo'] = faNo.text;

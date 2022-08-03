@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/services/Period.service.dart';
-import 'package:responsive_table/responsive_table.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferOutScreen extends StatefulWidget {
@@ -17,9 +15,9 @@ class TransferOutScreen extends StatefulWidget {
 class _TransferOutScreen extends State<TransferOutScreen> {
   final box = GetStorage();
   DbHelper dbHelper = DbHelper();
-  late List<DatatableHeader> _headers;
+  // late List<DatatableHeader> _headers;
 
-  List<Map<String, dynamic>> _sources = [];
+  // List<Map<String, dynamic>> _sources = [];
   List<DataRow> _rows = [];
 
   // int _currentPage = 1;
@@ -30,42 +28,24 @@ class _TransferOutScreen extends State<TransferOutScreen> {
   int itemsPerPage = 1;
 
   int? selectedValue;
+  Map<String, dynamic> selectedMap = {};
   String? sDate, eDate;
-  List _dropdownPeriods = [];
-
-  void fetchSinglePeriod() async {
-    // final periodService = PeriodService();
-    // periodService.getNow().then((value) {
-    //   setState(() {
-    //     selectedValue = value.body['periodId'];
-    //   });
-    // });
-    Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> p =
-        await db.query('periods', orderBy: 'periodId DESC');
-    if (p.isNotEmpty) {
-      var getFirst = p.first;
-      setState(() {
-        selectedValue = getFirst['periodId'];
-      });
-    }
-  }
+  List<Map<String, dynamic>> _dropdownPeriods = [];
 
   Future<List<DataRow>> genData(var startDate, var endDate, var page) async {
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> all = await db.query(
-      "fatrans",
-      where: "transferTypeCode = ?",
-      whereArgs: ['TO'],
-    );
-    print(all);
+    // List<Map<String, dynamic>> maps = await db.query(
+    //   "fatrans",
+    //   where: "transferTypeCode = ? AND isVoid = ? AND periodId = ?",
+    //   whereArgs: ["TO", 0, periodId],
+    // );
 
     List<Map<String, dynamic>> rows = [];
     // if (periodId == 0) {
     //   rows = await db.query(
     //     "fatrans",
     //     where: "transferTypeCode = ? AND isVoid = ?",
-    //     whereArgs: ["TI", 0],
+    //     whereArgs: ["TO", 0],
     //   );
     // } else {
     rows = await db.query(
@@ -98,7 +78,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
     //     "fatrans",
     //     where:
     //         "transferTypeCode = ? AND isVoid = ? LIMIT $offset, $itemsPerPage",
-    //     whereArgs: ["TI", 0],
+    //     whereArgs: ["TO", 0],
     //   );
     // } else {
     maps = await db.query(
@@ -111,7 +91,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
 
     List<DataRow> temps = [];
     var i = 1;
-    for (var data in maps) {
+    for (var data in rows) {
       DataRow row = DataRow(cells: [
         DataCell(
           Container(
@@ -143,6 +123,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
             child: Text(
               data['isApproved'] == 0 ? "Not Yet" : "Approved",
               style: TextStyle(
+                fontSize: 12,
                 color: data['isApproved'] == 0 ? Colors.red : Colors.green,
               ),
             ),
@@ -153,9 +134,9 @@ class _TransferOutScreen extends State<TransferOutScreen> {
             width: Get.width * 0.1,
             child: TextButton(
               onPressed: () {
-                Get.toNamed('/transferinitem',
+                Get.toNamed('/transferoutitem',
                         arguments: [data['id'], selectedValue])
-                    ?.whenComplete(() => fetchData());
+                    ?.whenComplete(() => fetchData(selectedMap));
               },
               child: const Icon(Icons.edit_note),
             ),
@@ -168,42 +149,34 @@ class _TransferOutScreen extends State<TransferOutScreen> {
     return temps;
   }
 
-  void fetchData() async {
-    Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> p =
-        await db.query('periods', orderBy: 'periodId DESC');
-    if (p.isNotEmpty) {
-      var getFirst = p.first;
-      // print(getFirst);
-      var sDateClean =
-          getFirst['startDate'].toString().substring(0, 10) + " 00:00";
-      var eDateClean =
-          getFirst['endDate'].toString().substring(0, 10) + " 23:59";
-      var results = await genData(sDateClean, eDateClean, page);
-      // print(sDateClean);
-      // print(eDateClean);
-      setState(() {
-        // selectedValue = selectedValue == 0 ? getFirst['periodId'] : 0;
-        sDate = sDateClean;
-        eDate = eDateClean;
-        _rows = results;
-      });
-    }
+  void fetchData(Map<String, dynamic> p) async {
+    // print(getFirst);
+    var sDateClean = p['startDate'].toString().substring(0, 10) + " 00:00";
+    var eDateClean = p['endDate'].toString().substring(0, 10) + " 23:59";
+    var results = await genData(sDateClean, eDateClean, page);
+    setState(() {
+      selectedValue = p['periodId'];
+      sDate = sDateClean;
+      eDate = eDateClean;
+      _rows = results;
+    });
   }
 
   void fetchPeriod() async {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.query("periods",
-        columns: ["periodId", "periodName"], orderBy: 'periodId DESC');
-    List items = [];
-
-    for (var row in maps) {
-      items.add(row);
-    }
+        columns: ["periodId", "periodName", "startDate", "endDate"],
+        orderBy: "periodId DESC");
+    // List<Map<String, dynamic>> maps = await db.rawQuery(
+    //     "SELECT p.periodId, p.periodName, p.startDate, p.endDate FROM periods p JOIN fasohead f ON f.periodId = p.periodId ORDER BY p.periodId DESC");
 
     setState(() {
-      _dropdownPeriods = items;
+      selectedValue = maps.isNotEmpty ? maps.first['periodId'] : null;
+      selectedMap = maps.first;
+      _dropdownPeriods = maps;
     });
+
+    fetchData(maps.first);
   }
 
   void confirmDownload() {
@@ -261,16 +234,41 @@ class _TransferOutScreen extends State<TransferOutScreen> {
         conflictAlgorithm: ConflictAlgorithm.replace);
     Get.snackbar("Information", insertId.toString());
 
-    fetchData();
+    fetchData(selectedMap);
+  }
+
+  void setPeriodAndFind(var value) async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> rows = await db.query(
+      'periods',
+      columns: ['periodId', 'periodName', 'startDate, endDate'],
+      where: 'periodId = ?',
+      whereArgs: [value],
+    );
+
+    if (rows.isNotEmpty) {
+      var getFirst = rows.first;
+      var sDateClean =
+          getFirst['startDate'].toString().substring(0, 10) + " 00:00";
+      var eDateClean =
+          getFirst['endDate'].toString().substring(0, 10) + " 23:59";
+      var results = await genData(sDateClean, eDateClean, page);
+      setState(() {
+        _rows = results;
+        sDate = sDateClean;
+        eDate = eDateClean;
+        selectedValue = int.parse(value.toString());
+        selectedMap = rows.first;
+      });
+    }
   }
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     super.initState();
-    fetchData();
     fetchPeriod();
-    fetchSinglePeriod();
   }
 
   @override
@@ -312,9 +310,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                           }).toList(),
                           value: selectedValue,
                           onChanged: (value) {
-                            setState(() {
-                              selectedValue = int.parse(value.toString());
-                            });
+                            setPeriodAndFind(value);
                           },
                         ),
                       ),
@@ -338,7 +334,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                     onPressed: () {
                       Get.toNamed('/transferoutitem',
                               arguments: [selectedValue])
-                          ?.whenComplete(() => fetchData());
+                          ?.whenComplete(() => fetchData(selectedMap));
                     },
                     icon: const Icon(Icons.add),
                     label: const Text("Add"),

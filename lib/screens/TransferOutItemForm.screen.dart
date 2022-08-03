@@ -106,8 +106,9 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
       Map<String, dynamic> map = Map();
 
       if (idTransItem == 0) {
-        map['transId'] = Get.arguments[0];
+        map['transLocalId'] = Get.arguments[0];
         map['transItemId'] = 0;
+        map['transId'] = 0;
         map['faItemId'] = 0;
         map['faId'] = faIdValue;
         map['remarks'] = remarks.text;
@@ -407,13 +408,14 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Status : "),
+                        SizedBox(
+                          child: const Text("Status : "),
                           width: Get.width * 0.14,
                         ),
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4.0),
                               border: Border.all(
