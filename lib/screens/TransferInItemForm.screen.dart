@@ -104,7 +104,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
       String formattedDate =
           DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now());
 
-      Map<String, dynamic> map = Map();
+      Map<String, dynamic> map = {};
 
       if (idTransItem == 0) {
         map['transLocalId'] = Get.arguments[0];
@@ -272,9 +272,11 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                     child: TextField(
                       enabled: false,
                       controller: transNo,
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.all(10),
-                        border: OutlineInputBorder(
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[300],
+                        contentPadding: const EdgeInsets.all(10),
+                        border: const OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.blueAccent),
                         ),
                       ),
@@ -299,7 +301,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                       children: [
                         Container(
                           child: Text("Tag No : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: Focus(
@@ -362,9 +364,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Description : "),
-                          width: Get.width * 0.14,
+                        SizedBox(
+                          child: const Text("Description : "),
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: TextField(
@@ -372,7 +374,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                             readOnly: true,
                             controller: description,
                             decoration: InputDecoration(
-                              fillColor: Colors.blueGrey[200],
+                              fillColor: Colors.grey[300],
                               filled: true,
                               contentPadding: const EdgeInsets.all(10),
                               border: const OutlineInputBorder(
@@ -389,9 +391,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("FA No : "),
-                          width: Get.width * 0.14,
+                        SizedBox(
+                          child: const Text("FA No : "),
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: TextField(
@@ -399,7 +401,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                             readOnly: true,
                             controller: faNo,
                             decoration: InputDecoration(
-                              fillColor: Colors.blueGrey[200],
+                              fillColor: Colors.grey[300],
                               filled: true,
                               contentPadding: const EdgeInsets.all(10),
                               border: const OutlineInputBorder(
@@ -415,13 +417,14 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text("Status : "),
-                          width: Get.width * 0.14,
+                        SizedBox(
+                          child: const Text("Status : "),
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4.0),
                               border: Border.all(
@@ -458,7 +461,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                       children: [
                         Container(
                           child: Text("Remarks : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: TextField(
@@ -494,7 +497,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                       onPressed: () {
                         actionSave();
                       },
-                      child: Text(
+                      child: const Text(
                         "Save",
                         style: TextStyle(
                           color: Colors.white,

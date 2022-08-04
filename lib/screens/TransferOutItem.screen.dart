@@ -25,6 +25,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
   int? plantId = 0;
   String? transTypeCode = "T";
   String? transferTypeCode = "TO";
+  int isApproved = 0;
 
   final transNo = TextEditingController();
   final dateTime = TextEditingController();
@@ -64,8 +65,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
 
   Future<void> actionDelete() async {
     Database db = await dbHelper.initDb();
-    int exec =
-        await db.delete("fatrans", where: "id = ?", whereArgs: [idFaTrans]);
+    await db.delete("fatrans", where: "id = ?", whereArgs: [idFaTrans]);
     Get.back();
   }
 
@@ -201,6 +201,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     if (maps.length == 1) {
       setState(() {
         idFaTrans = id;
+        isApproved = maps[0]['isApproved'];
         dateTime.text = maps[0]['transDate'];
         plantId = maps[0]['plantId'];
         transTypeCode = maps[0]['transTypeCode'];
@@ -493,11 +494,28 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                 padding: const EdgeInsets.all(14.0),
                 child: Column(
                   children: [
+                    if (isApproved == 1) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text(
+                            "Approved",
+                            style: TextStyle(
+                                color: Colors.green,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 12,
+                      ),
+                    ],
                     Row(
                       children: [
                         SizedBox(
                           child: const Text("Trans No : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: TextField(
@@ -505,7 +523,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                             readOnly: true,
                             controller: transNo,
                             decoration: InputDecoration(
-                              fillColor: Colors.blueGrey[200],
+                              fillColor: Colors.grey[300],
                               filled: true,
                               contentPadding: const EdgeInsets.all(10),
                               border: const OutlineInputBorder(
@@ -524,16 +542,20 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                       children: [
                         SizedBox(
                           child: const Text("Date/Time : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: TextField(
                             enabled: false,
                             readOnly: true,
                             controller: dateTime,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                            decoration: InputDecoration(
+                              fillColor: isApproved == 1
+                                  ? Colors.grey[300]
+                                  : Colors.white,
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),
                             ),
@@ -554,18 +576,23 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                       children: [
                         SizedBox(
                           child: const Text("Manual Ref : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
-                            child: TextField(
-                          controller: manualRef,
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent)),
+                          child: TextField(
+                            controller: manualRef,
+                            decoration: InputDecoration(
+                              fillColor: isApproved == 1
+                                  ? Colors.grey[300]
+                                  : Colors.white,
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent)),
+                            ),
                           ),
-                        )),
+                        ),
                       ],
                     ),
                     const SizedBox(
@@ -575,14 +602,18 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                       children: [
                         SizedBox(
                           child: const Text("Other Ref : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: TextField(
                             controller: otherRef,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
+                            decoration: InputDecoration(
+                              fillColor: isApproved == 1
+                                  ? Colors.grey[300]
+                                  : Colors.white,
+                              filled: true,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent)),
                             ),
@@ -597,14 +628,14 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                       children: [
                         SizedBox(
                           child: const Text("Loc. From : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         SizedBox(
                           width: Get.width * 0.2,
                           child: TextField(
                             controller: oldLocFrom,
                             decoration: InputDecoration(
-                              fillColor: Colors.blueGrey[200],
+                              fillColor: Colors.grey[300],
                               filled: true,
                               contentPadding: const EdgeInsets.all(10),
                               border: const OutlineInputBorder(
@@ -619,7 +650,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                             enabled: false,
                             readOnly: true,
                             decoration: InputDecoration(
-                              fillColor: Colors.blueGrey[200],
+                              fillColor: Colors.grey[300],
                               filled: true,
                               contentPadding: const EdgeInsets.all(10),
                               border: const OutlineInputBorder(
@@ -637,7 +668,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                       children: [
                         SizedBox(
                           child: const Text("Loc. To : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         SizedBox(
                           width: Get.width * 0.2,
@@ -650,7 +681,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                             child: TextField(
                               controller: newLocFrom,
                               decoration: InputDecoration(
-                                fillColor: Colors.blueGrey[200],
+                                fillColor: Colors.grey[300],
                                 filled: true,
                                 contentPadding: const EdgeInsets.all(10),
                                 border: const OutlineInputBorder(
@@ -666,7 +697,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                             enabled: false,
                             readOnly: true,
                             decoration: InputDecoration(
-                              fillColor: Colors.blueGrey[200],
+                              fillColor: Colors.grey[300],
                               filled: true,
                               contentPadding: const EdgeInsets.all(10),
                               border: const OutlineInputBorder(
@@ -685,27 +716,30 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
               width: Get.width,
               child: Column(
                 children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 6.0, vertical: 3.0),
-                    height: 50,
-                    width: 600,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 62, 81, 255),
-                      ),
-                      onPressed: () {
-                        actionSave();
-                      },
-                      child: const Text(
-                        "Save as Draft",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
+                  if (isApproved == 0) ...[
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3.0),
+                      height: 50,
+                      width: 600,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor:
+                              const Color.fromARGB(255, 62, 81, 255),
+                        ),
+                        onPressed: () {
+                          actionSave();
+                        },
+                        child: const Text(
+                          "Save as Draft",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                   if (idFaTrans != 0) ...[
                     Container(
                       margin: const EdgeInsets.symmetric(
@@ -720,7 +754,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         onPressed: () {
                           // if (transNo.text != "") {
                           Get.toNamed('/transferoutitemlist',
-                              arguments: [idFaTrans, transNo.text]);
+                              arguments: [idFaTrans, transNo.text, isApproved]);
                           // } else {
                           //   Get.dialog(
                           //     const AlertDialog(
@@ -739,74 +773,74 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         ),
                       ),
                     ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 6.0, vertical: 3.0),
-                      height: 50,
-                      width: 600,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 40, 165, 61),
-                        ),
-                        onPressed: () {
-                          confirmApprove();
-                        },
-                        child: const Text(
-                          "Approve",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
+                    if (isApproved == 0) ...[
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 6.0, vertical: 3.0),
+                        height: 50,
+                        width: 600,
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 40, 165, 61),
+                          ),
+                          onPressed: () {
+                            confirmApprove();
+                          },
+                          child: const Text(
+                            "Approve",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 6.0, vertical: 3.0),
-                      height: 50,
-                      width: 600,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 116, 54, 173),
-                        ),
-                        onPressed: () {
-                          confirmUploadToServer();
-                        },
-                        child: const Text(
-                          "Upload to Server",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 6.0, vertical: 3.0),
+                        height: 50,
+                        width: 600,
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 116, 54, 173),
+                          ),
+                          onPressed: () {
+                            confirmUploadToServer();
+                          },
+                          child: const Text(
+                            "Upload to Server",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                  if (idFaTrans != 0) ...[
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 6.0, vertical: 3.0),
-                      height: 50,
-                      width: 600,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 228, 11, 29),
-                        ),
-                        onPressed: () {
-                          actionConfirm();
-                        },
-                        child: const Text(
-                          "Delete",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 6.0, vertical: 3.0),
+                        height: 50,
+                        width: 600,
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 228, 11, 29),
+                          ),
+                          onPressed: () {
+                            actionConfirm();
+                          },
+                          child: const Text(
+                            "Delete",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ],
               ),

@@ -24,16 +24,17 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
   int idFaTrans = 0;
   final transNo = TextEditingController();
 
-  late List<DatatableHeader> _headers;
+  // late List<DatatableHeader> _headers;
 
-  List<Map<String, dynamic>> _sources = [];
+  // List<Map<String, dynamic>> _sources = [];
   List<DataRow> _rows = [];
 
-  int _currentPage = 1;
+  // int _currentPage = 1;
   bool _isLoading = true;
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     super.initState();
     idFaTrans = Get.arguments[0];
@@ -46,53 +47,59 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
     List<Map<String, dynamic>> maps = await db.rawQuery(
         "SELECT s.*, i.assetName, c.genName AS con FROM fatransitem s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses c ON c.genCode = s.conStatCode WHERE s.transLocalId = ${Get.arguments[0]}");
 
-    print(maps);
+    // print(maps);
     List<DataRow> temps = [];
     var i = 1;
     for (var data in maps) {
       DataRow row = DataRow(cells: [
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.1,
             child: Text("$i"),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.2,
             child: Text(data['tagNo'].toString()),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.25,
             child: Text(data['description'].toString()),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.1,
-            child: Text("1"),
+            child: const Text("1"),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.1,
             child: Text(data['con']),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.1,
-            child: TextButton(
-              onPressed: () {
-                Get.toNamed(
-                  '/transferoutitemform',
-                  arguments: [Get.arguments[0], Get.arguments[1], data['id']],
-                )?.whenComplete(() => fetchData());
-              },
-              child: Icon(Icons.edit_note),
-            ),
+            child: Get.arguments[2] == 0
+                ? TextButton(
+                    onPressed: () {
+                      Get.toNamed(
+                        '/transferoutitemform',
+                        arguments: [
+                          Get.arguments[0],
+                          Get.arguments[1],
+                          data['id']
+                        ],
+                      )?.whenComplete(() => fetchData());
+                    },
+                    child: const Icon(Icons.edit_note),
+                  )
+                : null,
           ),
         ),
       ]);
@@ -130,31 +137,36 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
                     child: TextField(
                       enabled: false,
                       controller: transNo,
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.all(10),
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blueAccent)),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[300],
+                        contentPadding: const EdgeInsets.all(10),
+                        border: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blueAccent),
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            Container(
+            SizedBox(
               width: Get.width,
               child: Row(
                 children: [
-                  TextButton.icon(
-                    onPressed: () {
-                      Get.toNamed(
-                        '/transferoutitemform',
-                        arguments: [Get.arguments[0], Get.arguments[1], 0],
-                      )?.whenComplete(() => fetchData());
-                    },
-                    icon: Icon(Icons.add),
-                    label: Text("Add"),
-                  ),
-                  SizedBox(
+                  if (Get.arguments[2] == 0) ...[
+                    TextButton.icon(
+                      onPressed: () {
+                        Get.toNamed(
+                          '/transferoutitemform',
+                          arguments: [Get.arguments[0], Get.arguments[1], 0],
+                        )?.whenComplete(() => fetchData());
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text("Add"),
+                    ),
+                  ],
+                  const SizedBox(
                     width: 10,
                   ),
                 ],

@@ -53,21 +53,21 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
   void actionConfirm() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to delete data ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to delete data ?"),
         actions: [
           TextButton(
             onPressed: () {
               Get.back();
               actionDelete();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -76,8 +76,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
 
   Future<void> actionDelete() async {
     Database db = await dbHelper.initDb();
-    int exec = await db
-        .delete("fatransitem", where: "id = ?", whereArgs: [idTransItem]);
+    await db.delete("fatransitem", where: "id = ?", whereArgs: [idTransItem]);
     Get.back();
   }
 
@@ -103,7 +102,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
       String formattedDate =
           DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now());
 
-      Map<String, dynamic> map = Map();
+      Map<String, dynamic> map = {};
 
       if (idTransItem == 0) {
         map['transLocalId'] = Get.arguments[0];
@@ -155,14 +154,14 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
             where: "id = ?", whereArgs: [idTransItem]);
 
         Get.dialog(AlertDialog(
-          title: Text("Information"),
-          content: Text("Data has been updated."),
+          title: const Text("Information"),
+          content: const Text("Data has been updated."),
           actions: [
             TextButton(
               onPressed: () {
                 Get.back();
               },
-              child: Text("Close"),
+              child: const Text("Close"),
             ),
           ],
         ));
@@ -206,8 +205,8 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
   void confirmDownloadItems() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to sync data items now ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to sync data items now ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -215,13 +214,13 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
               // ex. actionUploadToServer();
               Get.back();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -230,6 +229,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     super.initState();
     transNo.text = Get.arguments[1];
