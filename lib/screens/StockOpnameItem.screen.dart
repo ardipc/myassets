@@ -54,6 +54,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   String? selectedOwnership;
   List _optionsOwnership = [];
 
+  final _formKey = GlobalKey<FormState>();
+
   void fetchPeriod() async {
     Database db = await dbHelper.initDb();
 
@@ -411,365 +413,412 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                 borderSide: const BorderSide(color: Colors.grey, width: 1),
               ),
               color: Colors.white,
-              child: Container(
-                padding: const EdgeInsets.all(14.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Tag No : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: Focus(
-                            onFocusChange: (value) {
-                              if (!value) {
-                                getInfoItem(tagNoController.text);
-                              }
-                            },
-                            child: TextFormField(
-                              validator: (value) {
-                                print(value);
+              child: Form(
+                key: _formKey,
+                child: Container(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Tag No : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: Focus(
+                              onFocusChange: (value) {
+                                if (!value) {
+                                  getInfoItem(tagNoController.text);
+                                }
                               },
-                              enabled: isConfirmed ? false : true,
-                              controller: tagNoController,
-                              decoration: const InputDecoration(
-                                hintText: "ex. ARA140001580",
-                                contentPadding: EdgeInsets.all(10),
-                                border: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent),
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter some text';
+                                  }
+                                  return null;
+                                },
+                                enabled: isConfirmed ? false : true,
+                                controller: tagNoController,
+                                decoration: const InputDecoration(
+                                  hintText: "ex. ARA140001580",
+                                  contentPadding: EdgeInsets.all(10),
+                                  border: OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            try {
-                              String barcode = await BarcodeScanner.scan();
-                              getInfoItem(barcode);
-                              setState(() {
-                                barcode = barcode;
-                                tagNoController.text = barcode;
-                              });
-                            } on PlatformException catch (error) {
-                              if (error.code ==
-                                  BarcodeScanner.CameraAccessDenied) {
+                          TextButton(
+                            onPressed: () async {
+                              try {
+                                String barcode = await BarcodeScanner.scan();
+                                getInfoItem(barcode);
                                 setState(() {
-                                  barcode =
-                                      'Izin kamera tidak diizinkan oleh si pengguna';
+                                  barcode = barcode;
+                                  tagNoController.text = barcode;
                                 });
-                              } else {
+                              } on PlatformException catch (error) {
+                                if (error.code ==
+                                    BarcodeScanner.CameraAccessDenied) {
+                                  setState(() {
+                                    barcode =
+                                        'Izin kamera tidak diizinkan oleh si pengguna';
+                                  });
+                                } else {
+                                  setState(() {
+                                    barcode = 'Error: $error';
+                                  });
+                                }
+                              } catch (e) {
                                 setState(() {
-                                  barcode = 'Error: $error';
+                                  barcode = '';
                                 });
                               }
-                            } catch (e) {
-                              setState(() {
-                                barcode = '';
-                              });
-                            }
-                          },
-                          child: const Icon(Icons.qr_code),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            confirmDownloadTag();
-                          },
-                          child: const Icon(Icons.download),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Description : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            enabled: false,
-                            // readOnly: true,
-                            controller: descriptionController,
-                            decoration: InputDecoration(
-                              fillColor: Colors.blueGrey[200],
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("FA No : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: TextFormField(
-                            enabled: false,
-                            // readOnly: true,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter some text';
-                              }
-                              return null;
                             },
-                            controller: faNoController,
-                            decoration: InputDecoration(
-                              fillColor: Colors.blueGrey[200],
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
-                            ),
+                            child: const Icon(Icons.qr_code),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Existence : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4.0),
-                              border: Border.all(
-                                style: BorderStyle.solid,
-                                width: 0.80,
-                              ),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                isExpanded: true,
-                                hint: const Text("Select Existence"),
-                                items: _optionsExistence.map((item) {
-                                  return DropdownMenuItem(
-                                    child: Text(item['genName']),
-                                    value: item['genCode'],
-                                  );
-                                }).toList(),
-                                value: selectedExistence,
-                                onChanged: isConfirmed
-                                    ? null
-                                    : (value) {
-                                        setState(() {
-                                          selectedExistence = value.toString();
-                                          if (value == "ex1") {
-                                            isAda = false;
-                                          } else {
-                                            isAda = true;
-                                            selectedTagging = null;
-                                            selectedUsage = null;
-                                            selectedCondition = null;
-                                            selectedOwnership = null;
-                                          }
-                                        });
-                                      },
+                          TextButton(
+                            onPressed: () {
+                              confirmDownloadTag();
+                            },
+                            child: const Icon(Icons.download),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Description : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: TextField(
+                              enabled: false,
+                              // readOnly: true,
+                              controller: descriptionController,
+                              decoration: InputDecoration(
+                                fillColor: Colors.blueGrey[200],
+                                filled: true,
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent)),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Tagging : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4.0),
-                              border: Border.all(
-                                style: BorderStyle.solid,
-                                width: 0.80,
-                              ),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                isExpanded: true,
-                                hint: const Text("Select Tagging"),
-                                items: _optionsTagging.map((item) {
-                                  return DropdownMenuItem(
-                                    child: Text(item['genName']),
-                                    value: item['genCode'],
-                                  );
-                                }).toList(),
-                                value: selectedTagging,
-                                onChanged: isAda
-                                    ? null
-                                    : (value) {
-                                        setState(() {
-                                          selectedTagging = value.toString();
-                                        });
-                                      },
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("FA No : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: TextFormField(
+                              enabled: false,
+                              // readOnly: true,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller: faNoController,
+                              decoration: InputDecoration(
+                                fillColor: Colors.blueGrey[200],
+                                filled: true,
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent)),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Usage : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4.0),
-                              border: Border.all(
-                                style: BorderStyle.solid,
-                                width: 0.80,
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Existence : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4.0),
+                                border: Border.all(
+                                  style: BorderStyle.solid,
+                                  width: 0.80,
+                                ),
                               ),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                isExpanded: true,
-                                hint: const Text("Select Usage"),
-                                items: _optionsUsage.map((item) {
-                                  return DropdownMenuItem(
-                                    child: Text(item['genName']),
-                                    value: item['genCode'],
-                                  );
-                                }).toList(),
-                                value: selectedUsage,
-                                onChanged: isAda
-                                    ? null
-                                    : (value) {
-                                        setState(() {
-                                          selectedUsage = value.toString();
-                                        });
-                                      },
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButtonFormField(
+                                  validator: (value) {
+                                    if (value == null) {
+                                      return 'Please select option';
+                                    }
+                                    return null;
+                                  },
+                                  isExpanded: true,
+                                  hint: const Text("Select Existence"),
+                                  items: _optionsExistence.map((item) {
+                                    return DropdownMenuItem(
+                                      child: Text(item['genName']),
+                                      value: item['genCode'],
+                                    );
+                                  }).toList(),
+                                  value: selectedExistence,
+                                  onChanged: isConfirmed
+                                      ? null
+                                      : (value) {
+                                          setState(() {
+                                            selectedExistence =
+                                                value.toString();
+                                            if (value == "ex1") {
+                                              isAda = false;
+                                            } else {
+                                              isAda = true;
+                                              selectedTagging = null;
+                                              selectedUsage = null;
+                                              selectedCondition = null;
+                                              selectedOwnership = null;
+                                            }
+                                          });
+                                        },
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Condition : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4.0),
-                              border: Border.all(
-                                style: BorderStyle.solid,
-                                width: 0.80,
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Tagging : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4.0),
+                                border: Border.all(
+                                  style: BorderStyle.solid,
+                                  width: 0.80,
+                                ),
                               ),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                isExpanded: true,
-                                hint: const Text("Select Condition"),
-                                items: _optionsCondition.map((item) {
-                                  return DropdownMenuItem(
-                                    child: Text(item['genName']),
-                                    value: item['genCode'],
-                                  );
-                                }).toList(),
-                                value: selectedCondition,
-                                onChanged: isAda
-                                    ? null
-                                    : (value) {
-                                        setState(() {
-                                          selectedCondition = value.toString();
-                                        });
-                                      },
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButtonFormField(
+                                  isExpanded: true,
+                                  hint: const Text("Select Tagging"),
+                                  items: _optionsTagging.map((item) {
+                                    return DropdownMenuItem(
+                                      child: Text(item['genName']),
+                                      value: item['genCode'],
+                                    );
+                                  }).toList(),
+                                  value: selectedTagging,
+                                  validator: (value) {
+                                    if (selectedExistence == 'ex1') {
+                                      if (value == null) {
+                                        return 'Please select option';
+                                      }
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: isAda
+                                      ? null
+                                      : (value) {
+                                          setState(() {
+                                            selectedTagging = value.toString();
+                                          });
+                                        },
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Ownership : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4.0),
-                              border: Border.all(
-                                style: BorderStyle.solid,
-                                width: 0.80,
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Usage : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4.0),
+                                border: Border.all(
+                                  style: BorderStyle.solid,
+                                  width: 0.80,
+                                ),
                               ),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                isExpanded: true,
-                                hint: const Text("Select Ownership"),
-                                items: _optionsOwnership.map((item) {
-                                  return DropdownMenuItem(
-                                    child: Text(item['genName']),
-                                    value: item['genCode'],
-                                  );
-                                }).toList(),
-                                value: selectedOwnership,
-                                onChanged: isAda
-                                    ? null
-                                    : (value) {
-                                        setState(() {
-                                          selectedOwnership = value.toString();
-                                        });
-                                      },
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButtonFormField(
+                                  isExpanded: true,
+                                  hint: const Text("Select Usage"),
+                                  items: _optionsUsage.map((item) {
+                                    return DropdownMenuItem(
+                                      child: Text(item['genName']),
+                                      value: item['genCode'],
+                                    );
+                                  }).toList(),
+                                  value: selectedUsage,
+                                  validator: (value) {
+                                    if (selectedExistence == 'ex1') {
+                                      if (value == null) {
+                                        return 'Please select option';
+                                      }
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: isAda
+                                      ? null
+                                      : (value) {
+                                          setState(() {
+                                            selectedUsage = value.toString();
+                                          });
+                                        },
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Condition : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4.0),
+                                border: Border.all(
+                                  style: BorderStyle.solid,
+                                  width: 0.80,
+                                ),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButtonFormField(
+                                  isExpanded: true,
+                                  hint: const Text("Select Condition"),
+                                  items: _optionsCondition.map((item) {
+                                    return DropdownMenuItem(
+                                      child: Text(item['genName']),
+                                      value: item['genCode'],
+                                    );
+                                  }).toList(),
+                                  value: selectedCondition,
+                                  validator: (value) {
+                                    if (selectedExistence == 'ex1') {
+                                      if (value == null) {
+                                        return 'Please select option';
+                                      }
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: isAda
+                                      ? null
+                                      : (value) {
+                                          setState(() {
+                                            selectedCondition =
+                                                value.toString();
+                                          });
+                                        },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Ownership : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4.0),
+                                border: Border.all(
+                                  style: BorderStyle.solid,
+                                  width: 0.80,
+                                ),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButtonFormField(
+                                  isExpanded: true,
+                                  hint: const Text("Select Ownership"),
+                                  items: _optionsOwnership.map((item) {
+                                    return DropdownMenuItem(
+                                      child: Text(item['genName']),
+                                      value: item['genCode'],
+                                    );
+                                  }).toList(),
+                                  value: selectedOwnership,
+                                  validator: (value) {
+                                    if (selectedExistence == 'ex1') {
+                                      if (value == null) {
+                                        return 'Please select option';
+                                      }
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: isAda
+                                      ? null
+                                      : (value) {
+                                          setState(() {
+                                            selectedOwnership =
+                                                value.toString();
+                                          });
+                                        },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -793,7 +842,9 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                             ),
                             onPressed: () {
                               if (Get.arguments[2]['soStatusCode'] == "0") {
-                                actionSave();
+                                if (_formKey.currentState!.validate()) {
+                                  actionSave();
+                                }
                               } else {
                                 Get.dialog(
                                   const AlertDialog(
