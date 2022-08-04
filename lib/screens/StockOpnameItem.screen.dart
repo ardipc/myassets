@@ -488,7 +488,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               // readOnly: true,
                               controller: descriptionController,
                               decoration: InputDecoration(
-                                fillColor: Colors.blueGrey[200],
+                                fillColor: Colors.grey[300],
                                 filled: true,
                                 contentPadding: const EdgeInsets.all(10),
                                 border: const OutlineInputBorder(
@@ -520,7 +520,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               },
                               controller: faNoController,
                               decoration: InputDecoration(
-                                fillColor: Colors.blueGrey[200],
+                                fillColor: Colors.grey[300],
                                 filled: true,
                                 contentPadding: const EdgeInsets.all(10),
                                 border: const OutlineInputBorder(
