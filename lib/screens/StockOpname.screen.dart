@@ -227,7 +227,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     // print(maps);
     for (var data in maps) {
       Map<String, dynamic> map = {};
-      map['stockOpnameId'] = '';
+      map['stockOpnameId'] = data['stockOpnameId'];
       map['periodId'] = data['periodId'] ?? 0;
       map['faId'] = data['faId'];
       map['locationId'] = data['locationId'];
