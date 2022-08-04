@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -386,20 +384,6 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                           ),
                         ),
                       ),
-                      // DropdownButtonHideUnderline(
-                      //   child: DropdownButton(
-                      //     isExpanded: true,
-                      //     hint: const Text("Select Period"),
-                      //     items: _optionsPeriods.map((item) {
-                      //       return DropdownMenuItem(
-                      //         child: Text(item['periodName']),
-                      //         value: item['periodId'],
-                      //       );
-                      //     }).toList(),
-                      //     value: selectedValue,
-                      //     onChanged: null,
-                      //   ),
-                      // ),
                     ),
                   ),
                 ],
@@ -646,13 +630,16 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                     }
                                     return null;
                                   },
-                                  onChanged: isAda
+                                  onChanged: isConfirmed
                                       ? null
-                                      : (value) {
-                                          setState(() {
-                                            selectedTagging = value.toString();
-                                          });
-                                        },
+                                      : (isAda
+                                          ? null
+                                          : (value) {
+                                              setState(() {
+                                                selectedTagging =
+                                                    value.toString();
+                                              });
+                                            }),
                                 ),
                               ),
                             ),
@@ -698,13 +685,16 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                     }
                                     return null;
                                   },
-                                  onChanged: isAda
+                                  onChanged: isConfirmed
                                       ? null
-                                      : (value) {
-                                          setState(() {
-                                            selectedUsage = value.toString();
-                                          });
-                                        },
+                                      : (isAda
+                                          ? null
+                                          : (value) {
+                                              setState(() {
+                                                selectedUsage =
+                                                    value.toString();
+                                              });
+                                            }),
                                 ),
                               ),
                             ),
@@ -750,14 +740,16 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                     }
                                     return null;
                                   },
-                                  onChanged: isAda
+                                  onChanged: isConfirmed
                                       ? null
-                                      : (value) {
-                                          setState(() {
-                                            selectedCondition =
-                                                value.toString();
-                                          });
-                                        },
+                                      : (isAda
+                                          ? null
+                                          : (value) {
+                                              setState(() {
+                                                selectedCondition =
+                                                    value.toString();
+                                              });
+                                            }),
                                 ),
                               ),
                             ),
@@ -803,14 +795,16 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                     }
                                     return null;
                                   },
-                                  onChanged: isAda
+                                  onChanged: isConfirmed
                                       ? null
-                                      : (value) {
-                                          setState(() {
-                                            selectedOwnership =
-                                                value.toString();
-                                          });
-                                        },
+                                      : (isAda
+                                          ? null
+                                          : (value) {
+                                              setState(() {
+                                                selectedOwnership =
+                                                    value.toString();
+                                              });
+                                            }),
                                 ),
                               ),
                             ),
@@ -841,7 +835,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   : const Color.fromARGB(255, 62, 81, 255),
                             ),
                             onPressed: () {
-                              if (Get.arguments[2]['soStatusCode'] == "0") {
+                              if (!isConfirmed) {
                                 if (_formKey.currentState!.validate()) {
                                   actionSave();
                                 }
