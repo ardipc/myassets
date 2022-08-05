@@ -561,12 +561,14 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                             ),
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            _selectDate(context);
-                          },
-                          child: const Icon(Icons.date_range),
-                        ),
+                        if (isApproved == 0) ...[
+                          TextButton(
+                            onPressed: () {
+                              _selectDate(context);
+                            },
+                            child: const Icon(Icons.date_range),
+                          ),
+                        ],
                       ],
                     ),
                     const SizedBox(

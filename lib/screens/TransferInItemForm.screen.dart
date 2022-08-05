@@ -139,6 +139,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
             TextButton(
               onPressed: () {
                 Get.back();
+                Get.back();
               },
               child: const Text("Close"),
             ),
@@ -161,6 +162,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
           actions: [
             TextButton(
               onPressed: () {
+                Get.back();
                 Get.back();
               },
               child: const Text("Close"),

@@ -131,14 +131,15 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
         });
 
         Get.dialog(AlertDialog(
-          title: Text("Information"),
-          content: Text("Data has been saved."),
+          title: const Text("Information"),
+          content: const Text("Data has been saved."),
           actions: [
             TextButton(
               onPressed: () {
                 Get.back();
+                Get.back();
               },
-              child: Text("Close"),
+              child: const Text("Close"),
             ),
           ],
         ));
@@ -159,6 +160,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
           actions: [
             TextButton(
               onPressed: () {
+                Get.back();
                 Get.back();
               },
               child: const Text("Close"),
@@ -292,7 +294,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                       children: [
                         SizedBox(
                           child: const Text("Tag No : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: Focus(
@@ -357,7 +359,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                       children: [
                         Container(
                           child: Text("Description : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: TextField(
@@ -365,7 +367,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                             readOnly: true,
                             controller: description,
                             decoration: InputDecoration(
-                              fillColor: Colors.blueGrey[200],
+                              fillColor: Colors.grey[300],
                               filled: true,
                               contentPadding: const EdgeInsets.all(10),
                               border: const OutlineInputBorder(
@@ -384,7 +386,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                       children: [
                         Container(
                           child: Text("FA No : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: TextField(
@@ -392,7 +394,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                             readOnly: true,
                             controller: faNo,
                             decoration: InputDecoration(
-                              fillColor: Colors.blueGrey[200],
+                              fillColor: Colors.grey[300],
                               filled: true,
                               contentPadding: const EdgeInsets.all(10),
                               border: const OutlineInputBorder(
@@ -410,7 +412,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                       children: [
                         SizedBox(
                           child: const Text("Status : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: Container(
@@ -452,7 +454,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                       children: [
                         SizedBox(
                           child: const Text("Remarks : "),
-                          width: Get.width * 0.14,
+                          width: Get.width * 0.18,
                         ),
                         Expanded(
                           child: TextField(
