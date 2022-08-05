@@ -35,6 +35,9 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
   String? selectedStatus;
   List _optionsStatus = [];
 
+  final _key = GlobalKey<FormState>();
+  final _focusTagNo = FocusNode();
+
   final remarks = TextEditingController();
 
   void fetchAllOptions() async {
@@ -54,21 +57,21 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
   void actionConfirm() {
     Get.dialog(
       AlertDialog(
-        title: Text("Confirmation"),
-        content: Text("Are you sure to delete data ?"),
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure to delete data ?"),
         actions: [
           TextButton(
             onPressed: () {
               Get.back();
               actionDelete();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -77,8 +80,7 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
 
   Future<void> actionDelete() async {
     Database db = await dbHelper.initDb();
-    int exec = await db
-        .delete("fatransitem", where: "id = ?", whereArgs: [idTransItem]);
+    await db.delete("fatransitem", where: "id = ?", whereArgs: [idTransItem]);
     Get.back();
   }
 
@@ -153,8 +155,12 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
         map['conStatCode'] = selectedStatus;
         map['tagNo'] = tagNo.text;
 
-        int exec = await db.update("fatransitem", map,
-            where: "id = ?", whereArgs: [idTransItem]);
+        await db.update(
+          "fatransitem",
+          map,
+          where: "id = ?",
+          whereArgs: [idTransItem],
+        );
 
         Get.dialog(AlertDialog(
           title: const Text("Information"),
@@ -186,7 +192,10 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
         description.text = maps[0]['description'].toString();
         faNo.text = maps[0]['faNo'].toString();
         faIdValue = maps[0]['faId'];
-        selectedStatus = maps[0]['conStatCode'];
+        // ignore: prefer_null_aware_operators
+        selectedStatus = maps[0]['conStatCode'] != null
+            ? maps[0]['conStatCode'].toString()
+            : null;
         remarks.text = maps[0]['remarks'];
       });
     }
@@ -195,15 +204,32 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
   Future<void> getInfoItem(String value) async {
     Database db = await dbHelper.initDb();
     String parseToInt = value == '' ? '0' : value;
-    List<Map<String, dynamic>> maps =
-        await db.query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
-    if (maps.length == 1) {
-      setState(() {
-        tagNo.text = value;
-        description.text = maps[0]['assetName'];
-        faIdValue = maps[0]['faId'];
-        faNo.text = maps[0]['faNo'].toString();
-      });
+
+    List<Map<String, dynamic>> checkTagNo = await db.query(
+      'fatransitem',
+      where: "transLocalId = ? AND tagNo = ?",
+      whereArgs: [Get.arguments[0], value],
+    );
+    if (checkTagNo.isNotEmpty) {
+      Get.snackbar("Information", "TagNo sudah terdapat di transaksi ini.");
+      tagNo.text = "";
+      _focusTagNo.requestFocus();
+    } else {
+      List<Map<String, dynamic>> maps = await db
+          .query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
+      if (maps.length == 1) {
+        setState(() {
+          tagNo.text = value;
+          description.text = maps[0]['assetName'];
+          faIdValue = maps[0]['faId'];
+          faNo.text = maps[0]['faNo'].toString();
+        });
+      } else {
+        Get.snackbar("Information", "TagNo tidak ditemukan.");
+        description.text = "";
+        faNo.text = "";
+        faIdValue = null;
+      }
     }
   }
 
@@ -289,215 +315,238 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
             ),
             Card(
               elevation: 4,
-              margin: EdgeInsets.all(12.0),
+              margin: const EdgeInsets.all(12.0),
               shape: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(3),
-                borderSide: BorderSide(color: Colors.grey, width: 1),
+                borderSide: const BorderSide(
+                  color: Colors.grey,
+                  width: 1,
+                ),
               ),
               color: Colors.white,
-              child: Container(
-                padding: EdgeInsets.all(14.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          child: Text("Tag No : "),
-                          width: Get.width * 0.18,
-                        ),
-                        Expanded(
-                          child: Focus(
-                            onFocusChange: (value) {
-                              if (!value) {
-                                getInfoItem(tagNo.text);
+              child: Form(
+                key: _key,
+                child: Container(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Tag No : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: Focus(
+                              onFocusChange: (value) {
+                                if (!value) {
+                                  getInfoItem(tagNo.text);
+                                }
+                              },
+                              child: TextFormField(
+                                focusNode: _focusTagNo,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "Please fill some text";
+                                  }
+                                  return null;
+                                },
+                                controller: tagNo,
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.all(10),
+                                  border: OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              try {
+                                String barcode = await BarcodeScanner.scan();
+                                getInfoItem(barcode);
+                                setState(() {
+                                  barcode = barcode;
+                                  tagNo.text = barcode;
+                                });
+                              } on PlatformException catch (error) {
+                                if (error.code ==
+                                    BarcodeScanner.CameraAccessDenied) {
+                                  setState(() {
+                                    tagNo.text =
+                                        'Izin kamera tidak diizinkan oleh si pengguna';
+                                  });
+                                } else {
+                                  setState(() {
+                                    tagNo.text = 'Error: $error';
+                                  });
+                                }
+                              } catch (e) {
+                                setState(() {
+                                  barcode = '';
+                                });
                               }
                             },
+                            child: const Icon(Icons.qr_code),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              confirmDownloadItems();
+                            },
+                            child: const Icon(Icons.download),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Description : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
                             child: TextField(
-                              controller: tagNo,
-                              decoration: const InputDecoration(
-                                contentPadding: EdgeInsets.all(10),
-                                border: OutlineInputBorder(
+                              enabled: false,
+                              readOnly: true,
+                              controller: description,
+                              decoration: InputDecoration(
+                                fillColor: Colors.grey[300],
+                                filled: true,
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
                                   borderSide:
                                       BorderSide(color: Colors.blueAccent),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            try {
-                              String barcode = await BarcodeScanner.scan();
-                              getInfoItem(barcode);
-                              setState(() {
-                                barcode = barcode;
-                                tagNo.text = barcode;
-                              });
-                            } on PlatformException catch (error) {
-                              if (error.code ==
-                                  BarcodeScanner.CameraAccessDenied) {
-                                setState(() {
-                                  tagNo.text =
-                                      'Izin kamera tidak diizinkan oleh si pengguna';
-                                });
-                              } else {
-                                setState(() {
-                                  tagNo.text = 'Error: $error';
-                                });
-                              }
-                            } catch (e) {
-                              setState(() {
-                                barcode = '';
-                              });
-                            }
-                          },
-                          child: Icon(Icons.qr_code),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            confirmDownloadItems();
-                          },
-                          child: Icon(Icons.download),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Description : "),
-                          width: Get.width * 0.18,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            enabled: false,
-                            readOnly: true,
-                            controller: description,
-                            decoration: InputDecoration(
-                              fillColor: Colors.grey[300],
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
-                              ),
-                            ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("FA No : "),
+                            width: Get.width * 0.18,
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("FA No : "),
-                          width: Get.width * 0.18,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            enabled: false,
-                            readOnly: true,
-                            controller: faNo,
-                            decoration: InputDecoration(
-                              fillColor: Colors.grey[300],
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
+                          Expanded(
+                            child: TextField(
+                              enabled: false,
+                              readOnly: true,
+                              controller: faNo,
+                              decoration: InputDecoration(
+                                fillColor: Colors.grey[300],
+                                filled: true,
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
                                   borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Status : "),
-                          width: Get.width * 0.18,
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4.0),
-                              border: Border.all(
-                                style: BorderStyle.solid,
-                                width: 0.80,
-                              ),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                isExpanded: true,
-                                hint: const Text("Select Status"),
-                                items: _optionsStatus.map((item) {
-                                  return DropdownMenuItem(
-                                    child: Text(item['genName']),
-                                    value: item['genCode'],
-                                  );
-                                }).toList(),
-                                value: selectedStatus,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedStatus = value.toString();
-                                  });
-                                },
+                                      BorderSide(color: Colors.blueAccent),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          child: Text("Remarks : "),
-                          width: Get.width * 0.18,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: remarks,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Status : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4.0),
+                                border: Border.all(
+                                  style: BorderStyle.solid,
+                                  width: 0.80,
+                                ),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButtonFormField(
+                                  validator: (value) {
+                                    if (value == null) {
+                                      return "Please select options";
+                                    }
+                                    return null;
+                                  },
+                                  isExpanded: true,
+                                  hint: const Text("Select Status"),
+                                  items: _optionsStatus.map((item) {
+                                    return DropdownMenuItem(
+                                      child: Text(item['genName']),
+                                      value: item['genCode'],
+                                    );
+                                  }).toList(),
+                                  value: selectedStatus,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedStatus = value.toString();
+                                    });
+                                  },
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Remarks : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: TextFormField(
+                              controller: remarks,
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.all(10),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.blueAccent,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            Container(
+            SizedBox(
               width: Get.width,
               child: Column(
                 children: [
                   Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 6.0, vertical: 3.0),
                     height: 50,
                     width: 600,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 62, 81, 255),
+                        backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                       ),
                       onPressed: () {
-                        actionSave();
+                        if (_key.currentState!.validate()) {
+                          actionSave();
+                        }
                       },
                       child: const Text(
                         "Save",
@@ -510,18 +559,19 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
                   ),
                   if (idTransItem != 0) ...[
                     Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3.0),
                       height: 50,
                       width: 600,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 228, 11, 29),
+                          backgroundColor:
+                              const Color.fromARGB(255, 228, 11, 29),
                         ),
                         onPressed: () {
                           actionConfirm();
                         },
-                        child: Text(
+                        child: const Text(
                           "Delete",
                           style: TextStyle(
                             color: Colors.white,

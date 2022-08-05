@@ -79,7 +79,7 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
         DataCell(
           SizedBox(
             width: Get.width * 0.1,
-            child: Text(data['con']),
+            child: Text(data['con'].toString()),
           ),
         ),
         DataCell(

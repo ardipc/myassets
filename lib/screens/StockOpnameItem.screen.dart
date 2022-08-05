@@ -332,11 +332,16 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         await db.query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
     if (maps.length == 1) {
       setState(() {
-        faIdValue = maps[0]['faId'];
         tagNoController.text = value;
         descriptionController.text = maps[0]['assetName'];
         faNoController.text = maps[0]['faNo'];
+        faIdValue = maps[0]['faId'];
       });
+    } else {
+      Get.snackbar("Information", "TagNo tidak ditemukan.");
+      descriptionController.text = "";
+      faNoController.text = "";
+      faIdValue = null;
     }
   }
 

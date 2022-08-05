@@ -36,6 +36,9 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
 
   final remarks = TextEditingController();
 
+  final _key = GlobalKey<FormState>();
+  final _focusTagNo = FocusNode();
+
   void fetchAllOptions() async {
     Database db = await dbHelper.initDb();
 
@@ -151,7 +154,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
         map['description'] = description.text;
         map['faNo'] = faNo.text;
 
-        int exec = await db.update("fatransitem", map,
+        await db.update("fatransitem", map,
             where: "id = ?", whereArgs: [idTransItem]);
 
         Get.dialog(AlertDialog(
@@ -183,7 +186,10 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
         tagNo.text = maps[0]['tagNo'];
         faNo.text = maps[0]['faNo'].toString();
         description.text = maps[0]['description'].toString();
-        selectedStatus = maps[0]['conStatCode'].toString();
+        // ignore: prefer_null_aware_operators
+        selectedStatus = maps[0]['conStatCode'] != null
+            ? maps[0]['conStatCode'].toString()
+            : null;
         remarks.text = maps[0]['remarks'];
       });
     }
@@ -192,15 +198,31 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
   Future<void> getInfoItem(String value) async {
     Database db = await dbHelper.initDb();
     int parseToInt = int.parse(value == '' ? '0' : value);
-    List<Map<String, dynamic>> maps =
-        await db.query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
-    if (maps.length == 1) {
-      setState(() {
-        tagNo.text = value;
-        description.text = maps[0]['assetName'].toString();
-        faNo.text = maps[0]['faNo'].toString();
-        faIdValue = maps[0]['faId'];
-      });
+    List<Map<String, dynamic>> checkTagNo = await db.query(
+      'fatransitem',
+      where: "transLocalId = ? AND tagNo = ?",
+      whereArgs: [Get.arguments[0], value],
+    );
+    if (checkTagNo.isNotEmpty) {
+      Get.snackbar("Information", "TagNo sudah terdapat di transaksi ini.");
+      tagNo.text = "";
+      _focusTagNo.requestFocus();
+    } else {
+      List<Map<String, dynamic>> maps = await db
+          .query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
+      if (maps.length == 1) {
+        setState(() {
+          tagNo.text = value;
+          description.text = maps[0]['assetName'].toString();
+          faNo.text = maps[0]['faNo'].toString();
+          faIdValue = maps[0]['faId'];
+        });
+      } else {
+        Get.snackbar("Information", "TagNo tidak ditemukan.");
+        description.text = "";
+        faNo.text = "";
+        faIdValue = null;
+      }
     }
   }
 
@@ -280,31 +302,202 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
             ),
             Card(
               elevation: 4,
-              margin: EdgeInsets.all(12.0),
+              margin: const EdgeInsets.all(12.0),
               shape: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(3),
-                borderSide: BorderSide(color: Colors.grey, width: 1),
+                borderSide: const BorderSide(
+                  color: Colors.grey,
+                  width: 1,
+                ),
               ),
               color: Colors.white,
-              child: Container(
-                padding: const EdgeInsets.all(14.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Tag No : "),
-                          width: Get.width * 0.18,
-                        ),
-                        Expanded(
-                          child: Focus(
-                            onFocusChange: (value) {
-                              if (!value) {
-                                getInfoItem(tagNo.text);
+              child: Form(
+                key: _key,
+                child: Container(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Tag No : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: Focus(
+                              onFocusChange: (value) {
+                                if (!value) {
+                                  getInfoItem(tagNo.text);
+                                }
+                              },
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "Please fill some text";
+                                  }
+                                  return null;
+                                },
+                                controller: tagNo,
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.all(10),
+                                  border: OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              try {
+                                String barcode = await BarcodeScanner.scan();
+                                getInfoItem(barcode);
+                                setState(() {
+                                  barcode = barcode;
+                                  tagNo.text = barcode;
+                                });
+                              } on PlatformException catch (error) {
+                                if (error.code ==
+                                    BarcodeScanner.CameraAccessDenied) {
+                                  setState(() {
+                                    tagNo.text =
+                                        'Izin kamera tidak diizinkan oleh si pengguna';
+                                  });
+                                } else {
+                                  setState(() {
+                                    tagNo.text = 'Error: $error';
+                                  });
+                                }
+                              } catch (e) {
+                                setState(() {
+                                  barcode = '';
+                                });
                               }
                             },
+                            child: const Icon(Icons.qr_code),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              confirmDownloadItems();
+                            },
+                            child: const Icon(Icons.download),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Description : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
                             child: TextField(
-                              controller: tagNo,
+                              enabled: false,
+                              readOnly: true,
+                              controller: description,
+                              decoration: InputDecoration(
+                                fillColor: Colors.grey[300],
+                                filled: true,
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("FA No : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: TextField(
+                              enabled: false,
+                              readOnly: true,
+                              controller: faNo,
+                              decoration: InputDecoration(
+                                fillColor: Colors.grey[300],
+                                filled: true,
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Status : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4.0),
+                                border: Border.all(
+                                  style: BorderStyle.solid,
+                                  width: 0.80,
+                                ),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButtonFormField(
+                                  validator: (value) {
+                                    if (value == null) {
+                                      return "Please select options";
+                                    }
+                                    return null;
+                                  },
+                                  isExpanded: true,
+                                  hint: const Text("Select Status"),
+                                  items: _optionsStatus.map((item) {
+                                    return DropdownMenuItem(
+                                      child: Text(item['genName']),
+                                      value: item['genCode'],
+                                    );
+                                  }).toList(),
+                                  value: selectedStatus,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedStatus = value.toString();
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Remarks : "),
+                            width: Get.width * 0.18,
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: remarks,
                               decoration: const InputDecoration(
                                 contentPadding: EdgeInsets.all(10),
                                 border: OutlineInputBorder(
@@ -314,163 +507,10 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                               ),
                             ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            try {
-                              String barcode = await BarcodeScanner.scan();
-                              getInfoItem(barcode);
-                              setState(() {
-                                barcode = barcode;
-                                tagNo.text = barcode;
-                              });
-                            } on PlatformException catch (error) {
-                              if (error.code ==
-                                  BarcodeScanner.CameraAccessDenied) {
-                                setState(() {
-                                  tagNo.text =
-                                      'Izin kamera tidak diizinkan oleh si pengguna';
-                                });
-                              } else {
-                                setState(() {
-                                  tagNo.text = 'Error: $error';
-                                });
-                              }
-                            } catch (e) {
-                              setState(() {
-                                barcode = '';
-                              });
-                            }
-                          },
-                          child: Icon(Icons.qr_code),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            confirmDownloadItems();
-                          },
-                          child: Icon(Icons.download),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          child: Text("Description : "),
-                          width: Get.width * 0.18,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            enabled: false,
-                            readOnly: true,
-                            controller: description,
-                            decoration: InputDecoration(
-                              fillColor: Colors.grey[300],
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          child: Text("FA No : "),
-                          width: Get.width * 0.18,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            enabled: false,
-                            readOnly: true,
-                            controller: faNo,
-                            decoration: InputDecoration(
-                              fillColor: Colors.grey[300],
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Status : "),
-                          width: Get.width * 0.18,
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4.0),
-                              border: Border.all(
-                                style: BorderStyle.solid,
-                                width: 0.80,
-                              ),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                isExpanded: true,
-                                hint: const Text("Select Status"),
-                                items: _optionsStatus.map((item) {
-                                  return DropdownMenuItem(
-                                    child: Text(item['genName']),
-                                    value: item['genCode'],
-                                  );
-                                }).toList(),
-                                value: selectedStatus,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedStatus = value.toString();
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Remarks : "),
-                          width: Get.width * 0.18,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: remarks,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(10),
-                              border: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -488,7 +528,9 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
                         backgroundColor: const Color.fromARGB(255, 62, 81, 255),
                       ),
                       onPressed: () {
-                        actionSave();
+                        if (_key.currentState!.validate()) {
+                          actionSave();
+                        }
                       },
                       child: const Text(
                         "Save",
