@@ -34,91 +34,50 @@ class _TransferInScreen extends State<TransferInScreen> {
 
   Future<List<DataRow>> genData(var startDate, var endDate, var page) async {
     Database db = await dbHelper.initDb();
-    // List<Map<String, dynamic>> maps = await db.query(
-    //   "fatrans",
-    //   where: "transferTypeCode = ? AND isVoid = ? AND periodId = ?",
-    //   whereArgs: ["TI", 0, periodId],
-    // );
 
-    List<Map<String, dynamic>> rows = [];
-    // if (periodId == 0) {
-    //   rows = await db.query(
-    //     "fatrans",
-    //     where: "transferTypeCode = ? AND isVoid = ?",
-    //     whereArgs: ["TI", 0],
-    //   );
-    // } else {
-    rows = await db.query(
+    // List<Map<String, dynamic>> all = await db.query(
+    //   'fatrans',
+    //   columns: ['id', 'transDate', 'transNo', 'isApproved', 'transferTypeCode'],
+    // );
+    // print(all);
+
+    List<Map<String, dynamic>> rows = await db.query(
       "fatrans",
       where:
           "transferTypeCode = ? AND isVoid = ? AND transDate BETWEEN ? AND ?",
       whereArgs: ["TI", 0, startDate, endDate],
     );
-    // }
-
-    int offset = (page - 1) * itemsPerPage;
-    if (rows.isEmpty) {
-      setState(() {
-        pageCount = 1;
-      });
-    } else {
-      setState(() {
-        pageCount = (rows.length / itemsPerPage).ceil();
-      });
-      if (page > pageCount) {
-        setState(() {
-          page = 1;
-        });
-      }
-    }
-
-    List<Map<String, dynamic>> maps = [];
-    // if (periodId == 0) {
-    //   maps = await db.query(
-    //     "fatrans",
-    //     where:
-    //         "transferTypeCode = ? AND isVoid = ? LIMIT $offset, $itemsPerPage",
-    //     whereArgs: ["TI", 0],
-    //   );
-    // } else {
-    maps = await db.query(
-      "fatrans",
-      where:
-          "transferTypeCode = ? AND isVoid = ? AND transDate BETWEEN ? AND ? LIMIT $offset, $itemsPerPage",
-      whereArgs: ["TI", 0, startDate, endDate],
-    );
-    // }
 
     List<DataRow> temps = [];
     var i = 1;
     for (var data in rows) {
       DataRow row = DataRow(cells: [
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.075,
             child: Text("$i"),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.2,
             child: Text(data['transDate']),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.20,
             child: Text(data['transNo']),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.25,
             child: Text(data['manualRef']),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.1,
             child: Text(
               data['isApproved'] == 0 ? "Not Yet" : "Approved",
@@ -130,12 +89,12 @@ class _TransferInScreen extends State<TransferInScreen> {
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.1,
             child: TextButton(
               onPressed: () {
                 Get.toNamed('/transferinitem',
-                        arguments: [data['id'], selectedValue])
+                        arguments: [data['id'], selectedValue, sDate, eDate])
                     ?.whenComplete(() => fetchData(selectedMap));
               },
               child: const Icon(Icons.edit_note),
@@ -332,9 +291,12 @@ class _TransferInScreen extends State<TransferInScreen> {
                 children: [
                   TextButton.icon(
                     onPressed: () {
-                      Get.toNamed('/transferinitem',
-                              arguments: [selectedValue, selectedValue])
-                          ?.whenComplete(() => fetchData(selectedMap));
+                      Get.toNamed('/transferinitem', arguments: [
+                        selectedValue,
+                        selectedValue,
+                        sDate,
+                        eDate
+                      ])?.whenComplete(() => fetchData(selectedMap));
                     },
                     icon: const Icon(Icons.add),
                     label: const Text("Add"),

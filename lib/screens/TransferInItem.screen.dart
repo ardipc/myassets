@@ -39,6 +39,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   final newLocFrom = TextEditingController();
   final detailNewLocFrom = TextEditingController();
 
+  final _key = GlobalKey<FormState>();
+  final _focusNode = FocusNode();
+
   void actionConfirm() {
     Get.dialog(
       AlertDialog(
@@ -473,6 +476,19 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     detailOldLocFrom.text = box.read('intransitName');
   }
 
+  void findAndCheckManualRef(String value) async {
+    Database db = await dbHelper.initDb();
+    List<Map<String, dynamic>> maps = await db.query(
+      'fatrans',
+      where: "transferTypeCode = ? AND manualRef = ?",
+      whereArgs: [transferTypeCode, value],
+    );
+    if (maps.isNotEmpty) {
+      manualRef.text = "";
+      _focusNode.requestFocus();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -489,159 +505,222 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                 borderRadius: BorderRadius.circular(3),
                 borderSide: const BorderSide(color: Colors.grey, width: 1),
               ),
-              color: Colors.white,
-              child: Container(
-                padding: const EdgeInsets.all(14.0),
-                child: Column(
-                  children: [
-                    if (isApproved == 1) ...[
+              // color: Colors.white,
+              child: Form(
+                key: _key,
+                child: Container(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Column(
+                    children: [
+                      if (isApproved == 1) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Text(
+                              "Approved",
+                              style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 12,
+                        ),
+                      ],
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            "Approved",
-                            style: TextStyle(
-                                color: Colors.green,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
+                        children: [
+                          SizedBox(
+                            child: const Text("Trans No : "),
+                            width: Get.width * 0.14,
+                          ),
+                          Expanded(
+                            child: TextField(
+                              enabled: false,
+                              readOnly: true,
+                              controller: transNo,
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.grey[300],
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.blueAccent),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(
-                        height: 12,
+                        height: 14,
                       ),
-                    ],
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Trans No : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            enabled: false,
-                            readOnly: true,
-                            controller: transNo,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.grey[300],
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blueAccent),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Date/Time : "),
+                            width: Get.width * 0.14,
+                          ),
+                          Expanded(
+                            child: TextFormField(
+                              enabled: true,
+                              readOnly: true,
+                              controller: dateTime,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Please choose the date";
+                                }
+                                return null;
+                              },
+                              decoration: InputDecoration(
+                                fillColor: isApproved == 1
+                                    ? Colors.grey[300]
+                                    : Colors.white,
+                                filled: true,
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent)),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Date/Time : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            enabled: false,
-                            readOnly: true,
-                            controller: dateTime,
-                            decoration: InputDecoration(
-                              fillColor: isApproved == 1
-                                  ? Colors.grey[300]
-                                  : Colors.white,
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
+                          if (isApproved == 0) ...[
+                            TextButton(
+                              onPressed: () {
+                                _selectDate(context);
+                              },
+                              child: const Icon(Icons.date_range),
+                            ),
+                          ]
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Manual Ref : "),
+                            width: Get.width * 0.14,
+                          ),
+                          Expanded(
+                            child: Focus(
+                              onFocusChange: (isFocus) {
+                                if (!isFocus) {
+                                  findAndCheckManualRef(manualRef.text);
+                                }
+                              },
+                              child: TextFormField(
+                                focusNode: _focusNode,
+                                controller: manualRef,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "Please fill some text";
+                                  }
+                                  return null;
+                                },
+                                decoration: InputDecoration(
+                                  fillColor: isApproved == 1
+                                      ? Colors.grey[300]
+                                      : Colors.white,
+                                  filled: true,
+                                  contentPadding: const EdgeInsets.all(10),
+                                  border: const OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.blueAccent)),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                        if (isApproved == 0) ...[
-                          TextButton(
-                            onPressed: () {
-                              _selectDate(context);
-                            },
-                            child: const Icon(Icons.date_range),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Other Ref : "),
+                            width: Get.width * 0.14,
                           ),
-                        ]
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Manual Ref : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: manualRef,
-                            decoration: InputDecoration(
-                              fillColor: isApproved == 1
-                                  ? Colors.grey[300]
-                                  : Colors.white,
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Other Ref : "),
-                          width: Get.width * 0.14,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: otherRef,
-                            decoration: InputDecoration(
-                              fillColor: isApproved == 1
-                                  ? Colors.grey[300]
-                                  : Colors.white,
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Loc. From : "),
-                          width: Get.width * 0.14,
-                        ),
-                        SizedBox(
-                          width: Get.width * 0.2,
-                          child: Focus(
-                            onFocusChange: (value) {
-                              if (!value) {
-                                getLocationByCoce(oldLocFrom.text);
-                              }
-                            },
+                          Expanded(
                             child: TextField(
-                              controller: oldLocFrom,
+                              controller: otherRef,
+                              decoration: InputDecoration(
+                                fillColor: isApproved == 1
+                                    ? Colors.grey[300]
+                                    : Colors.white,
+                                filled: true,
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Loc. From : "),
+                            width: Get.width * 0.14,
+                          ),
+                          SizedBox(
+                            width: Get.width * 0.2,
+                            child: Focus(
+                              onFocusChange: (value) {
+                                if (!value) {
+                                  getLocationByCoce(oldLocFrom.text);
+                                }
+                              },
+                              child: TextField(
+                                controller: oldLocFrom,
+                                decoration: InputDecoration(
+                                  fillColor: Colors.grey[300],
+                                  filled: true,
+                                  contentPadding: const EdgeInsets.all(10),
+                                  border: const OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.blueAccent)),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: detailOldLocFrom,
+                              enabled: false,
+                              readOnly: true,
+                              decoration: InputDecoration(
+                                fillColor: Colors.grey[300],
+                                filled: true,
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent)),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            child: const Text("Loc. To : "),
+                            width: Get.width * 0.14,
+                          ),
+                          SizedBox(
+                            width: Get.width * 0.2,
+                            child: TextField(
+                              controller: newLocFrom,
                               decoration: InputDecoration(
                                 fillColor: Colors.grey[300],
                                 filled: true,
@@ -652,65 +731,25 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                               ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: detailOldLocFrom,
-                            enabled: false,
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              fillColor: Colors.grey[300],
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
+                          Expanded(
+                            child: TextField(
+                              controller: detailNewLocFrom,
+                              enabled: false,
+                              readOnly: true,
+                              decoration: InputDecoration(
+                                fillColor: Colors.grey[300],
+                                filled: true,
+                                contentPadding: const EdgeInsets.all(10),
+                                border: const OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.blueAccent)),
+                              ),
                             ),
-                          ),
-                        )
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 14,
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: const Text("Loc. To : "),
-                          width: Get.width * 0.14,
-                        ),
-                        SizedBox(
-                          width: Get.width * 0.2,
-                          child: TextField(
-                            controller: newLocFrom,
-                            decoration: InputDecoration(
-                              fillColor: Colors.grey[300],
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: detailNewLocFrom,
-                            enabled: false,
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              fillColor: Colors.grey[300],
-                              filled: true,
-                              contentPadding: const EdgeInsets.all(10),
-                              border: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.blueAccent)),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -730,7 +769,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                               const Color.fromARGB(255, 62, 81, 255),
                         ),
                         onPressed: () {
-                          actionSave();
+                          if (_key.currentState!.validate()) {
+                            actionSave();
+                          }
                         },
                         child: const Text(
                           "Save as Draft",
