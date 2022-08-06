@@ -348,33 +348,6 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   Future<void> actionConfirmAllSO() async {
     final box = GetStorage();
     Database db = await dbHelper.initDb();
-
-    // List<Map<String, dynamic>> mapsSO = await db.query("stockopnames");
-
-    // for (var row in mapsSO) {
-    //   List<Map<String, dynamic>> checkRows = await db.query(
-    //     "soconfirms",
-    //     where: "soConfirmId = ?",
-    //     whereArgs: [row['id']],
-    //   );
-    //   if (checkRows.isEmpty) {
-    //     Map<String, dynamic> m = {};
-    //     m['soConfirmId'] = row['id'];
-    //     m['periodId'] = selectedValue;
-    //     m['locId'] = box.read('locationId');
-    //     m['confirmDate'] =
-    //         DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
-    //     m['confirmBy'] = box.read('username');
-    //     m['uploadDate'] = '';
-    //     m['uploadBy'] = 0;
-    //     m['uploadMessage'] = '';
-    //     await db.insert(
-    //       'soconfirms',
-    //       m,
-    //       conflictAlgorithm: ConflictAlgorithm.replace,
-    //     );
-    //   }
-    // }
     int exec = 0;
     List<Map<String, dynamic>> findFASO = await db.query(
       "fasohead",
@@ -406,9 +379,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
         ),
       );
 
-      setState(() {
-        isConfirmed = true;
-      });
+      fetchFASOHead(fasohead['periodId']);
     }
   }
 
