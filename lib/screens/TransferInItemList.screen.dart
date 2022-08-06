@@ -63,7 +63,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
         DataCell(
           SizedBox(
             width: Get.width * 0.25,
-            child: Text(data['assetName']),
+            child: Text(data['assetName'].toString()),
           ),
         ),
         DataCell(

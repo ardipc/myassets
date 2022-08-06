@@ -13,4 +13,12 @@ class FAItemService extends GetConnect with CacheManager {
       headers: {"Authorization": "Bearer $token"},
     );
   }
+
+  Future<Response> getByTagNo(String value) {
+    var token = getToken();
+    return get(
+      "${box.read("apiAddress")}/Api/FAItem/ByTag?tagNo=$value",
+      headers: {"Authorization": "Bearer $token"},
+    );
+  }
 }

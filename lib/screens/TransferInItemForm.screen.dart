@@ -6,6 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/screens/Table.screen.dart';
+import 'package:myasset/services/FAItem.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferInItemFormScreen extends StatefulWidget {
@@ -233,29 +234,82 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
     }
   }
 
+  void fetchTagNo(String value) async {
+    final faItem = FAItemService();
+    Database db = await dbHelper.initDb();
+
+    faItem.getByTagNo(value).then((value) async {
+      var body = value.body['faitem'];
+      // print(body);
+      if (body['faId'] == 0) {
+        Get.snackbar("Information", "TagNo not found on server.");
+        description.text = "";
+        faNo.text = "";
+        faIdValue = null;
+      } else {
+        Map<String, dynamic> map = {
+          "faId": body['faId'],
+          "faNo": body['faNo'],
+          "tagNo": body['tagNo'],
+          "assetName": body['assetName'],
+          "locId": body['locationId'],
+          "added": body['added'],
+          "disposed": body['disposed'],
+          "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
+          "syncBy": box.read('userId')
+        };
+        List<Map<String, dynamic>> rows = await db.query(
+          'faitems',
+          where: 'tagNo = ?',
+          whereArgs: [body['tagNo']],
+        );
+        if (rows.isNotEmpty) {
+          await db.update(
+            'faitems',
+            map,
+            where: 'faId = ?',
+            whereArgs: [body['faId']],
+          );
+        } else {
+          await db.insert('faitems', map,
+              conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+
+        description.text = body['assetName'];
+        faNo.text = body['faNo'];
+        faIdValue = body['faId'];
+      }
+    });
+  }
+
   void confirmDownloadItems() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text("Confirmation"),
-        content: const Text("Are you sure to sync data items now ?"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // please add action in here
-              // ex. actionUploadToServer();
-              Get.back();
-            },
-            child: const Text("YES"),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text("NO"),
-          ),
-        ],
-      ),
-    );
+    if (tagNo.text.isEmpty) {
+      Get.snackbar("Information", "TagNo field still empty.");
+    } else {
+      Get.dialog(
+        AlertDialog(
+          title: const Text("Confirmation"),
+          content: Text("Are you sure to download TagNo : ${tagNo.text} ?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // please add action in here
+                // ex. actionUploadToServer();
+                fetchTagNo(tagNo.text);
+                Get.back();
+              },
+              child: const Text("YES"),
+            ),
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text("NO"),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
