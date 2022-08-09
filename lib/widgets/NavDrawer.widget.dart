@@ -63,6 +63,11 @@ class NavDrawerWidget extends StatelessWidget {
             onTap: () => {authController.actionConfirmUnregister()},
           ),
           ListTile(
+            leading: const Icon(Icons.lock_open),
+            title: const Text('Change Password'),
+            onTap: () => {Get.toNamed('/password')},
+          ),
+          ListTile(
             leading: const Icon(Icons.exit_to_app),
             title: const Text('Logout'),
             onTap: () => {authController.actionLogout()},

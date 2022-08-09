@@ -7,6 +7,7 @@ import 'package:myasset/screens/HomePage.screen.dart';
 import 'package:myasset/screens/Login.screen.dart';
 import 'package:myasset/screens/MyApp.screen.dart';
 import 'package:myasset/screens/Otp.screen.dart';
+import 'package:myasset/screens/Password.screen.dart';
 import 'package:myasset/screens/Register.screen.dart';
 import 'package:myasset/screens/Settings.screen.dart';
 import 'package:myasset/screens/StockOpname.screen.dart';
@@ -138,6 +139,10 @@ void main() async {
         GetPage(
           name: '/settings',
           page: () => SettingsScreen(),
+        ),
+        GetPage(
+          name: '/password',
+          page: () => PasswordScreen(),
         ),
       ],
     ),

@@ -302,6 +302,8 @@ class DownloadController extends GetxController {
 
     var transService = FATransService();
     var transItemService = FATransItemService();
+    var response = await transItemService.getAll();
+    var responseBody = response.body;
     listProgress.add(rowProgress("Sync table FA Trans."));
     // await db.delete("fatrans", where: null);
     await transService.getAll().then((value) async {
@@ -309,11 +311,11 @@ class DownloadController extends GetxController {
       for (var i = 0; i < periods.length; i++) {
         listProgress.add(rowProgress("ID ${periods[i]['transId']} inserted."));
 
-        List<Map<String, dynamic>> sFa = await db.query('fatrans',
-            where: "transId = ?", whereArgs: [periods[i]['transId']]);
-
-        var response = await transItemService.getAll();
-        var responseBody = response.body;
+        List<Map<String, dynamic>> sFa = await db.query(
+          'fatrans',
+          where: "transId = ?",
+          whereArgs: [periods[i]['transId']],
+        );
 
         Map<String, dynamic> map = {
           "transId": periods[i]['transId'],
@@ -382,6 +384,7 @@ class DownloadController extends GetxController {
                 whereArgs: [item['transId']],
               );
             } else {
+              map['transLocalId'] = sFa.first['transLocalId'];
               await db.insert(
                 'fatransitem',
                 map,
@@ -430,6 +433,7 @@ class DownloadController extends GetxController {
                 whereArgs: [item['transId']],
               );
             } else {
+              map['transLocalId'] = getTransId;
               await db.insert(
                 'fatransitem',
                 map,

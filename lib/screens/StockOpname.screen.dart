@@ -46,27 +46,57 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       DataRow row = DataRow(cells: [
         DataCell(
           SizedBox(
-            width: Get.width * 0.1,
-            child: Text("$i"),
+            width: Get.width * 0.06,
+            child: Text(
+              "$i",
+              style: const TextStyle(fontSize: 11),
+            ),
           ),
         ),
         DataCell(
           SizedBox(
-            width: Get.width * 0.12,
-            child: Text(data['tagNo'].toString()),
-          ),
-        ),
-        DataCell(
-          SizedBox(
-            width: Get.width * 0.2,
-            child: Text(data['assetName'].toString()),
+            width: Get.width * 0.16,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  data['tagNo'].toString(),
+                  style: const TextStyle(fontSize: 11),
+                ),
+                if (data['rejectNote'] != "") ...[
+                  IconButton(
+                    onPressed: () {
+                      Get.dialog(
+                        AlertDialog(
+                          title: const Text("Reject Note"),
+                          content: Text(data['rejectNote']),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.info_outline),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
         DataCell(
           SizedBox(
             width: Get.width * 0.2,
             child: Text(
-                "qty = ${data['baseQty'].toString()}\ncondition = ${data['conBase'] == null ? data['baseConStatCode'].toString() : data['conBase'].toString()}"),
+              data['assetName'].toString(),
+              style: const TextStyle(fontSize: 11),
+            ),
+          ),
+        ),
+        DataCell(
+          SizedBox(
+            width: Get.width * 0.2,
+            child: Text(
+              "qty = ${data['baseQty'].toString()}\ncondition = ${data['conBase'] == null ? data['baseConStatCode'].toString() : data['conBase'].toString()}",
+              style: const TextStyle(fontSize: 11),
+            ),
           ),
         ),
         DataCell(
@@ -78,7 +108,9 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                 arguments: [data['id'], periodId, fasohead, selectedName],
               )?.whenComplete(() => fetchData(selectedValue)),
               child: Text(
-                  "qty = ${data['qty'].toString()}\nexistence = ${data['existence'].toString()}\ntagging = ${data['tag'].toString()}\nusage = ${data['usagename'].toString()}\ncondition = ${data['con'] == null ? data['conStatCode'].toString() : data['con'].toString()}\nowner = ${data['own'].toString()}"),
+                "qty = ${data['qty'].toString()}\nexistence = ${data['existence'].toString()}\ntagging = ${data['tag'].toString()}\nusage = ${data['usagename'].toString()}\ncondition = ${data['con'] == null ? data['conStatCode'].toString() : data['con'].toString()}\nowner = ${data['own'].toString()}",
+                style: const TextStyle(fontSize: 11),
+              ),
             ),
           ),
         ),
@@ -396,7 +428,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     db.insert("faitems", map, conflictAlgorithm: ConflictAlgorithm.replace);
 
     List<Map<String, dynamic>> maps = await db.query("faitems");
-    print(maps);
+    // print(maps);
   }
 
   void setAndFindSO(value) async {
@@ -471,6 +503,32 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                 ],
               ),
             ),
+            if (fasohead['rejectNote'] != '') ...[
+              Card(
+                color: Colors.red[100],
+                child: SizedBox(
+                  width: Get.width,
+                  height: 50,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Reject Note",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          fasohead['rejectNote'].toString(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
@@ -488,7 +546,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                         DataTable(
                           columnSpacing: 0.5,
                           dataRowHeight: 110,
-                          columns: [
+                          columns: const [
                             DataColumn(
                               label: Text(
                                 'No.',
