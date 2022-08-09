@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:myasset/controllers/Auth.controller.dart';
 import 'package:myasset/services/User.service.dart';
 // import 'package:myasset/controllers/Auth.controller.dart';
 
@@ -19,6 +20,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
   final conPass = TextEditingController();
 
   void actionSave() async {
+    final authController = AuthController();
     // ignore: avoid_print
     print("Change Password");
     final userService = UserService();
@@ -27,15 +29,28 @@ class _PasswordScreenState extends State<PasswordScreen> {
       "newPwd": newPass.text,
       "confirmPwd": conPass.text
     };
-    userService.changePassword(m).then((value) {
+    userService.changePassword(m).then((value) async {
       // ignore: avoid_print
       print(value.body);
-      Get.dialog(
-        const AlertDialog(
-          title: Text("Information"),
-          content: Text("Password sukses diganti."),
-        ),
-      );
+      var body = value.body;
+      if (body['status'] == true) {
+        await authController.saveToken(body['token']);
+        box.write('token', body['token']);
+
+        Get.dialog(
+          const AlertDialog(
+            title: Text("Information"),
+            content: Text("Password sukses diganti."),
+          ),
+        );
+      } else {
+        Get.dialog(
+          AlertDialog(
+            title: const Text("Information"),
+            content: Text(body['message']),
+          ),
+        );
+      }
     });
   }
 
