@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:myasset/controllers/Stockopname.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
+import 'package:myasset/services/FAItem.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class StockOpnameItemScreen extends StatefulWidget {
@@ -72,29 +73,82 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     });
   }
 
+  void fetchTagNo(String value) async {
+    final faItem = FAItemService();
+    Database db = await dbHelper.initDb();
+
+    faItem.getByTagNo(value).then((value) async {
+      var body = value.body['faitem'];
+      // print(body);
+      if (body['faId'] == 0) {
+        Get.snackbar("Information", "TagNo not found on server.");
+        descriptionController.text = "";
+        faNoController.text = "";
+        faIdValue = null;
+      } else {
+        Map<String, dynamic> map = {
+          "faId": body['faId'],
+          "faNo": body['faNo'],
+          "tagNo": body['tagNo'],
+          "assetName": body['assetName'],
+          "locId": body['locationId'],
+          "added": body['added'],
+          "disposed": body['disposed'],
+          "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
+          "syncBy": box.read('userId')
+        };
+        List<Map<String, dynamic>> rows = await db.query(
+          'faitems',
+          where: 'tagNo = ?',
+          whereArgs: [body['tagNo']],
+        );
+        if (rows.isNotEmpty) {
+          await db.update(
+            'faitems',
+            map,
+            where: 'faId = ?',
+            whereArgs: [body['faId']],
+          );
+        } else {
+          await db.insert('faitems', map,
+              conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+
+        descriptionController.text = body['assetName'];
+        faNoController.text = body['faNo'];
+        faIdValue = body['faId'];
+      }
+    });
+  }
+
   void confirmDownloadTag() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text("Confirmation"),
-        content: const Text("Are you sure to sync now ?"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // please add action in here
-              // ex. actionUploadToServer();
-              Get.back();
-            },
-            child: const Text("YES"),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text("NO"),
-          ),
-        ],
-      ),
-    );
+    if (tagNoController.text.isEmpty) {
+      Get.snackbar("Information", "TagNo field still empty.");
+    } else {
+      Get.dialog(
+        AlertDialog(
+          title: const Text("Confirmation"),
+          content: const Text("Are you sure to sync data items now ?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // please add action in here
+                // ex. actionUploadToServer();
+                fetchTagNo(tagNoController.text);
+                Get.back();
+              },
+              child: const Text("YES"),
+            ),
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text("NO"),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   Future<void> fetchData(int id) async {
@@ -105,6 +159,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
       where: "id = ?",
       whereArgs: [id],
     );
+
+    // print(maps);
 
     if (maps.length == 1) {
       List<Map<String, dynamic>> mapsItem = await db.query(
@@ -123,20 +179,34 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         // ignore: prefer_null_aware_operators
         if (maps[0]['existStatCode'] != null) {
           selectedExistence = maps[0]['existStatCode'].toString();
-          isAda = maps[0]['existStatCode'].toString() == 'ex1' ? false : true;
+          isAda = maps[0]['existStatCode'].toString() == 'ex1' ? true : false;
+        } else {
+          selectedExistence = null;
         }
-        if (maps[0]['tagStatCode'] != null) {
-          selectedTagging = maps[0]['tagStatCode'].toString();
-        }
-        if (maps[0]['usageStatCode'] != null) {
-          selectedUsage = maps[0]['usageStatCode'].toString();
-        }
-        if (maps[0]['conStatCode'] != null) {
-          selectedCondition = maps[0]['conStatCode'].toString();
-        }
-        if (maps[0]['ownStatCode'] != null) {
-          selectedOwnership = maps[0]['ownStatCode'].toString();
-        }
+        // if (maps[0]['tagStatCode'] != null) {
+        // ignore: prefer_null_aware_operators
+        selectedTagging = maps[0]['tagStatCode'] != null
+            ? maps[0]['tagStatCode'].toString()
+            : null;
+        // }
+        // if (maps[0]['usageStatCode'] != null) {
+        // ignore: prefer_null_aware_operators
+        selectedUsage = maps[0]['usageStatCode'] != null
+            ? maps[0]['usageStatCode'].toString()
+            : null;
+        // }
+        // if (maps[0]['conStatCode'] != null) {
+        // ignore: prefer_null_aware_operators
+        selectedCondition = maps[0]['conStatCode'] != null
+            ? maps[0]['conStatCode'].toString()
+            : null;
+        // }
+        // if (maps[0]['ownStatCode'] != null) {
+        // ignore: prefer_null_aware_operators
+        selectedOwnership = maps[0]['ownStatCode'] != null
+            ? maps[0]['ownStatCode'].toString()
+            : null;
+        // }
       });
     }
   }
@@ -268,6 +338,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         map['usageStatCode'] = selectedUsage;
         map['conStatCode'] = selectedCondition;
         map['ownStatCode'] = selectedOwnership;
+        map['saveDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+        map['savedBy'] = box.read('userId');
 
         int exec = await db.insert("stockopnames", map,
             conflictAlgorithm: ConflictAlgorithm.replace);
@@ -313,6 +385,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
         map['conStatCode'] = selectedCondition;
         map['ownStatCode'] = selectedOwnership;
         map['qty'] = selectedExistence == "ex1" ? 1 : 0;
+        map['saveDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+        map['savedBy'] = box.read('userId');
 
         int exec = await db.update("stockopnames", map,
             where: "id = ?", whereArgs: [idStockOpname]);
@@ -327,21 +401,57 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
 
   Future<void> getInfoItem(String value) async {
     Database db = await dbHelper.initDb();
-    String parseToInt = value == '' ? '0' : value;
-    List<Map<String, dynamic>> maps =
-        await db.query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
-    if (maps.length == 1) {
-      setState(() {
-        tagNoController.text = value;
-        descriptionController.text = maps[0]['assetName'];
-        faNoController.text = maps[0]['faNo'];
-        faIdValue = maps[0]['faId'];
-      });
+    String data = value == '' ? '0' : value;
+    if (isConfirmed) {
+      List<Map<String, dynamic>> maps =
+          await db.query("stockopnames", where: "tagNo = ?", whereArgs: [data]);
+      if (maps.length == 1) {
+        List<Map<String, dynamic>> mapsItem = await db.query(
+          "faitems",
+          where: "faId = ?",
+          whereArgs: [maps[0]['faId']],
+        );
+        var item = mapsItem.length == 1 ? mapsItem.first : {"faNo": ""};
+        var body = maps.first;
+        setState(() {
+          descriptionController.text = body['description'];
+          faNoController.text = item['faNo'];
+          faIdValue = body['faId'];
+          selectedExistence = body['existStatCode'].toString();
+          selectedTagging = body['tagStatCode'].toString();
+          selectedUsage = body['usageStatCode'].toString();
+          selectedCondition = body['conStatCode'].toString();
+          selectedOwnership = body['ownStatCode'].toString();
+        });
+      } else {
+        Get.snackbar("Information", "TagNo tidak ditemukan.");
+        setState(() {
+          descriptionController.text = "";
+          faNoController.text = "";
+          faIdValue = null;
+          selectedExistence = null;
+          selectedTagging = null;
+          selectedUsage = null;
+          selectedCondition = null;
+          selectedOwnership = null;
+        });
+      }
     } else {
-      Get.snackbar("Information", "TagNo tidak ditemukan.");
-      descriptionController.text = "";
-      faNoController.text = "";
-      faIdValue = null;
+      List<Map<String, dynamic>> maps =
+          await db.query("faitems", where: "tagNo = ?", whereArgs: [data]);
+      if (maps.length == 1) {
+        setState(() {
+          tagNoController.text = value;
+          descriptionController.text = maps[0]['assetName'];
+          faNoController.text = maps[0]['faNo'];
+          faIdValue = maps[0]['faId'];
+        });
+      } else {
+        Get.snackbar("Information", "TagNo tidak ditemukan.");
+        descriptionController.text = "";
+        faNoController.text = "";
+        faIdValue = null;
+      }
     }
   }
 
@@ -377,7 +487,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                     width: 20,
                   ),
                   Expanded(
-                    child: Container(
+                    child: SizedBox(
                       child: TextFormField(
                         controller: periodController,
                         enabled: false,
@@ -428,7 +538,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   }
                                   return null;
                                 },
-                                enabled: isConfirmed ? false : true,
+                                // enabled: isConfirmed ? false : true,
                                 controller: tagNoController,
                                 decoration: const InputDecoration(
                                   hintText: "ex. ARA140001580",
@@ -580,9 +690,13 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                             selectedExistence =
                                                 value.toString();
                                             if (value == "ex1") {
-                                              isAda = false;
-                                            } else {
                                               isAda = true;
+                                              selectedTagging = null;
+                                              selectedUsage = null;
+                                              selectedCondition = null;
+                                              selectedOwnership = null;
+                                            } else {
+                                              isAda = false;
                                               selectedTagging = null;
                                               selectedUsage = null;
                                               selectedCondition = null;
@@ -637,7 +751,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   },
                                   onChanged: isConfirmed
                                       ? null
-                                      : (isAda
+                                      : (!isAda
                                           ? null
                                           : (value) {
                                               setState(() {
@@ -692,7 +806,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   },
                                   onChanged: isConfirmed
                                       ? null
-                                      : (isAda
+                                      : (!isAda
                                           ? null
                                           : (value) {
                                               setState(() {
@@ -747,7 +861,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   },
                                   onChanged: isConfirmed
                                       ? null
-                                      : (isAda
+                                      : (!isAda
                                           ? null
                                           : (value) {
                                               setState(() {
@@ -802,7 +916,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   },
                                   onChanged: isConfirmed
                                       ? null
-                                      : (isAda
+                                      : (!isAda
                                           ? null
                                           : (value) {
                                               setState(() {

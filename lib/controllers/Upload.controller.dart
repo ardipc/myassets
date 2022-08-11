@@ -22,7 +22,7 @@ class UploadController extends GetxController {
     // TODO: implement onInit
     super.onInit();
     // ignore: avoid_print
-    print("init download ${box.read('username')}");
+    print("init download ${box.read('userId')}");
   }
 
   @override
@@ -73,7 +73,7 @@ class UploadController extends GetxController {
     listProgress.add(rowProgress("Uploading Stock Opname data..."));
     List<Map<String, dynamic>> soRows = await db.query(
       'stockopnames',
-      where: "uploadDate IS NULL OR uploadDate = ? OR uploadDate <= syncDate",
+      where: "uploadDate IS NULL OR uploadDate = ? OR saveDate >= uploadDate",
       whereArgs: [''],
     );
 
@@ -99,7 +99,7 @@ class UploadController extends GetxController {
           m['stockOpnameId'] = res['stockOpnameId'];
           m['uploadDate'] =
               DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-          m['uploadBy'] = box.read('username');
+          m['uploadBy'] = box.read('userId');
           m['uploadMessage'] = res['message'];
           await db.update(
             "stockopnames",
@@ -144,8 +144,11 @@ class UploadController extends GetxController {
     for (var data in transRows) {
       listProgress
           .add(rowProgress("Uploading Transaction ID ${data['id']}..."));
-      List<Map<String, dynamic>> transItemRows = await db
-          .query('fatransitem', where: "transId = ?", whereArgs: [data['id']]);
+      List<Map<String, dynamic>> transItemRows = await db.query(
+        'fatransitem',
+        where: "transLocalId = ?",
+        whereArgs: [data['id']],
+      );
       for (var r in transItemRows) {
         listProgress
             .add(rowProgress("Uploading Item Transaction ID ${data['id']}..."));
@@ -156,7 +159,7 @@ class UploadController extends GetxController {
         m['conStat'] = r['conStat'];
         m['oldTag'] = r['oldTag'];
         m['newTag'] = r['newTag'];
-        m['userId'] = box.read('username');
+        m['userId'] = box.read('userId');
 
         faTransItemService.create(m).then((value) async {
           var res = value.body;
@@ -165,7 +168,7 @@ class UploadController extends GetxController {
             m['transItemId'] = res['transItemId'];
             m['uploadDate'] =
                 DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-            m['uploadBy'] = box.read('username');
+            m['uploadBy'] = box.read('userId');
             m['uploadMessage'] = res['message'];
             await db.update(
               'fatransitem',
@@ -187,7 +190,7 @@ class UploadController extends GetxController {
       map['newLocId'] = data['newLocId'];
       map['isApproved'] = data['isApproved'] == 1 ? true : false;
       map['isVoid'] = data['isVoid'] == 1 ? true : false;
-      map['userId'] = box.read('username');
+      map['userId'] = box.read('userId');
 
       faTransService.create(map).then((value) async {
         var res = value.body;
@@ -196,7 +199,7 @@ class UploadController extends GetxController {
           m['transId'] = res['transId'];
           m['uploadDate'] =
               DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-          m['uploadBy'] = box.read('username');
+          m['uploadBy'] = box.read('userId');
           m['uploadMessage'] = res['message'];
           await db.update(
             "fatrans",

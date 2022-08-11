@@ -66,6 +66,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                 ),
                 if (data['rejectNote'] != "") ...[
                   IconButton(
+                    color: Colors.red[600],
                     onPressed: () {
                       Get.dialog(
                         AlertDialog(
@@ -156,7 +157,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     if (maps.isNotEmpty) {
       setState(() {
         fasohead = maps.first;
-        isConfirmed = maps.first['soStatusCode'] == "0" ? false : true;
+        isConfirmed = maps.first['soStatusCode'] == "1" ? true : false;
       });
     } else {
       setState(() {
@@ -254,7 +255,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     final box = GetStorage();
 
     List<Map<String, dynamic>> maps = await db.rawQuery(
-      "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode WHERE s.periodId = '$selectedValue' AND s.uploadDate IS NULL OR s.uploadDate = ''",
+      "SELECT s.*, i.tagNo, i.assetName, e.genName AS existence, t.genName AS tag, u.genName AS usagename, c.genName AS con, o.genName AS own FROM stockopnames s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses e ON e.genCode = s.existStatCode LEFT JOIN statuses t ON t.genCode = s.tagStatCode LEFT JOIN statuses u ON u.genCode = s.usageStatCode LEFT JOIN statuses c ON c.genCode = s.conStatCode LEFT JOIN statuses o ON o.genCode = s.ownStatCode WHERE s.periodId = '$selectedValue' AND s.uploadDate IS NULL OR s.uploadDate = '' OR s.saveDate >= uploadDate",
     );
     // print(maps);
     for (var data in maps) {

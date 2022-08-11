@@ -27,6 +27,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
   String? transferTypeCode = "TO";
   int isApproved = 0;
 
+  int transId = 0;
   final transNo = TextEditingController();
   final dateTime = TextEditingController();
   final manualRef = TextEditingController();
@@ -153,6 +154,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
               TextButton(
                 onPressed: () {
                   Get.back();
+                  Get.back();
                 },
                 child: const Text("Close"),
               ),
@@ -182,6 +184,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
               TextButton(
                 onPressed: () {
                   Get.back();
+                  Get.back();
                 },
                 child: const Text("Close"),
               ),
@@ -204,6 +207,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     if (maps.length == 1) {
       setState(() {
         idFaTrans = id;
+        transId = maps[0]['transId'] ?? 0;
         isApproved = maps[0]['isApproved'];
         dateTime.text = maps[0]['transDate'];
         plantId = maps[0]['plantId'];
@@ -370,12 +374,18 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.query(
       'fatrans',
-      where: "transferTypeCode = ? AND manualRef = ?",
-      whereArgs: [transferTypeCode, value],
+      where: "transferTypeCode = ? AND manualRef = ? AND locationId = ?",
+      whereArgs: [transferTypeCode, value, box.read('locationId')],
     );
     if (maps.isNotEmpty) {
-      manualRef.text = "";
-      _focusNode.requestFocus();
+      var data = maps.first;
+      if (data['id'] == idFaTrans) {
+        manualRef.text = data['manualRef'];
+      } else {
+        Get.snackbar("Information", "Manual Ref sudah pernah ada.");
+        manualRef.text = "";
+        _focusNode.requestFocus();
+      }
     }
   }
 
@@ -796,8 +806,12 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                         ),
                         onPressed: () {
                           // if (transNo.text != "") {
-                          Get.toNamed('/transferoutitemlist',
-                              arguments: [idFaTrans, transNo.text, isApproved]);
+                          Get.toNamed('/transferoutitemlist', arguments: [
+                            idFaTrans,
+                            transNo.text,
+                            isApproved,
+                            transId
+                          ]);
                           // } else {
                           //   Get.dialog(
                           //     const AlertDialog(

@@ -118,6 +118,8 @@ class DbHelper {
         conStatCode TEXT,
         ownStatCode TEXT,
         rejectNote TEXT,
+        saveDate TEXT,
+        savedBy TEXT,
         syncDate TEXT,
         syncBy TEXT,
         uploadDate TEXT,
@@ -125,6 +127,8 @@ class DbHelper {
         uploadMessage TEXT
       )
     ''');
+
+    // saveDate >= uploadDate OR uploadDate IS NULL OR uploadDate = ''
 
     // fa trans
     await db.execute('''
@@ -217,7 +221,9 @@ class DbHelper {
         uploadBy TEXT,
         uploadMessage TEXT,
         syncDate TEXT,
-        syncBy TEXT
+        syncBy TEXT,
+        saveDate TEXT,
+        savedBy TEXT
       )
     ''');
   }

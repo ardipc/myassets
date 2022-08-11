@@ -67,7 +67,7 @@ class _TransferInScreen extends State<TransferInScreen> {
         DataCell(
           SizedBox(
             width: Get.width * 0.20,
-            child: Text(data['transNo']),
+            child: Text(data['transNo'].toString()),
           ),
         ),
         DataCell(

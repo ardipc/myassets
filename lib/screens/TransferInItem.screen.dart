@@ -27,6 +27,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   String? transferTypeCode = "TI";
   int isApproved = 0;
 
+  int transId = 0;
   final transNo = TextEditingController();
   final dateTime = TextEditingController();
   final manualRef = TextEditingController();
@@ -88,6 +89,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   }
 
   Future<void> actionSave() async {
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
+
     if (transNo.text.isEmpty &&
         manualRef.text.isEmpty &&
         oldLocFrom.text.isEmpty &&
@@ -109,9 +113,6 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     } else {
       Database db = await dbHelper.initDb();
 
-      DateTime now = DateTime.now();
-      String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
-
       Map<String, dynamic> map = {};
       if (idFaTrans == 0) {
         map['transId'] = 0;
@@ -131,7 +132,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         map['isApproved'] = 0;
         map['isVoid'] = 0;
         map['saveDate'] = formattedDate;
-        map['savedBy'] = box.read('username');
+        map['savedBy'] = box.read('userId');
         map['uploadDate'] = '';
         map['uploadBy'] = '';
         map['uploadMessage'] = '';
@@ -153,6 +154,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
               TextButton(
                 onPressed: () {
                   Get.back();
+                  Get.back();
                 },
                 child: const Text("Close"),
               ),
@@ -170,6 +172,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         map['newLocId'] = box.read('locationId');
         map['newLocCode'] = box.read('locationCode');
         map['newLocName'] = box.read('locationName');
+        map['saveDate'] = formattedDate;
+        map['savedBy'] = box.read('userId');
 
         int exec = await db
             .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
@@ -181,6 +185,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
             actions: [
               TextButton(
                 onPressed: () {
+                  Get.back();
                   Get.back();
                 },
                 child: const Text("Close"),
@@ -204,6 +209,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     if (maps.length == 1) {
       setState(() {
         idFaTrans = id;
+        transId = maps[0]['transId'] ?? 0;
         isApproved = maps[0]['isApproved'];
         dateTime.text = maps[0]['transDate'];
         plantId = maps[0]['plantId'];
@@ -484,8 +490,14 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       whereArgs: [transferTypeCode, value],
     );
     if (maps.isNotEmpty) {
-      manualRef.text = "";
-      _focusNode.requestFocus();
+      var data = maps.first;
+      if (data['id'] == idFaTrans) {
+        manualRef.text = data['manualRef'];
+      } else {
+        Get.snackbar("Information", "Manual Ref sudah pernah ada.");
+        manualRef.text = "";
+        _focusNode.requestFocus();
+      }
     }
   }
 
@@ -796,8 +808,12 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                         ),
                         onPressed: () {
                           // if (transNo.text != "") {
-                          Get.toNamed('/transferinitemlist',
-                              arguments: [idFaTrans, transNo.text, isApproved]);
+                          Get.toNamed('/transferinitemlist', arguments: [
+                            idFaTrans,
+                            transNo.text,
+                            isApproved,
+                            transId
+                          ]);
                           // } else {
                           //   Get.dialog(
                           //     const AlertDialog(

@@ -45,7 +45,7 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
   Future<List<DataRow>> genData() async {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.rawQuery(
-        "SELECT s.*, i.assetName, c.genName AS con FROM fatransitem s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses c ON c.genCode = s.conStatCode WHERE s.transLocalId = ${Get.arguments[0]}");
+        "SELECT s.*, i.assetName, c.genName AS con FROM fatransitem s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses c ON c.genCode = s.conStatCode WHERE s.transLocalId = '${Get.arguments[0]}' OR s.transId = '${Get.arguments[3]}'");
 
     // print(maps);
     List<DataRow> temps = [];
