@@ -27,10 +27,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (rows.isEmpty) {
       Get.dialog(
-        const AlertDialog(
-          content: Text(
+        AlertDialog(
+          content: const Text(
               "Master data has not been downloaded.\nPlease download it in Download menu on left sidebar."),
-          title: Text("Message"),
+          title: const Text("Message"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.toNamed('/download');
+              },
+              child: const Text("Go to download"),
+            ),
+          ],
         ),
       );
     }
@@ -106,11 +114,12 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               icon: const Icon(Icons.copy),
             ),
-            IconButton(
-                onPressed: () {
-                  showIsiTabel();
-                },
-                icon: const Icon(Icons.table_chart))
+            // IconButton(
+            //   onPressed: () {
+            //     showIsiTabel();
+            //   },
+            //   icon: const Icon(Icons.table_chart),
+            // )
           ],
         ),
       ),

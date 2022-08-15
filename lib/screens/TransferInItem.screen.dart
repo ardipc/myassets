@@ -92,53 +92,39 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
 
-    if (transNo.text.isEmpty &&
-        manualRef.text.isEmpty &&
-        oldLocFrom.text.isEmpty &&
-        newLocFrom.text.isEmpty) {
-      Get.dialog(
-        AlertDialog(
-          title: const Text("Information"),
-          content: const Text("Please fill all the field."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
-    } else {
-      Database db = await dbHelper.initDb();
+    bool isExistManualRef = await isFindAndCheckManualRef(manualRef.text);
 
-      Map<String, dynamic> map = {};
-      if (idFaTrans == 0) {
-        map['transId'] = 0;
-        map['plantId'] = box.read('plantId');
-        map['transTypeCode'] = 'T';
-        map['transDate'] = dateTime.text;
-        map['transNo'] = transNo.text;
-        map['manualRef'] = manualRef.text;
-        map['otherRef'] = otherRef.text;
-        map['transferTypeCode'] = transferTypeCode;
-        map['oldLocId'] = oldLocId;
-        map['oldLocCode'] = oldLocFrom.text;
-        map['oldLocName'] = detailOldLocFrom.text;
-        map['newLocId'] = box.read('locationId');
-        map['newLocCode'] = box.read('locationCode');
-        map['newLocName'] = box.read('locationName');
-        map['isApproved'] = 0;
-        map['isVoid'] = 0;
-        map['saveDate'] = formattedDate;
-        map['savedBy'] = box.read('userId');
-        map['uploadDate'] = '';
-        map['uploadBy'] = '';
-        map['uploadMessage'] = '';
-        map['syncDate'] = '';
-        map['syncBy'] = 0;
+    Database db = await dbHelper.initDb();
 
+    Map<String, dynamic> map = {};
+    if (idFaTrans == 0) {
+      map['transId'] = 0;
+      map['plantId'] = box.read('plantId');
+      map['transTypeCode'] = 'T';
+      map['transDate'] = dateTime.text;
+      map['transNo'] = transNo.text;
+      map['manualRef'] = manualRef.text;
+      map['otherRef'] = otherRef.text;
+      map['transferTypeCode'] = transferTypeCode;
+      map['oldLocId'] = oldLocId;
+      map['oldLocCode'] = oldLocFrom.text;
+      map['oldLocName'] = detailOldLocFrom.text;
+      map['newLocId'] = box.read('locationId');
+      map['newLocCode'] = box.read('locationCode');
+      map['newLocName'] = box.read('locationName');
+      map['isApproved'] = 0;
+      map['isVoid'] = 0;
+      map['saveDate'] = formattedDate;
+      map['savedBy'] = box.read('userId');
+      map['uploadDate'] = '';
+      map['uploadBy'] = '';
+      map['uploadMessage'] = '';
+      map['syncDate'] = '';
+      map['syncBy'] = 0;
+
+      if (isExistManualRef) {
+        findAndCheckManualRef(manualRef.text);
+      } else {
         int exec = await db.insert("fatrans", map,
             conflictAlgorithm: ConflictAlgorithm.replace);
 
@@ -161,38 +147,38 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
             ],
           ));
         }
-      } else {
-        map['transDate'] = dateTime.text;
-        map['transNo'] = transNo.text;
-        map['manualRef'] = manualRef.text;
-        map['otherRef'] = otherRef.text;
-        map['oldLocId'] = oldLocId;
-        map['oldLocCode'] = oldLocFrom.text;
-        map['oldLocName'] = detailOldLocFrom.text;
-        map['newLocId'] = box.read('locationId');
-        map['newLocCode'] = box.read('locationCode');
-        map['newLocName'] = box.read('locationName');
-        map['saveDate'] = formattedDate;
-        map['savedBy'] = box.read('userId');
+      }
+    } else {
+      map['transDate'] = dateTime.text;
+      map['transNo'] = transNo.text;
+      map['manualRef'] = manualRef.text;
+      map['otherRef'] = otherRef.text;
+      map['oldLocId'] = oldLocId;
+      map['oldLocCode'] = oldLocFrom.text;
+      map['oldLocName'] = detailOldLocFrom.text;
+      map['newLocId'] = box.read('locationId');
+      map['newLocCode'] = box.read('locationCode');
+      map['newLocName'] = box.read('locationName');
+      map['saveDate'] = formattedDate;
+      map['savedBy'] = box.read('userId');
 
-        int exec = await db
-            .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
+      int exec = await db
+          .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
 
-        if (exec != 0) {
-          Get.dialog(AlertDialog(
-            title: const Text("Information"),
-            content: const Text("Data has been updated."),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Get.back();
-                  Get.back();
-                },
-                child: const Text("Close"),
-              ),
-            ],
-          ));
-        }
+      if (exec != 0) {
+        Get.dialog(AlertDialog(
+          title: const Text("Information"),
+          content: const Text("Data has been updated."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+                Get.back();
+              },
+              child: const Text("Close"),
+            ),
+          ],
+        ));
       }
     }
   }
@@ -482,7 +468,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     detailOldLocFrom.text = box.read('intransitName');
   }
 
-  void findAndCheckManualRef(String value) async {
+  Future<bool> isFindAndCheckManualRef(String value) async {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.query(
       'fatrans',
@@ -490,9 +476,17 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       whereArgs: [transferTypeCode, value],
     );
     if (maps.isNotEmpty) {
-      var data = maps.first;
-      if (data['id'] == idFaTrans) {
-        manualRef.text = data['manualRef'];
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void findAndCheckManualRef(String value) async {
+    bool isExist = await isFindAndCheckManualRef(value);
+    if (isExist) {
+      if (idFaTrans != 0) {
+        manualRef.text = value;
       } else {
         Get.snackbar("Information", "Manual Ref sudah pernah ada.");
         manualRef.text = "";

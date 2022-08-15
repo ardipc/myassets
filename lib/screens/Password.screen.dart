@@ -89,6 +89,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: oldPass,
+                      obscureText: true,
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(10),
                         border: OutlineInputBorder(
@@ -111,6 +112,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: newPass,
+                      obscureText: true,
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(10),
                         border: OutlineInputBorder(
@@ -133,6 +135,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: conPass,
+                      obscureText: true,
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(10),
                         border: OutlineInputBorder(

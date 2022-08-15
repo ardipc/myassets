@@ -157,7 +157,8 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     if (maps.isNotEmpty) {
       setState(() {
         fasohead = maps.first;
-        isConfirmed = maps.first['soStatusCode'] == "1" ? true : false;
+        isConfirmed =
+            (["1", "4"].contains(maps.first['soStatusCode'])) ? true : false;
       });
     } else {
       setState(() {
@@ -451,6 +452,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   @override
   Widget build(BuildContext context) {
     // ignore: avoid_print
+    print(fasohead['rejectNote']);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Stock Opname'),
@@ -504,7 +506,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                 ],
               ),
             ),
-            if (fasohead['rejectNote'] != '') ...[
+            if (fasohead['rejectNote'] != null) ...[
               Card(
                 color: Colors.red[100],
                 child: SizedBox(

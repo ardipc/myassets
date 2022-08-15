@@ -69,7 +69,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     setState(() {
       _optionsPeriods = items;
       selectedValue = Get.arguments[1];
-      isConfirmed = Get.arguments[2]['soStatusCode'] == "1" ? true : false;
+      isConfirmed =
+          ["1", "4"].contains(Get.arguments[2]['soStatusCode']) ? true : false;
     });
   }
 
