@@ -99,7 +99,7 @@ class UploadController extends GetxController {
           m['stockOpnameId'] = res['stockOpnameId'];
           m['uploadDate'] =
               DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-          m['uploadBy'] = box.read('userId');
+          m['uploadBy'] = box.read('userId').toString();
           m['uploadMessage'] = res['message'];
           await db.update(
             "stockopnames",
@@ -168,7 +168,7 @@ class UploadController extends GetxController {
             m['transItemId'] = res['transItemId'];
             m['uploadDate'] =
                 DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-            m['uploadBy'] = box.read('userId');
+            m['uploadBy'] = box.read('userId').toString();
             m['uploadMessage'] = res['message'];
             await db.update(
               'fatransitem',
@@ -199,7 +199,7 @@ class UploadController extends GetxController {
           m['transId'] = res['transId'];
           m['uploadDate'] =
               DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-          m['uploadBy'] = box.read('userId');
+          m['uploadBy'] = box.read('userId').toString();
           m['uploadMessage'] = res['message'];
           await db.update(
             "fatrans",
@@ -209,8 +209,8 @@ class UploadController extends GetxController {
               data['id'],
             ],
           );
-          listProgress.add(
-              rowProgress("ID ${res['stockOpnameId'].toString()} uploaded."));
+          listProgress
+              .add(rowProgress("ID ${data['id'].toString()} uploaded."));
         }
       });
     }
