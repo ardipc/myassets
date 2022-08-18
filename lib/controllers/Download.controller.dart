@@ -350,48 +350,48 @@ class DownloadController extends GetxController {
             whereArgs: [periods[i]['transId']],
           );
 
-          List<dynamic> getTransItems = responseBody['transitems'];
-          List filtered = getTransItems
-              .where((element) => element['transId'] == getTransId)
-              .toList();
-          for (var item in filtered) {
-            List<Map<String, dynamic>> getFaTransItems = await db.query(
-              'fatransitem',
-              where: 'transId = ?',
-              whereArgs: [item['transId']],
-            );
-            Map<String, dynamic> map = {
-              "transItemId": item['transItemId'],
-              "transId": item['transId'],
-              "faId": item['faId'],
-              "qty": item['qty'],
-              "remarks": item['remarks'],
-              "conStatCode": item['conStatCode'],
-              "tagNo": item['oldTagNo'],
-              "oldTagNo": item['oldTagNo'],
-              "newTagNo": item['newTagNo'],
-              "saveDate": item['insertDate'],
-              "saveBy": item['insertBy'],
-              "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
-              "syncBy": box.read('userId')
-            };
-            if (getFaTransItems.isNotEmpty) {
-              map['transLocalId'] = getFaTransItems.first['transLocalId'];
-              await db.update(
-                'fatransitem',
-                map,
-                where: 'transId = ?',
-                whereArgs: [item['transId']],
-              );
-            } else {
-              map['transLocalId'] = sFa.first['transLocalId'];
-              await db.insert(
-                'fatransitem',
-                map,
-                conflictAlgorithm: ConflictAlgorithm.replace,
-              );
-            }
-          }
+          // List<dynamic> getTransItems = responseBody['transitems'];
+          // List filtered = getTransItems
+          //     .where((element) => element['transId'] == getTransId)
+          //     .toList();
+          // for (var item in filtered) {
+          //   List<Map<String, dynamic>> getFaTransItems = await db.query(
+          //     'fatransitem',
+          //     where: 'transId = ?',
+          //     whereArgs: [item['transId']],
+          //   );
+          //   Map<String, dynamic> map = {
+          //     "transItemId": item['transItemId'],
+          //     "transId": item['transId'],
+          //     "faId": item['faId'],
+          //     "qty": item['qty'],
+          //     "remarks": item['remarks'],
+          //     "conStatCode": item['conStatCode'],
+          //     "tagNo": item['oldTagNo'],
+          //     "oldTagNo": item['oldTagNo'],
+          //     "newTagNo": item['newTagNo'],
+          //     "saveDate": item['insertDate'],
+          //     "saveBy": item['insertBy'],
+          //     "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+          //     "syncBy": box.read('userId')
+          //   };
+          //   if (getFaTransItems.isNotEmpty) {
+          //     map['transLocalId'] = getFaTransItems.first['transLocalId'];
+          //     await db.update(
+          //       'fatransitem',
+          //       map,
+          //       where: 'transId = ?',
+          //       whereArgs: [item['transId']],
+          //     );
+          //   } else {
+          //     map['transLocalId'] = sFa.first['transLocalId'];
+          //     await db.insert(
+          //       'fatransitem',
+          //       map,
+          //       conflictAlgorithm: ConflictAlgorithm.replace,
+          //     );
+          //   }
+          // }
         } else {
           var getTransId = await db.insert(
             "fatrans",
@@ -399,79 +399,79 @@ class DownloadController extends GetxController {
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
 
-          List<dynamic> getTransItems = response.body['transitems'];
-          List<dynamic> filtered = getTransItems
-              .where((element) => element['transId'] == getTransId)
-              .toList();
-          for (var item in filtered) {
-            List<Map<String, dynamic>> getFaTransItems = await db.query(
-              'fatransitem',
-              where: 'transId = ?',
-              whereArgs: [item['transId']],
-            );
-            Map<String, dynamic> map = {
-              "transItemId": item['transItemId'],
-              "transId": item['transId'],
-              "faId": item['faId'],
-              "qty": item['qty'],
-              "remarks": item['remarks'],
-              "conStatCode": item['conStatCode'],
-              "tagNo": item['oldTagNo'],
-              "oldTagNo": item['oldTagNo'],
-              "newTagNo": item['newTagNo'],
-              "saveDate": item['insertDate'],
-              "saveBy": item['insertBy'],
-              "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
-              "syncBy": box.read('userId')
-            };
-            if (getFaTransItems.isNotEmpty) {
-              map['transLocalId'] = getFaTransItems.first['transLocalId'];
-              await db.update(
-                'fatransitem',
-                map,
-                where: 'transId = ?',
-                whereArgs: [item['transId']],
-              );
-            } else {
-              map['transLocalId'] = getTransId;
-              await db.insert(
-                'fatransitem',
-                map,
-                conflictAlgorithm: ConflictAlgorithm.replace,
-              );
-            }
-          }
+          // List<dynamic> getTransItems = response.body['transitems'];
+          // List<dynamic> filtered = getTransItems
+          //     .where((element) => element['transId'] == getTransId)
+          //     .toList();
+          // for (var item in filtered) {
+          //   List<Map<String, dynamic>> getFaTransItems = await db.query(
+          //     'fatransitem',
+          //     where: 'transId = ?',
+          //     whereArgs: [item['transId']],
+          //   );
+          //   Map<String, dynamic> map = {
+          //     "transItemId": item['transItemId'],
+          //     "transId": item['transId'],
+          //     "faId": item['faId'],
+          //     "qty": item['qty'],
+          //     "remarks": item['remarks'],
+          //     "conStatCode": item['conStatCode'],
+          //     "tagNo": item['oldTagNo'],
+          //     "oldTagNo": item['oldTagNo'],
+          //     "newTagNo": item['newTagNo'],
+          //     "saveDate": item['insertDate'],
+          //     "saveBy": item['insertBy'],
+          //     "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+          //     "syncBy": box.read('userId')
+          //   };
+          //   if (getFaTransItems.isNotEmpty) {
+          //     map['transLocalId'] = getFaTransItems.first['transLocalId'];
+          //     await db.update(
+          //       'fatransitem',
+          //       map,
+          //       where: 'transId = ?',
+          //       whereArgs: [item['transId']],
+          //     );
+          //   } else {
+          //     map['transLocalId'] = getTransId;
+          //     await db.insert(
+          //       'fatransitem',
+          //       map,
+          //       conflictAlgorithm: ConflictAlgorithm.replace,
+          //     );
+          //   }
+          // }
         }
       }
     });
     listProgress.add(rowProgress("Table FA Trans completed."));
 
-    // listProgress.add(rowProgress("Sync table FA Trans Item."));
-    // await db.delete("fatransitem", where: null);
-    // await transItemService.getAll().then((value) async {
-    //   List periods = value.body['transitems'];
-    //   for (var i = 0; i < periods.length; i++) {
-    //     listProgress
-    //         .add(rowProgress("ID ${periods[i]['transItemId']} inserted."));
-    //     Map<String, dynamic> map = {
-    //       "transItemId": periods[i]['transItemId'],
-    //       "transId": periods[i]['transId'],
-    //       // "faItemId": INTEGER,
-    //       "faId": periods[i]['faId'],
-    //       // "faNo": INTEGER,
-    //       // "description": TEXT,
-    //       "remarks": periods[i]['remarks'],
-    //       "conStatCode": periods[i]['conStatCode'],
-    //       "tagNo": periods[i]['oldTagNo'],
-    //       "saveDate": periods[i]['insertDate'],
-    //       "saveBy": periods[i]['insertBy'],
-    //       "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
-    //       "syncBy": box.read('userId')
-    //     };
-    //     await db.insert("fatransitem", map);
-    //   }
-    // });
-    // listProgress.add(rowProgress("Table FA Trans Item completed."));
+    listProgress.add(rowProgress("Sync table FA Trans Item."));
+    await db.delete("fatransitem", where: null);
+    await transItemService.getAll().then((value) async {
+      List periods = value.body['transitems'];
+      for (var i = 0; i < periods.length; i++) {
+        listProgress
+            .add(rowProgress("ID ${periods[i]['transItemId']} inserted."));
+        Map<String, dynamic> map = {
+          "transItemId": periods[i]['transItemId'],
+          "transId": periods[i]['transId'],
+          // "faItemId": INTEGER,
+          "faId": periods[i]['faId'],
+          // "faNo": INTEGER,
+          // "description": TEXT,
+          "remarks": periods[i]['remarks'],
+          "conStatCode": periods[i]['conStatCode'],
+          "tagNo": periods[i]['oldTagNo'],
+          "saveDate": periods[i]['insertDate'],
+          "saveBy": periods[i]['insertBy'],
+          "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+          "syncBy": box.read('userId')
+        };
+        await db.insert("fatransitem", map);
+      }
+    });
+    listProgress.add(rowProgress("Table FA Trans Item completed."));
   }
 
   Widget rowProgress(String text) {
