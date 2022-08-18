@@ -34,6 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
           actions: [
             TextButton(
               onPressed: () {
+                Get.back();
                 Get.toNamed('/download');
               },
               child: const Text("Go to download"),
@@ -55,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void showIsiTabel() async {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> so = await db.query(
-      'stockopnames',
+      'fatransitem',
       // where: 'tagNo = ?',
       // whereArgs: ['40000005993'],
     );
@@ -111,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: box.read('token')));
                 Get.snackbar("Information", "Copy to Clipboard.");
+                showIsiTabel();
               },
               icon: const Icon(Icons.copy),
             ),
