@@ -43,6 +43,12 @@ class _PasswordScreenState extends State<PasswordScreen> {
             content: Text("Password sukses diganti."),
           ),
         );
+
+        setState(() {
+          oldPass.text = "";
+          newPass.text = "";
+          conPass.text = "";
+        });
       } else {
         Get.dialog(
           AlertDialog(
