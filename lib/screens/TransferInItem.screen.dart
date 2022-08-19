@@ -26,6 +26,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   String? transTypeCode = "T";
   String? transferTypeCode = "TI";
   int isApproved = 0;
+  String oldManRef = "";
+  Map<String, dynamic> transaction = {};
 
   int transId = 0;
   final transNo = TextEditingController();
@@ -204,6 +206,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         transNo.text = maps[0]['transNo'];
         dateTime.text = maps[0]['dateTime'];
         manualRef.text = maps[0]['manualRef'];
+        oldManRef = maps[0]['manualRef'];
         otherRef.text = maps[0]['otherRef'];
 
         // oldLocId = maps[0]['oldLocId'];
@@ -272,12 +275,14 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     final serviceFATrans = FATransService();
     final serviceFATransItem = FATransItemService();
 
-    // print(map);
+    // ignore: avoid_print
+    print(map);
 
     serviceFATrans.create(map).then((value) async {
       // print("FATrans ${value.body}");
       var res = value.body;
-      // print(res);
+      // ignore: avoid_print
+      print(res);
       // if (res['message'].toString().isNotEmpty) {
       Map<String, dynamic> m = {};
       m['transId'] = res['transId'];
@@ -397,9 +402,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       whereArgs: [idFaTrans, transId],
     );
     // ignore: avoid_print
-    print(idFaTrans);
+    // print(idFaTrans);
     // ignore: avoid_print
-    print(getItems);
+    // print(getItems);
     if (getItems.isNotEmpty) {
       Get.dialog(
         AlertDialog(
@@ -483,6 +488,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       whereArgs: [transferTypeCode, value],
     );
     if (maps.isNotEmpty) {
+      setState(() {
+        transaction = maps.first;
+      });
       return true;
     } else {
       return false;
@@ -491,10 +499,19 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
   void findAndCheckManualRef(String value) async {
     bool isExist = await isFindAndCheckManualRef(value);
+    // print("isExist : $isExist");
+    // print("idFaTrans : $idFaTrans");
     // print(transId);
+    // print(oldManRef);
     if (isExist) {
       if (idFaTrans != 0) {
-        manualRef.text = value;
+        if (transId == transaction['transId']) {
+          manualRef.text = value;
+        } else {
+          Get.snackbar("Information", "Manual Ref sudah pernah ada.");
+          manualRef.text = "";
+          _focusNode.requestFocus();
+        }
       } else {
         Get.snackbar("Information", "Manual Ref sudah pernah ada.");
         manualRef.text = "";

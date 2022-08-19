@@ -27,6 +27,9 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
   String? transferTypeCode = "TO";
   int isApproved = 0;
 
+  String oldManRef = "";
+  Map<String, dynamic> transaction = {};
+
   int transId = 0;
   final transNo = TextEditingController();
   final dateTime = TextEditingController();
@@ -202,6 +205,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         transNo.text = maps[0]['transNo'];
         dateTime.text = maps[0]['dateTime'];
         manualRef.text = maps[0]['manualRef'];
+        oldManRef = maps[0]['manualRef'];
         otherRef.text = maps[0]['otherRef'];
 
         // oldLocId = maps[0]['oldLocId'];
@@ -370,6 +374,9 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       whereArgs: [transferTypeCode, value],
     );
     if (maps.isNotEmpty) {
+      setState(() {
+        transaction = maps.first;
+      });
       return true;
     } else {
       return false;
@@ -380,7 +387,13 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     bool isExist = await isFindAndCheckManualRef(value);
     if (isExist) {
       if (idFaTrans != 0) {
-        manualRef.text = value;
+        if (transId == transaction['transId']) {
+          manualRef.text = value;
+        } else {
+          Get.snackbar("Information", "Manual Ref sudah pernah ada.");
+          manualRef.text = "";
+          _focusNode.requestFocus();
+        }
       } else {
         Get.snackbar("Information", "Manual Ref sudah pernah ada.");
         manualRef.text = "";

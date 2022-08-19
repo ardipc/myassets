@@ -153,7 +153,8 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       where: "periodId = ? AND locationId = ?",
       whereArgs: [periodId, box.read('locationId')],
     );
-    // print(maps);
+    // ignore: avoid_print
+    print(maps);
     if (maps.isNotEmpty) {
       setState(() {
         fasohead = maps.first;
@@ -452,7 +453,8 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   @override
   Widget build(BuildContext context) {
     // ignore: avoid_print
-    print(fasohead['rejectNote']);
+    // print(fasohead['rejectNote'].toString().isBlank);
+    // print(fasohead['rejectNote'].runtimeType);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Stock Opname'),
@@ -506,7 +508,8 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                 ],
               ),
             ),
-            if (fasohead['rejectNote'] != null) ...[
+            if (fasohead['rejectNote'] != null &&
+                fasohead['rejectNote'].toString().isBlank == false) ...[
               Card(
                 color: Colors.red[100],
                 child: SizedBox(
