@@ -20,37 +20,6 @@ class _ClearScreen extends State<ClearScreen> {
 
   final dateTime = TextEditingController();
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      initialDatePickerMode: DatePickerMode.day,
-      firstDate: DateTime(2015),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      _selectTime(context);
-      setState(() {
-        dateTime.text = picked.toString().substring(0, 10);
-      });
-    }
-  }
-
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
-    if (picked != null) {
-      TimeOfDay now = picked;
-      setState(() {
-        dateTime.text = dateTime.text +
-            " " +
-            now.hour.toString().padLeft(2, "0") +
-            ":" +
-            now.minute.toString().padLeft(2, "0");
-      });
-    }
-  }
-
   Future<void> fetchPeriod() async {
     Database db = await dbHelper.initDb();
 

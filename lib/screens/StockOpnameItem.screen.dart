@@ -1,3 +1,4 @@
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -24,7 +25,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   var isReadOnly = false;
   var isConfirmed = false;
 
-  List _optionsPeriods = [];
+  // List _optionsPeriods = [];
   int? selectedValue;
 
   String barcode = "";
@@ -67,10 +68,10 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     }
 
     setState(() {
-      _optionsPeriods = items;
+      // _optionsPeriods = items;
       selectedValue = Get.arguments[1];
       isConfirmed =
-          ["1", "4"].contains(Get.arguments[2]['soStatusCode']) ? true : false;
+          ["0", "2"].contains(Get.arguments[2]['soStatusCode']) ? false : true;
     });
   }
 
@@ -978,30 +979,32 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                           ),
                         ),
                         if (idStockOpname != 0) ...[
-                          Container(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 6.0,
-                              vertical: 3.0,
-                            ),
-                            height: 50,
-                            width: 600,
-                            child: TextButton(
-                              style: TextButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 228, 11, 29),
+                          if (!isConfirmed) ...[
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 6.0,
+                                vertical: 3.0,
                               ),
-                              onPressed: () {
-                                actionConfirm();
-                              },
-                              child: const Text(
-                                "Delete",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
+                              height: 50,
+                              width: 600,
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                  backgroundColor:
+                                      const Color.fromARGB(255, 228, 11, 29),
+                                ),
+                                onPressed: () {
+                                  actionConfirm();
+                                },
+                                child: const Text(
+                                  "Delete",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                          ]
                         ],
                       ],
                     )

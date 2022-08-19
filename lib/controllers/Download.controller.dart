@@ -21,20 +21,6 @@ class DownloadController extends GetxController {
   var listProgress = <Widget>[].obs;
   final box = GetStorage();
 
-  @override
-  void onInit() {
-    // ignore: todo
-    // TODO: implement onInit
-    super.onInit();
-  }
-
-  @override
-  void onClose() {
-    // ignore: todo
-    // TODO: implement onClose
-    super.onClose();
-  }
-
   void confirmDownload() {
     Get.dialog(
       AlertDialog(
@@ -302,8 +288,8 @@ class DownloadController extends GetxController {
 
     var transService = FATransService();
     var transItemService = FATransItemService();
-    var response = await transItemService.getAll();
-    var responseBody = response.body;
+    // var response = await transItemService.getAll();
+    // var responseBody = response.body;
     listProgress.add(rowProgress("Sync table FA Trans."));
     // await db.delete("fatrans", where: null);
     await transService.getAll().then((value) async {
@@ -342,7 +328,7 @@ class DownloadController extends GetxController {
 
         if (sFa.length == 1) {
           // action update
-          var getTransId = sFa.first['transId'];
+          // var getTransId = sFa.first['transId'];
           await db.update(
             'fatrans',
             map,
@@ -393,7 +379,8 @@ class DownloadController extends GetxController {
           //   }
           // }
         } else {
-          var getTransId = await db.insert(
+          // var getTransId =
+          await db.insert(
             "fatrans",
             map,
             conflictAlgorithm: ConflictAlgorithm.replace,

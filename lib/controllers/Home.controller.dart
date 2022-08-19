@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/models/preferences.model.dart';
 import 'package:myasset/models/user.model.dart';
-import 'package:sqflite/sqlite_api.dart';
 
 class HomeController extends GetxController {
   DbHelper dbHelper = DbHelper();
@@ -16,13 +15,6 @@ class HomeController extends GetxController {
     // TODO: implement onInit
     super.onInit();
     getData();
-  }
-
-  @override
-  void onClose() {
-    // ignore: todo
-    // TODO: implement onClose
-    super.onClose();
   }
 
   void getData() async {

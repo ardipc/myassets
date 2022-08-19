@@ -1,10 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:responsive_table/responsive_table.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferOutItemListScreen extends StatefulWidget {
@@ -30,7 +27,7 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
   List<DataRow> _rows = [];
 
   // int _currentPage = 1;
-  bool _isLoading = true;
+  // bool _isLoading = true;
 
   @override
   void initState() {
@@ -110,9 +107,11 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
   }
 
   void fetchData() async {
-    setState(() => _isLoading = true);
-    _rows = await genData();
-    setState(() => _isLoading = false);
+    // setState(() => _isLoading = true);
+    setState(() async {
+      _rows = await genData();
+    });
+    // setState(() => _isLoading = false);
   }
 
   @override
@@ -190,7 +189,7 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
                         DataTable(
                           columnSpacing: 0.5,
                           dataRowHeight: 40,
-                          columns: [
+                          columns: const [
                             DataColumn(
                               label: Text(
                                 'No.',

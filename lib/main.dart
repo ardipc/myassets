@@ -12,7 +12,6 @@ import 'package:myasset/screens/Register.screen.dart';
 import 'package:myasset/screens/Settings.screen.dart';
 import 'package:myasset/screens/StockOpname.screen.dart';
 import 'package:myasset/screens/StockOpnameItem.screen.dart';
-import 'package:myasset/screens/Table.screen.dart';
 import 'package:myasset/screens/TransferIn.screen.dart';
 import 'package:myasset/screens/TransferInItem.screen.dart';
 import 'package:myasset/screens/TransferInItemForm.screen.dart';
@@ -66,23 +65,19 @@ void main() async {
         ),
         GetPage(
           name: '/home',
-          page: () => MyHomePage(title: "Asset Control"),
+          page: () => const MyHomePage(title: "Asset Control"),
         ),
         GetPage(
           name: '/login',
-          page: () => LoginScreen(),
+          page: () => const LoginScreen(),
         ),
         GetPage(
           name: '/register',
-          page: () => RegisterScreen(),
+          page: () => const RegisterScreen(),
         ),
         GetPage(
           name: '/otp',
-          page: () => OtpScreen(),
-        ),
-        GetPage(
-          name: '/table',
-          page: () => DataPage(),
+          page: () => const OtpScreen(),
         ),
         GetPage(
           name: '/stockopname',
@@ -90,39 +85,39 @@ void main() async {
         ),
         GetPage(
           name: '/stockopnameitem',
-          page: () => StockOpnameItemScreen(),
+          page: () => const StockOpnameItemScreen(),
         ),
         GetPage(
           name: '/transferin',
-          page: () => TransferInScreen(),
+          page: () => const TransferInScreen(),
         ),
         GetPage(
           name: '/transferinitem',
-          page: () => TransferInItemScreen(),
+          page: () => const TransferInItemScreen(),
         ),
         GetPage(
           name: '/transferinitemlist',
-          page: () => TransferInItemListScreen(),
+          page: () => const TransferInItemListScreen(),
         ),
         GetPage(
           name: '/transferinitemform',
-          page: () => TransferInItemFormScreen(),
+          page: () => const TransferInItemFormScreen(),
         ),
         GetPage(
           name: '/transferout',
-          page: () => TransferOutScreen(),
+          page: () => const TransferOutScreen(),
         ),
         GetPage(
           name: '/transferoutitem',
-          page: () => TransferOutItemScreen(),
+          page: () => const TransferOutItemScreen(),
         ),
         GetPage(
           name: '/transferoutitemlist',
-          page: () => TransferOutItemListScreen(),
+          page: () => const TransferOutItemListScreen(),
         ),
         GetPage(
           name: '/transferoutitemform',
-          page: () => TransferOutItemFormScreen(),
+          page: () => const TransferOutItemFormScreen(),
         ),
         GetPage(
           name: '/download',
@@ -134,15 +129,15 @@ void main() async {
         ),
         GetPage(
           name: '/clear',
-          page: () => ClearScreen(),
+          page: () => const ClearScreen(),
         ),
         GetPage(
           name: '/settings',
-          page: () => SettingsScreen(),
+          page: () => const SettingsScreen(),
         ),
         GetPage(
           name: '/password',
-          page: () => PasswordScreen(),
+          page: () => const PasswordScreen(),
         ),
       ],
     ),

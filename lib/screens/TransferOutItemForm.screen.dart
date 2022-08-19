@@ -1,3 +1,4 @@
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,7 +10,7 @@ import 'package:myasset/services/FAItem.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferOutItemFormScreen extends StatefulWidget {
-  TransferOutItemFormScreen({Key? key}) : super(key: key);
+  const TransferOutItemFormScreen({Key? key}) : super(key: key);
 
   @override
   State<TransferOutItemFormScreen> createState() =>

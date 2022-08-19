@@ -27,7 +27,7 @@ class _TransferInScreen extends State<TransferInScreen> {
   int pageCount = 1;
   int itemsPerPage = 1;
 
-  int? selectedValue;
+  int selectedValue = 0;
   Map<String, dynamic> selectedMap = {};
   String? sDate, eDate;
   List<Map<String, dynamic>> _dropdownPeriods = [];
@@ -291,12 +291,9 @@ class _TransferInScreen extends State<TransferInScreen> {
                 children: [
                   TextButton.icon(
                     onPressed: () {
-                      Get.toNamed('/transferinitem', arguments: [
-                        selectedValue,
-                        selectedValue,
-                        sDate,
-                        eDate
-                      ])?.whenComplete(() => fetchData(selectedMap));
+                      Get.toNamed('/transferinitem',
+                              arguments: [0, selectedValue, sDate, eDate])
+                          ?.whenComplete(() => fetchData(selectedMap));
                     },
                     icon: const Icon(Icons.add),
                     label: const Text("Add"),

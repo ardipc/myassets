@@ -9,7 +9,7 @@ import 'package:myasset/services/Location.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferInItemScreen extends StatefulWidget {
-  TransferInItemScreen({Key? key}) : super(key: key);
+  const TransferInItemScreen({Key? key}) : super(key: key);
 
   @override
   State<TransferInItemScreen> createState() => _TransferInItemScreenState();
@@ -19,7 +19,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   final box = GetStorage();
   DbHelper dbHelper = DbHelper();
 
-  TimeOfDay selectedTime = TimeOfDay(hour: 00, minute: 00);
+  TimeOfDay selectedTime = const TimeOfDay(hour: 00, minute: 00);
 
   int? idFaTrans = 0;
   int? plantId = 0;
@@ -256,12 +256,12 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
     Map<String, dynamic> map = {};
     map['idFaTrans'] = idFaTrans;
-    map['transId'] = "";
+    map['transId'] = transId == 0 ? "" : transId;
     map['plantId'] = box.read('plantId');
     map['transDate'] = dateTime.text;
     map['manualRef'] = manualRef.text;
     map['otherRef'] = otherRef.text;
-    map['transferType'] = 'TI';
+    map['transferType'] = transferTypeCode;
     map['oldLocId'] = box.read('intransitId');
     map['newLocId'] = box.read('locationId');
     map['isApproved'] = false;
@@ -277,6 +277,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     serviceFATrans.create(map).then((value) async {
       // print("FATrans ${value.body}");
       var res = value.body;
+      // print(res);
       // if (res['message'].toString().isNotEmpty) {
       Map<String, dynamic> m = {};
       m['transId'] = res['transId'];
@@ -285,7 +286,10 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       m['uploadBy'] = box.read('userId');
       m['uploadMessage'] = res['message'];
 
-      await db.update("fatrans", m, where: "id = ?", whereArgs: [idFaTrans]);
+      if (res['transNo'] != null) {
+        await db.update("fatrans", m, where: "id = ?", whereArgs: [idFaTrans]);
+      }
+
       await db.update(
         "fatransitem",
         {"transId": res['transId']},
@@ -302,9 +306,11 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         );
       }
 
-      setState(() {
-        transNo.text = res['transNo'];
-      });
+      if (res['transNo'] != null) {
+        setState(() {
+          transNo.text = res['transNo'];
+        });
+      }
 
       // looping fa trans item
       List<Map<String, dynamic>> rows = await db.query(
@@ -387,8 +393,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> getItems = await db.query(
       'fatransitem',
-      where: "transLocalId = ?",
-      whereArgs: [idFaTrans],
+      where: "transLocalId = ? OR transId = ?",
+      whereArgs: [idFaTrans, transId],
     );
     // ignore: avoid_print
     print(idFaTrans);
@@ -453,6 +459,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     // ignore: todo
     // TODO: implement initState
     super.initState();
+    // print(Get.arguments[0]);
     if (Get.arguments != null) {
       fetchData(Get.arguments[0]);
     } else {
@@ -484,6 +491,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
   void findAndCheckManualRef(String value) async {
     bool isExist = await isFindAndCheckManualRef(value);
+    // print(transId);
     if (isExist) {
       if (idFaTrans != 0) {
         manualRef.text = value;

@@ -1,3 +1,4 @@
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,12 +6,11 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:myasset/screens/Table.screen.dart';
 import 'package:myasset/services/FAItem.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferInItemFormScreen extends StatefulWidget {
-  TransferInItemFormScreen({Key? key}) : super(key: key);
+  const TransferInItemFormScreen({Key? key}) : super(key: key);
 
   @override
   State<TransferInItemFormScreen> createState() =>

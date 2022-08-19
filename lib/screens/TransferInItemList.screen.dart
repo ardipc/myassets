@@ -1,10 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:myasset/helpers/db.helper.dart';
-import 'package:responsive_table/responsive_table.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferInItemListScreen extends StatefulWidget {
@@ -25,8 +22,8 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
 
   List<DataRow> _rows = [];
 
-  int _currentPage = 1;
-  bool _isLoading = true;
+  // final int _currentPage = 1;
+  // bool _isLoading = true;
 
   @override
   void initState() {
@@ -44,9 +41,9 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
     List<Map<String, dynamic>> maps = await db.rawQuery(
         "SELECT s.*, i.assetName, c.genName AS con FROM fatransitem s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses c ON c.genCode = s.conStatCode WHERE s.transLocalId = ${Get.arguments[0]}  OR s.transId = '${Get.arguments[3]}'");
 
-    print(
-        "SELECT s.*, i.assetName, c.genName AS con FROM fatransitem s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses c ON c.genCode = s.conStatCode WHERE s.transLocalId = ${Get.arguments[0]}  OR s.transId = '${Get.arguments[3]}'");
-    print(maps);
+    // print(
+    //     "SELECT s.*, i.assetName, c.genName AS con FROM fatransitem s LEFT JOIN faitems i ON i.faId = s.faId LEFT JOIN statuses c ON c.genCode = s.conStatCode WHERE s.transLocalId = ${Get.arguments[0]}  OR s.transId = '${Get.arguments[3]}'");
+    // print(maps);
 
     List<DataRow> temps = [];
     var i = 1;
@@ -110,9 +107,11 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
   }
 
   void fetchData() async {
-    setState(() => _isLoading = true);
-    _rows = await genData();
-    setState(() => _isLoading = false);
+    // setState(() => _isLoading = true);
+    setState(() async {
+      _rows = await genData();
+    });
+    // setState(() => _isLoading = false);
   }
 
   @override
@@ -190,7 +189,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
                         DataTable(
                           columnSpacing: 0.5,
                           dataRowHeight: 40,
-                          columns: [
+                          columns: const [
                             DataColumn(
                               label: Text(
                                 'No.',

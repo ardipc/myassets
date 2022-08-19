@@ -158,7 +158,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       setState(() {
         fasohead = maps.first;
         isConfirmed =
-            (["1", "4"].contains(maps.first['soStatusCode'])) ? true : false;
+            (["0", "2"].contains(maps.first['soStatusCode'])) ? false : true;
       });
     } else {
       setState(() {
@@ -179,10 +179,10 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     final periodService = PeriodService();
     Database db = await dbHelper.initDb();
 
-    List<Map<String, dynamic>> maps = await db.query(
-      "periods",
-      columns: ["periodId", "periodName"],
-    );
+    // List<Map<String, dynamic>> maps = await db.query(
+    //   "periods",
+    //   columns: ["periodId", "periodName"],
+    // );
 
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
@@ -419,7 +419,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
 
   Future<void> actionInsertToItems() async {
     Database db = await dbHelper.initDb();
-    Map<String, dynamic> map = Map();
+    Map<String, dynamic> map = {};
     map['tagNo'] = 2;
     map['assetName'] = 'Keyboard';
     map['locId'] = 1;
@@ -429,7 +429,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     map['syncBy'] = 0;
     db.insert("faitems", map, conflictAlgorithm: ConflictAlgorithm.replace);
 
-    List<Map<String, dynamic>> maps = await db.query("faitems");
+    // List<Map<String, dynamic>> maps = await db.query("faitems");
     // print(maps);
   }
 

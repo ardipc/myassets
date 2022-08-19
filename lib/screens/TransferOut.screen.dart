@@ -27,7 +27,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
   int pageCount = 1;
   int itemsPerPage = 1;
 
-  int? selectedValue;
+  int selectedValue = 0;
   Map<String, dynamic> selectedMap = {};
   String? sDate, eDate;
   List<Map<String, dynamic>> _dropdownPeriods = [];
@@ -56,7 +56,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
     );
     // }
 
-    int offset = (page - 1) * itemsPerPage;
+    // int offset = (page - 1) * itemsPerPage;
     if (rows.isEmpty) {
       setState(() {
         pageCount = 1;
@@ -72,7 +72,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
       }
     }
 
-    List<Map<String, dynamic>> maps = [];
+    // List<Map<String, dynamic>> maps = [];
     // if (periodId == 0) {
     //   maps = await db.query(
     //     "fatrans",
@@ -81,12 +81,12 @@ class _TransferOutScreen extends State<TransferOutScreen> {
     //     whereArgs: ["TO", 0],
     //   );
     // } else {
-    maps = await db.query(
-      "fatrans",
-      where:
-          "transferTypeCode = ? AND isVoid = ? AND transDate BETWEEN ? AND ? LIMIT $offset, $itemsPerPage",
-      whereArgs: ["TO", 0, startDate, endDate],
-    );
+    // maps = await db.query(
+    //   "fatrans",
+    //   where:
+    //       "transferTypeCode = ? AND isVoid = ? AND transDate BETWEEN ? AND ? LIMIT $offset, $itemsPerPage",
+    //   whereArgs: ["TO", 0, startDate, endDate],
+    // );
     // }
 
     List<DataRow> temps = [];
@@ -94,31 +94,31 @@ class _TransferOutScreen extends State<TransferOutScreen> {
     for (var data in rows) {
       DataRow row = DataRow(cells: [
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.075,
             child: Text("$i"),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.2,
             child: Text(data['transDate']),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.20,
             child: Text(data['transNo']),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.25,
             child: Text(data['manualRef']),
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.1,
             child: Text(
               data['isApproved'] == 0 ? "Not Yet" : "Approved",
@@ -130,7 +130,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
           ),
         ),
         DataCell(
-          Container(
+          SizedBox(
             width: Get.width * 0.1,
             child: TextButton(
               onPressed: () {
@@ -332,9 +332,12 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                 children: [
                   TextButton.icon(
                     onPressed: () {
-                      Get.toNamed('/transferoutitem',
-                              arguments: [selectedValue])
-                          ?.whenComplete(() => fetchData(selectedMap));
+                      Get.toNamed('/transferoutitem', arguments: [
+                        0,
+                        selectedValue,
+                        sDate,
+                        eDate,
+                      ])?.whenComplete(() => fetchData(selectedMap));
                     },
                     icon: const Icon(Icons.add),
                     label: const Text("Add"),
@@ -363,7 +366,7 @@ class _TransferOutScreen extends State<TransferOutScreen> {
                         DataTable(
                           columnSpacing: 0.5,
                           dataRowHeight: 40,
-                          columns: [
+                          columns: const [
                             DataColumn(
                               label: Text(
                                 'No.',

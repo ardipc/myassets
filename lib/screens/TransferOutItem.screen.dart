@@ -9,7 +9,7 @@ import 'package:myasset/services/Location.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferOutItemScreen extends StatefulWidget {
-  TransferOutItemScreen({Key? key}) : super(key: key);
+  const TransferOutItemScreen({Key? key}) : super(key: key);
 
   @override
   State<TransferOutItemScreen> createState() => _TransferOutItemScreenState();
@@ -19,7 +19,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
   final box = GetStorage();
   DbHelper dbHelper = DbHelper();
 
-  TimeOfDay selectedTime = TimeOfDay(hour: 00, minute: 00);
+  TimeOfDay selectedTime = const TimeOfDay(hour: 00, minute: 00);
 
   int? idFaTrans = 0;
   int? plantId = 0;
@@ -54,13 +54,13 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
               Get.back();
               actionDelete();
             },
-            child: Text("YES"),
+            child: const Text("YES"),
           ),
           TextButton(
             onPressed: () {
               Get.back();
             },
-            child: Text("NO"),
+            child: const Text("NO"),
           ),
         ],
       ),
@@ -254,12 +254,12 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
 
     Map<String, dynamic> map = {};
     map['idFaTrans'] = idFaTrans;
-    map['transId'] = "";
+    map['transId'] = transId == 0 ? "" : transId;
     map['plantId'] = box.read('plantId');
     map['transDate'] = dateTime.text;
     map['manualRef'] = manualRef.text;
     map['otherRef'] = otherRef.text;
-    map['transferType'] = 'TO';
+    map['transferType'] = transferTypeCode;
     map['oldLocId'] = box.read('intransitId');
     map['newLocId'] = box.read('locationId');
     map['isApproved'] = false;
@@ -275,6 +275,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     serviceFATrans.create(map).then((value) async {
       // print("FATrans ${value.body}");
       var res = value.body;
+      // print(res);
       // if (res['message'].toString().isNotEmpty) {
       Map<String, dynamic> m = {};
       m['transId'] = res['transId'];
@@ -283,7 +284,10 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       m['uploadBy'] = box.read('userId');
       m['uploadMessage'] = res['message'];
 
-      await db.update("fatrans", m, where: "id = ?", whereArgs: [idFaTrans]);
+      if (res['transNo'] != null) {
+        await db.update("fatrans", m, where: "id = ?", whereArgs: [idFaTrans]);
+      }
+
       await db.update(
         "fatransitem",
         {"transId": res['transId']},
@@ -300,9 +304,11 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         );
       }
 
-      setState(() {
-        transNo.text = res['transNo'];
-      });
+      if (res['transNo'] != null) {
+        setState(() {
+          transNo.text = res['transNo'];
+        });
+      }
 
       // looping fa trans item
       List<Map<String, dynamic>> rows = await db.query(
@@ -412,8 +418,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> getItems = await db.query(
       'fatransitem',
-      where: "transLocalId = ?",
-      whereArgs: [idFaTrans],
+      where: "transLocalId = ? OR transId = ?",
+      whereArgs: [idFaTrans, transId],
     );
     // ignore: avoid_print
     print(idFaTrans);
