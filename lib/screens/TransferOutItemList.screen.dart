@@ -27,7 +27,7 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
   List<DataRow> _rows = [];
 
   // int _currentPage = 1;
-  // bool _isLoading = true;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -107,11 +107,9 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
   }
 
   void fetchData() async {
-    // setState(() => _isLoading = true);
-    setState(() async {
-      _rows = await genData();
-    });
-    // setState(() => _isLoading = false);
+    setState(() => _isLoading = true);
+    _rows = await genData();
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -121,133 +119,143 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
         title: const Text('Transfer Out Item List'),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 12.0, right: 12, left: 12),
-              child: Row(
+        child: _isLoading
+            ? const Center(
+                child: Text("Loading..."),
+              )
+            : Column(
                 children: [
-                  const Text("Trans No"),
-                  const SizedBox(
-                    width: 40,
-                  ),
-                  SizedBox(
-                    width: Get.width * 0.76,
-                    child: TextField(
-                      enabled: false,
-                      controller: transNo,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        contentPadding: const EdgeInsets.all(10),
-                        border: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blueAccent),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              width: Get.width,
-              child: Row(
-                children: [
-                  if (Get.arguments[2] == 0) ...[
-                    TextButton.icon(
-                      onPressed: () {
-                        Get.toNamed(
-                          '/transferoutitemform',
-                          arguments: [Get.arguments[0], Get.arguments[1], 0],
-                        )?.whenComplete(() => fetchData());
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text("Add"),
-                    ),
-                  ],
-                  const SizedBox(
-                    width: 10,
-                  ),
-                ],
-                mainAxisAlignment: MainAxisAlignment.end,
-              ),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Container(
-                  constraints: BoxConstraints(
-                    maxHeight: Get.height * 0.732,
-                  ),
-                  child: Card(
-                    elevation: 1,
-                    shadowColor: Colors.black,
-                    clipBehavior: Clip.none,
-                    child: ListView(
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(top: 12.0, right: 12, left: 12),
+                    child: Row(
                       children: [
-                        DataTable(
-                          columnSpacing: 0.5,
-                          dataRowHeight: 40,
-                          columns: const [
-                            DataColumn(
-                              label: Text(
-                                'No.',
+                        const Text("Trans No"),
+                        const SizedBox(
+                          width: 40,
+                        ),
+                        SizedBox(
+                          width: Get.width * 0.76,
+                          child: TextField(
+                            enabled: false,
+                            controller: transNo,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.grey[300],
+                              contentPadding: const EdgeInsets.all(10),
+                              border: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.blueAccent),
                               ),
                             ),
-                            DataColumn(
-                              label: Text(
-                                'Tag No',
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Description',
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Qty',
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Status',
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Action',
-                              ),
-                            ),
-                          ],
-                          rows: _rows,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                )
-              ],
-            ),
-            // Container(
-            //   width: Get.width,
-            //   child: Row(
-            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //     children: [
-            //       TextButton(
-            //         onPressed: () {},
-            //         child: Icon(Icons.chevron_left),
-            //       ),
-            //       Text("1 / 10 pages"),
-            //       TextButton(
-            //         onPressed: () {},
-            //         child: Icon(Icons.chevron_right),
-            //       ),
-            //     ],
-            //   ),
-            // ),
-          ],
-        ),
+                  SizedBox(
+                    width: Get.width,
+                    child: Row(
+                      children: [
+                        if (Get.arguments[2] == 0) ...[
+                          TextButton.icon(
+                            onPressed: () {
+                              Get.toNamed(
+                                '/transferoutitemform',
+                                arguments: [
+                                  Get.arguments[0],
+                                  Get.arguments[1],
+                                  0
+                                ],
+                              )?.whenComplete(() => fetchData());
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text("Add"),
+                          ),
+                        ],
+                        const SizedBox(
+                          width: 10,
+                        ),
+                      ],
+                      mainAxisAlignment: MainAxisAlignment.end,
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Container(
+                        constraints: BoxConstraints(
+                          maxHeight: Get.height * 0.732,
+                        ),
+                        child: Card(
+                          elevation: 1,
+                          shadowColor: Colors.black,
+                          clipBehavior: Clip.none,
+                          child: ListView(
+                            children: [
+                              DataTable(
+                                columnSpacing: 0.5,
+                                dataRowHeight: 40,
+                                columns: const [
+                                  DataColumn(
+                                    label: Text(
+                                      'No.',
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
+                                      'Tag No',
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
+                                      'Description',
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
+                                      'Qty',
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
+                                      'Status',
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
+                                      'Action',
+                                    ),
+                                  ),
+                                ],
+                                rows: _rows,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  // Container(
+                  //   width: Get.width,
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //     children: [
+                  //       TextButton(
+                  //         onPressed: () {},
+                  //         child: Icon(Icons.chevron_left),
+                  //       ),
+                  //       Text("1 / 10 pages"),
+                  //       TextButton(
+                  //         onPressed: () {},
+                  //         child: Icon(Icons.chevron_right),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                ],
+              ),
       ),
     );
   }
