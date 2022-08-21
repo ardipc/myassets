@@ -205,31 +205,32 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
   Future<void> getInfoItem(String value) async {
     Database db = await dbHelper.initDb();
     String parseToInt = value == '' ? '0' : value;
-
-    List<Map<String, dynamic>> checkTagNo = await db.query(
-      'fatransitem',
-      where: "transLocalId = ? AND tagNo = ?",
-      whereArgs: [Get.arguments[0], value],
-    );
-    if (checkTagNo.isNotEmpty) {
-      Get.snackbar("Information", "TagNo sudah terdapat di transaksi ini.");
-      tagNo.text = "";
-      _focusTagNo.requestFocus();
-    } else {
-      List<Map<String, dynamic>> maps = await db
-          .query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
-      if (maps.length == 1) {
-        setState(() {
-          tagNo.text = value;
-          description.text = maps[0]['assetName'];
-          faIdValue = maps[0]['faId'];
-          faNo.text = maps[0]['faNo'].toString();
-        });
+    if (value != "-") {
+      List<Map<String, dynamic>> checkTagNo = await db.query(
+        'fatransitem',
+        where: "transLocalId = ? AND tagNo = ?",
+        whereArgs: [Get.arguments[0], value],
+      );
+      if (checkTagNo.isNotEmpty) {
+        Get.snackbar("Information", "TagNo sudah terdapat di transaksi ini.");
+        tagNo.text = "";
+        _focusTagNo.requestFocus();
       } else {
-        Get.snackbar("Information", "TagNo tidak ditemukan.");
-        description.text = "";
-        faNo.text = "";
-        faIdValue = null;
+        List<Map<String, dynamic>> maps = await db
+            .query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
+        if (maps.length == 1) {
+          setState(() {
+            tagNo.text = value;
+            description.text = maps[0]['assetName'];
+            faIdValue = maps[0]['faId'];
+            faNo.text = maps[0]['faNo'].toString();
+          });
+        } else {
+          Get.snackbar("Information", "TagNo tidak ditemukan.");
+          description.text = "";
+          faNo.text = "";
+          faIdValue = null;
+        }
       }
     }
   }

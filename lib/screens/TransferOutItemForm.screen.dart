@@ -199,31 +199,33 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
 
   Future<void> getInfoItem(String value) async {
     Database db = await dbHelper.initDb();
-    int parseToInt = int.parse(value == '' ? '0' : value);
-    List<Map<String, dynamic>> checkTagNo = await db.query(
-      'fatransitem',
-      where: "transLocalId = ? AND tagNo = ?",
-      whereArgs: [Get.arguments[0], value],
-    );
-    if (checkTagNo.isNotEmpty) {
-      Get.snackbar("Information", "TagNo sudah terdapat di transaksi ini.");
-      tagNo.text = "";
-      _focusTagNo.requestFocus();
-    } else {
-      List<Map<String, dynamic>> maps = await db
-          .query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
-      if (maps.length == 1) {
-        setState(() {
-          tagNo.text = value;
-          description.text = maps[0]['assetName'].toString();
-          faNo.text = maps[0]['faNo'].toString();
-          faIdValue = maps[0]['faId'];
-        });
+    if (value != "-") {
+      String parseToInt = value == '' ? '0' : value;
+      List<Map<String, dynamic>> checkTagNo = await db.query(
+        'fatransitem',
+        where: "transLocalId = ? AND tagNo = ?",
+        whereArgs: [Get.arguments[0], value],
+      );
+      if (checkTagNo.isNotEmpty) {
+        Get.snackbar("Information", "TagNo sudah terdapat di transaksi ini.");
+        tagNo.text = "";
+        _focusTagNo.requestFocus();
       } else {
-        Get.snackbar("Information", "TagNo tidak ditemukan.");
-        description.text = "";
-        faNo.text = "";
-        faIdValue = null;
+        List<Map<String, dynamic>> maps = await db
+            .query("faitems", where: "tagNo = ?", whereArgs: [parseToInt]);
+        if (maps.length == 1) {
+          setState(() {
+            tagNo.text = value;
+            description.text = maps[0]['assetName'].toString();
+            faNo.text = maps[0]['faNo'].toString();
+            faIdValue = maps[0]['faId'];
+          });
+        } else {
+          Get.snackbar("Information", "TagNo tidak ditemukan.");
+          description.text = "";
+          faNo.text = "";
+          faIdValue = null;
+        }
       }
     }
   }
