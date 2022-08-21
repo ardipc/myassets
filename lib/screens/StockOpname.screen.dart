@@ -64,7 +64,9 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                   data['tagNo'].toString(),
                   style: const TextStyle(fontSize: 11),
                 ),
-                if (data['rejectNote'] != "") ...[
+                if (["0", "2"].contains(fasohead['soStatusCode']) == false &&
+                    data['rejectNote'].toString().isBlank == false &&
+                    data['rejectNote'] != null) ...[
                   IconButton(
                     color: Colors.red[600],
                     onPressed: () {
@@ -508,7 +510,8 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                 ],
               ),
             ),
-            if (fasohead['rejectNote'] != null &&
+            if (["0", "2"].contains(fasohead['soStatusCode']) == false &&
+                fasohead['rejectNote'] != null &&
                 fasohead['rejectNote'].toString().isBlank == false) ...[
               Card(
                 color: Colors.red[100],
