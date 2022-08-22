@@ -162,7 +162,8 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
       whereArgs: [id],
     );
 
-    // print(maps);
+    // ignore: avoid_print
+    print(maps);
 
     if (maps.length == 1) {
       List<Map<String, dynamic>> mapsItem = await db.query(
@@ -183,31 +184,35 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
           selectedExistence = maps[0]['existStatCode'].toString();
           isAda = maps[0]['existStatCode'].toString() == 'ex1' ? true : false;
         } else {
-          selectedExistence = null;
+          selectedExistence = "";
         }
         // if (maps[0]['tagStatCode'] != null) {
         // ignore: prefer_null_aware_operators
-        selectedTagging = maps[0]['tagStatCode'] != null
-            ? maps[0]['tagStatCode'].toString()
-            : null;
+        selectedTagging =
+            maps[0]['tagStatCode'] != null && maps[0]['tagStatCode'] != "null"
+                ? maps[0]['tagStatCode'].toString()
+                : "";
         // }
         // if (maps[0]['usageStatCode'] != null) {
         // ignore: prefer_null_aware_operators
-        selectedUsage = maps[0]['usageStatCode'] != null
+        selectedUsage = maps[0]['usageStatCode'] != null &&
+                maps[0]['usageStatCode'] != "null"
             ? maps[0]['usageStatCode'].toString()
-            : null;
+            : "";
         // }
         // if (maps[0]['conStatCode'] != null) {
         // ignore: prefer_null_aware_operators
-        selectedCondition = maps[0]['conStatCode'] != null
-            ? maps[0]['conStatCode'].toString()
-            : null;
+        selectedCondition =
+            maps[0]['conStatCode'] != null && maps[0]['conStatCode'] != "null"
+                ? maps[0]['conStatCode'].toString()
+                : "";
         // }
         // if (maps[0]['ownStatCode'] != null) {
         // ignore: prefer_null_aware_operators
-        selectedOwnership = maps[0]['ownStatCode'] != null
-            ? maps[0]['ownStatCode'].toString()
-            : null;
+        selectedOwnership =
+            maps[0]['ownStatCode'] != null && maps[0]['ownStatCode'] != "null"
+                ? maps[0]['ownStatCode'].toString()
+                : "";
         // }
       });
     }
@@ -237,32 +242,50 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
   void fetchAllOptions() async {
     Database db = await dbHelper.initDb();
 
-    List<Map<String, dynamic>> existMaps = await db.query(
+    var existMaps = [],
+        tagMaps = [],
+        usageMaps = [],
+        conMaps = [],
+        ownMaps = [];
+    List<Map<String, dynamic>> dbExists = await db.query(
       "statuses",
       where: 'genGroup = ?',
       whereArgs: ['EXISTSTAT'],
     );
+    existMaps = dbExists.toList();
+    existMaps.insert(0, {"genName": "", "genCode": ""});
 
-    List<Map<String, dynamic>> tagMaps = await db.query(
+    List<Map<String, dynamic>> dbtagMaps = await db.query(
       "statuses",
       where: 'genGroup = ?',
       whereArgs: ['TAGSTAT'],
     );
-    List<Map<String, dynamic>> usageMaps = await db.query(
+    tagMaps = dbtagMaps.toList();
+    tagMaps.insert(0, {"genName": "", "genCode": ""});
+
+    List<Map<String, dynamic>> dbusageMaps = await db.query(
       "statuses",
       where: 'genGroup = ?',
       whereArgs: ['USAGESTAT'],
     );
-    List<Map<String, dynamic>> conMaps = await db.query(
+    usageMaps = dbusageMaps.toList();
+    usageMaps.insert(0, {"genName": "", "genCode": ""});
+
+    List<Map<String, dynamic>> dbconMaps = await db.query(
       "statuses",
       where: 'genGroup = ?',
       whereArgs: ['CONSTAT'],
     );
-    List<Map<String, dynamic>> ownMaps = await db.query(
+    conMaps = dbconMaps.toList();
+    conMaps.insert(0, {"genName": "", "genCode": ""});
+
+    List<Map<String, dynamic>> dbownMaps = await db.query(
       "statuses",
       where: 'genGroup = ?',
       whereArgs: ['OWNSTAT'],
     );
+    ownMaps = dbownMaps.toList();
+    ownMaps.insert(0, {"genName": "", "genCode": ""});
 
     setState(() {
       _optionsExistence = existMaps;
@@ -464,6 +487,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
     super.initState();
     fetchAllOptions();
     fetchPeriod();
+    // print(selectedTagging);
     periodController.text = Get.arguments[3];
     if (Get.arguments != 0) {
       fetchData(Get.arguments[0]);
@@ -671,7 +695,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButtonFormField(
                                   validator: (value) {
-                                    if (value == null) {
+                                    if (value == null || value == "") {
                                       return 'Please select option';
                                     }
                                     return null;
@@ -745,7 +769,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   value: selectedTagging,
                                   validator: (value) {
                                     if (selectedExistence == 'ex1') {
-                                      if (value == null) {
+                                      if (value == null || value == "") {
                                         return 'Please select option';
                                       }
                                     }
@@ -800,7 +824,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   value: selectedUsage,
                                   validator: (value) {
                                     if (selectedExistence == 'ex1') {
-                                      if (value == null) {
+                                      if (value == null || value == "") {
                                         return 'Please select option';
                                       }
                                     }
@@ -855,7 +879,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   value: selectedCondition,
                                   validator: (value) {
                                     if (selectedExistence == 'ex1') {
-                                      if (value == null) {
+                                      if (value == null || value == "") {
                                         return 'Please select option';
                                       }
                                     }
@@ -910,7 +934,7 @@ class _StockOpnameItemScreenState extends State<StockOpnameItemScreen> {
                                   value: selectedOwnership,
                                   validator: (value) {
                                     if (selectedExistence == 'ex1') {
-                                      if (value == null) {
+                                      if (value == null || value == "") {
                                         return 'Please select option';
                                       }
                                     }

@@ -73,8 +73,8 @@ class UploadController extends GetxController {
     listProgress.add(rowProgress("Uploading Stock Opname data..."));
     List<Map<String, dynamic>> soRows = await db.query(
       'stockopnames',
-      where: "uploadDate IS NULL OR uploadDate = ? OR saveDate >= uploadDate",
-      whereArgs: [''],
+      where:
+          "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
     );
 
     var soService = StockopnameService();
@@ -109,15 +109,19 @@ class UploadController extends GetxController {
               data['id'],
             ],
           );
-          listProgress.add(
-              rowProgress("ID ${res['stockOpnameId'].toString()} uploaded."));
+          listProgress.add(rowProgress(
+              "StockOpane ID ${res['stockOpnameId'].toString()} uploaded."));
         }
       });
     }
 
     listProgress.add(rowProgress("Uploading FASOHead data..."));
     var fasoheadService = FASOHeadService();
-    List<Map<String, dynamic>> fasoRows = await db.query('fasohead');
+    List<Map<String, dynamic>> fasoRows = await db.query(
+      'fasohead',
+      where:
+          "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
+    );
     for (var data in fasoRows) {
       listProgress
           .add(rowProgress("Uploading FASOHead ID ${data['soHeadId']}..."));
@@ -129,24 +133,42 @@ class UploadController extends GetxController {
       };
       fasoheadService.create(map).then((value) async {
         var res = value.body;
-        listProgress.add(rowProgress(res['message'] != ""
-            ? res['message']
-            : "FASOHeadID ${data['soHeadId']} uploaded..."));
+        if (res['status'] == true) {
+          Map<String, dynamic> m = {};
+          m['uploadDate'] =
+              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+          m['uploadBy'] = box.read('userId').toString();
+          m['uploadMessage'] = res['message'];
+          await db.update(
+            "fasohead",
+            m,
+            where: "soHeadId = ?",
+            whereArgs: [
+              data['soHeadId'],
+            ],
+          );
+
+          listProgress.add(rowProgress(res['message'] != ""
+              ? res['message']
+              : "FASOHeadID ${data['soHeadId']} uploaded..."));
+        }
       });
     }
 
     listProgress.add(rowProgress("Uploading Transaction data..."));
-    List<Map<String, dynamic>> transRows = await db.query('fatrans',
-        where:
-            "uploadDate IS NULL OR uploadDate = '' OR uploadDate <= syncDate");
+    List<Map<String, dynamic>> transRows = await db.query(
+      'fatrans',
+      where:
+          "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
+    );
+    print(transRows[0]);
     var faTransService = FATransService();
     var faTransItemService = FATransItemService();
     for (var data in transRows) {
-      listProgress
-          .add(rowProgress("Uploading Transaction ID ${data['id']}..."));
       List<Map<String, dynamic>> transItemRows = await db.query(
         'fatransitem',
-        where: "transLocalId = ?",
+        where:
+            "transLocalId = ? AND (uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
         whereArgs: [data['id']],
       );
       for (var r in transItemRows) {
@@ -181,6 +203,7 @@ class UploadController extends GetxController {
       }
 
       Map<String, dynamic> map = {};
+      map['transId'] = data['transId'] == 0 ? "" : data['transId'];
       map['plantId'] = data['plantId'];
       map['transDate'] = data['transDate'];
       map['manualRef'] = data['manualRef'];
@@ -194,7 +217,8 @@ class UploadController extends GetxController {
 
       faTransService.create(map).then((value) async {
         var res = value.body;
-        if (res['message'].toString().isNotEmpty) {
+        // print(res);
+        if (res['message'] != "") {
           Map<String, dynamic> m = {};
           m['transId'] = res['transId'];
           m['uploadDate'] =
@@ -209,8 +233,8 @@ class UploadController extends GetxController {
               data['id'],
             ],
           );
-          listProgress
-              .add(rowProgress("ID ${data['id'].toString()} uploaded."));
+          listProgress.add(
+              rowProgress("Transaction ID ${data['id'].toString()} uploaded."));
         }
       });
     }

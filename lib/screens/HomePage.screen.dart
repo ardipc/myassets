@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:myasset/controllers/Home.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/widgets/NavDrawer.widget.dart';
@@ -55,33 +56,56 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void showIsiTabel() async {
     Database db = await dbHelper.initDb();
-    List<Map<String, dynamic>> so = await db.query(
-      'fatransitem',
-      // where: 'tagNo = ?',
-      // whereArgs: ['40000005993'],
-    );
-    // ignore: avoid_print
-    print(so);
-    // ignore: avoid_print
-    print("====================================================");
+    // await db.update(
+    //   "stockopnames",
+    //   {
+    //     "uploadDate": null,
+    //     "saveDate": null,
+    //     "savedBy": null,
+    //   },
+    //   where: "id = ?",
+    //   whereArgs: [1],
+    // );
 
-    List<Map<String, dynamic>> maps = await db.query(
-      'fatrans',
-      columns: ['id', 'manualRef', 'transferTypeCode', 'transId', 'transNo'],
+    List<Map<String, dynamic>> soRows = await db.query(
+      'stockopnames',
+      columns: ['id', 'uploadDate', 'saveDate'],
+      where:
+          "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
+      // where: 'id in (1,2)',
     );
-    // ignore: avoid_print
-    print(maps);
-    // ignore: avoid_print
-    print("====================================================");
 
-    List<Map<String, dynamic>> rows = await db.query(
-      'fatransitem',
-      columns: ['id', 'tagNo', 'transLocalId', 'transId'],
-    );
     // ignore: avoid_print
-    print(rows);
-    // ignore: avoid_print
-    print("====================================================");
+    print("Length : ${soRows.length}");
+    print("Rows : $soRows");
+
+    // List<Map<String, dynamic>> so = await db.query(
+    //   'fatransitem',
+    //   // where: 'tagNo = ?',
+    //   // whereArgs: ['40000005993'],
+    // );
+    // // ignore: avoid_print
+    // print(so);
+    // // ignore: avoid_print
+    // print("====================================================");
+
+    // List<Map<String, dynamic>> maps = await db.query(
+    //   'fatrans',
+    //   columns: ['id', 'manualRef', 'transferTypeCode', 'transId', 'transNo'],
+    // );
+    // // ignore: avoid_print
+    // print(maps);
+    // // ignore: avoid_print
+    // print("====================================================");
+
+    // List<Map<String, dynamic>> rows = await db.query(
+    //   'fatransitem',
+    //   columns: ['id', 'tagNo', 'transLocalId', 'transId'],
+    // );
+    // // ignore: avoid_print
+    // print(rows);
+    // // ignore: avoid_print
+    // print("====================================================");
   }
 
   @override

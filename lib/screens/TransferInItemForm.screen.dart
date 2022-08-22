@@ -122,11 +122,6 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
         map['tagNo'] = tagNo.text;
         map['saveDate'] = formattedDate;
         map['saveBy'] = box.read('userId');
-        map['syncDate'] = '';
-        map['syncBy'] = '';
-        map['uploadDate'] = '';
-        map['uploadBy'] = '';
-        map['uploadMessage'] = '';
 
         int exec = await db.insert("fatransitem", map,
             conflictAlgorithm: ConflictAlgorithm.replace);
@@ -155,6 +150,8 @@ class _TransferInItemFormScreenState extends State<TransferInItemFormScreen> {
         map['remarks'] = remarks.text;
         map['conStatCode'] = selectedStatus;
         map['tagNo'] = tagNo.text;
+        map['saveDate'] = formattedDate;
+        map['saveBy'] = box.read('userId');
 
         await db.update(
           "fatransitem",

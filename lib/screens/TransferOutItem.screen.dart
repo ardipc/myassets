@@ -119,11 +119,6 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       map['isVoid'] = 0;
       map['saveDate'] = formattedDate;
       map['savedBy'] = box.read('username');
-      map['uploadDate'] = '';
-      map['uploadBy'] = '';
-      map['uploadMessage'] = '';
-      map['syncDate'] = '';
-      map['syncBy'] = 0;
 
       if (isExistManualRef) {
         findAndCheckManualRef(manualRef.text);
@@ -370,8 +365,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     Database db = await dbHelper.initDb();
     List<Map<String, dynamic>> maps = await db.query(
       'fatrans',
-      where: "transferTypeCode = ? AND manualRef = ?",
-      whereArgs: [transferTypeCode, value],
+      where: "manualRef = ?",
+      whereArgs: [value],
     );
     if (maps.isNotEmpty) {
       setState(() {

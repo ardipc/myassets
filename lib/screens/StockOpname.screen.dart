@@ -64,7 +64,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                   data['tagNo'].toString(),
                   style: const TextStyle(fontSize: 11),
                 ),
-                if (["0", "2"].contains(fasohead['soStatusCode']) == false &&
+                if ([0, 2].contains(fasohead['soStatusCode']) == false &&
                     data['rejectNote'].toString().isBlank == false &&
                     data['rejectNote'] != null) ...[
                   IconButton(
@@ -392,7 +392,11 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
       whereArgs: [selectedValue, box.read('locationId')],
     );
     if (findFASO.isNotEmpty) {
-      Map<String, dynamic> map = {"soStatusCode": "1"};
+      Map<String, dynamic> map = {
+        "soStatusCode": "1",
+        "saveDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+        "savedBy": box.read('userId')
+      };
       exec = await db.update(
         'fasohead',
         map,
@@ -510,7 +514,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
                 ],
               ),
             ),
-            if (["0", "2"].contains(fasohead['soStatusCode']) == false &&
+            if ([0, 2].contains(fasohead['soStatusCode']) == false &&
                 fasohead['rejectNote'] != null &&
                 fasohead['rejectNote'].toString().isBlank == false) ...[
               Card(
