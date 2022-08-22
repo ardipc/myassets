@@ -158,23 +158,27 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       map['newLocCode'] = box.read('locationCode');
       map['newLocName'] = box.read('locationName');
 
-      int exec = await db
-          .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
+      if (isExistManualRef) {
+        findAndCheckManualRef(manualRef.text);
+      } else {
+        int exec = await db
+            .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
 
-      if (exec != 0) {
-        Get.dialog(AlertDialog(
-          title: const Text("Information"),
-          content: const Text("Data has been updated."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-                Get.back();
-              },
-              child: const Text("Close"),
-            ),
-          ],
-        ));
+        if (exec != 0) {
+          Get.dialog(AlertDialog(
+            title: const Text("Information"),
+            content: const Text("Data has been updated."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                  Get.back();
+                },
+                child: const Text("Close"),
+              ),
+            ],
+          ));
+        }
       }
     }
   }
@@ -368,6 +372,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       where: "manualRef = ?",
       whereArgs: [value],
     );
+    // print(maps);
     if (maps.isNotEmpty) {
       setState(() {
         transaction = maps.first;

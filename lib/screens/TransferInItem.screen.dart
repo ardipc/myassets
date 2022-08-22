@@ -159,23 +159,27 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       map['saveDate'] = formattedDate;
       map['savedBy'] = box.read('userId');
 
-      int exec = await db
-          .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
+      if (isExistManualRef) {
+        findAndCheckManualRef(manualRef.text);
+      } else {
+        int exec = await db
+            .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
 
-      if (exec != 0) {
-        Get.dialog(AlertDialog(
-          title: const Text("Information"),
-          content: const Text("Data has been updated."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-                Get.back();
-              },
-              child: const Text("Close"),
-            ),
-          ],
-        ));
+        if (exec != 0) {
+          Get.dialog(AlertDialog(
+            title: const Text("Information"),
+            content: const Text("Data has been updated."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                  Get.back();
+                },
+                child: const Text("Close"),
+              ),
+            ],
+          ));
+        }
       }
     }
   }
