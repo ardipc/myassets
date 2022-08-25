@@ -20,6 +20,7 @@ class DownloadController extends GetxController {
   var isStart = false.obs;
   var listProgress = <Widget>[].obs;
   final box = GetStorage();
+  var isLoading = false.obs;
 
   void confirmDownload() {
     Get.dialog(
@@ -53,6 +54,7 @@ class DownloadController extends GetxController {
 
   Future<void> startDownload() async {
     isStart.value = true;
+    isLoading.value = true;
     Database db = await dbHelper.initDb();
 
     listProgress.add(rowProgress("Downloading Master Data."));
@@ -71,7 +73,7 @@ class DownloadController extends GetxController {
           "genGroup": statuses[i]['genGroup'],
           "sort": statuses[i]['sort'],
           "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
-          "syncBy": box.read('username')
+          "syncBy": box.read('userId')
         };
         await db.insert("statuses", map);
       }
@@ -96,7 +98,7 @@ class DownloadController extends GetxController {
           "plantId": users[i]['plantId'],
           "locationId": users[i]['locationId'],
           "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
-          "syncBy": box.read('username')
+          "syncBy": box.read('userId')
         };
         await db.insert("users", map);
       }
@@ -119,7 +121,7 @@ class DownloadController extends GetxController {
           "added": users[i]['added'],
           "disposed": users[i]['disposed'],
           "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
-          "syncBy": box.read('username')
+          "syncBy": box.read('userId')
         };
         await db.insert(
           "faitems",
@@ -146,7 +148,7 @@ class DownloadController extends GetxController {
           "soStartDate": periods[i]['soStartDate'],
           "soEndDate": periods[i]['soEndDate'],
           "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
-          "syncBy": box.read('username')
+          "syncBy": box.read('userId')
         };
         await db.insert("periods", map);
       }
@@ -334,13 +336,11 @@ class DownloadController extends GetxController {
           "newLocName": "",
           "isApproved": periods[i]['isApproved'] ? 1 : 0,
           "isVoid": periods[i]['isVoid'] ? 1 : 0,
-          "saveDate": periods[i]['insertDate'],
-          "savedBy": periods[i]['insertBy'],
           "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
           "syncBy": box.read('userId')
         };
 
-        if (sFa.length == 1) {
+        if (sFa.isNotEmpty) {
           listProgress.add(
               rowProgress("Transcation ID ${periods[i]['transId']} updated."));
 
@@ -475,8 +475,6 @@ class DownloadController extends GetxController {
           "remarks": periods[i]['remarks'],
           "conStatCode": periods[i]['conStatCode'],
           "tagNo": periods[i]['oldTagNo'],
-          "saveDate": periods[i]['insertDate'],
-          "saveBy": periods[i]['insertBy'],
           "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
           "syncBy": box.read('userId')
         };
@@ -502,6 +500,14 @@ class DownloadController extends GetxController {
       }
     });
     listProgress.add(rowProgress("Table FA Trans Item completed."));
+
+    isLoading.value = false;
+    Get.dialog(
+      const AlertDialog(
+        title: Text("Information"),
+        content: Text("Download is completed."),
+      ),
+    );
   }
 
   Widget rowProgress(String text) {

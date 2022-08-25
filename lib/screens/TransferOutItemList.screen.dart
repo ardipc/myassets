@@ -47,6 +47,8 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
     List<DataRow> temps = [];
     var i = 1;
     for (var data in maps) {
+      // print(
+      //     "${data['tagNo']} - ${data['assetName']} - ${data['qty']} - ${data['con']}");
       DataRow row = DataRow(cells: [
         DataCell(
           SizedBox(
@@ -69,7 +71,7 @@ class _TransferOutItemListScreen extends State<TransferOutItemListScreen> {
         DataCell(
           SizedBox(
             width: Get.width * 0.1,
-            child: Text(data['qty'].toString()),
+            child: Text(data['qty'] == null ? "1" : data['qty'].toString()),
           ),
         ),
         DataCell(

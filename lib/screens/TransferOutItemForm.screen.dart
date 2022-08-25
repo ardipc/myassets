@@ -105,7 +105,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
       Database db = await dbHelper.initDb();
 
       String formattedDate =
-          DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now());
+          DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
 
       Map<String, dynamic> map = {};
 
@@ -182,6 +182,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
     );
     if (maps.isNotEmpty) {
       setState(() {
+        faIdValue = maps[0]['faId'];
         tagNo.text = maps[0]['tagNo'];
         faNo.text = maps[0]['faNo'].toString();
         description.text = maps[0]['description'].toString();

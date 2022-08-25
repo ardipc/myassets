@@ -70,7 +70,7 @@ class _TransferInItemListScreen extends State<TransferInItemListScreen> {
         DataCell(
           SizedBox(
             width: Get.width * 0.1,
-            child: const Text("1"),
+            child: Text(data['qty'] == null ? "1" : data['qty'].toString()),
           ),
         ),
         DataCell(

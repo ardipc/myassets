@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myasset/controllers/Download.controller.dart';
@@ -25,21 +26,26 @@ class DownloadScreen extends StatelessWidget {
       ),
       body: Obx(
         () => downloadController.isStart.value
-            ? Card(
-                elevation: 4,
-                margin: const EdgeInsets.all(12),
-                shape: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(3),
-                  borderSide: const BorderSide(color: Colors.grey, width: 1),
-                ),
-                color: Colors.white,
-                child: Container(
-                  padding: const EdgeInsets.all(6.0),
-                  child: ListView(
-                    children: downloadController.listProgress,
-                  ),
-                ),
-              )
+            ? downloadController.isLoading.value
+                ? const Center(
+                    child: CupertinoActivityIndicator(),
+                  )
+                : Card(
+                    elevation: 4,
+                    margin: const EdgeInsets.all(12),
+                    shape: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(3),
+                      borderSide:
+                          const BorderSide(color: Colors.grey, width: 1),
+                    ),
+                    color: Colors.white,
+                    child: Container(
+                      padding: const EdgeInsets.all(6.0),
+                      child: ListView(
+                        children: downloadController.listProgress,
+                      ),
+                    ),
+                  )
             : Center(
                 child: SizedBox(
                   height: 50,

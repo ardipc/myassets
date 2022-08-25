@@ -15,6 +15,7 @@ class UploadController extends GetxController {
   var isStart = false.obs;
   var listProgress = <Widget>[].obs;
   final box = GetStorage();
+  var isLoading = false.obs;
 
   @override
   void onInit() {
@@ -67,6 +68,7 @@ class UploadController extends GetxController {
   Future<void> startDownload() async {
     final box = GetStorage();
     isStart.value = true;
+    isLoading.value = true;
     Database db = await dbHelper.initDb();
     listProgress.add(rowProgress("Starting upload data."));
 
@@ -90,7 +92,7 @@ class UploadController extends GetxController {
       map['usageStatCode'] = data['usageStatCode'];
       map['conStatCode'] = data['conStatCode'];
       map['ownStatCode'] = data['ownStatCode'];
-      soService.createStockopname(map).then((value) async {
+      await soService.createStockopname(map).then((value) async {
         var res = value.body;
         // ignore: avoid_print
         // print(res);
@@ -131,7 +133,7 @@ class UploadController extends GetxController {
         "statusCode": data['soStatusCode'],
         "userId": box.read('userId'),
       };
-      fasoheadService.create(map).then((value) async {
+      await fasoheadService.create(map).then((value) async {
         var res = value.body;
         if (res['status'] == true) {
           Map<String, dynamic> m = {};
@@ -161,15 +163,16 @@ class UploadController extends GetxController {
       where:
           "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
     );
-    print(transRows[0]);
+    // print(transRows);
+
     var faTransService = FATransService();
     var faTransItemService = FATransItemService();
     for (var data in transRows) {
       List<Map<String, dynamic>> transItemRows = await db.query(
         'fatransitem',
         where:
-            "transLocalId = ? AND (uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
-        whereArgs: [data['id']],
+            "(transLocalId = ? OR transId = ?) AND (uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
+        whereArgs: [data['id'], data['transId']],
       );
       for (var r in transItemRows) {
         listProgress
@@ -183,7 +186,9 @@ class UploadController extends GetxController {
         m['newTag'] = r['newTag'];
         m['userId'] = box.read('userId');
 
-        faTransItemService.create(m).then((value) async {
+        // print(m);
+
+        await faTransItemService.create(m).then((value) async {
           var res = value.body;
           if (res['message'].toString().isNotEmpty) {
             Map<String, dynamic> mu = {};
@@ -208,14 +213,16 @@ class UploadController extends GetxController {
       map['transDate'] = data['transDate'];
       map['manualRef'] = data['manualRef'];
       map['otherRef'] = data['otherRef'];
-      map['transferType'] = data['transferType'];
+      map['transferType'] = data['transferTypeCode'];
       map['oldLocId'] = data['oldLocId'];
       map['newLocId'] = data['newLocId'];
       map['isApproved'] = data['isApproved'] == 1 ? true : false;
       map['isVoid'] = data['isVoid'] == 1 ? true : false;
       map['userId'] = box.read('userId');
 
-      faTransService.create(map).then((value) async {
+      // print(map);
+
+      await faTransService.create(map).then((value) async {
         var res = value.body;
         // print(res);
         if (res['message'] != "") {
@@ -240,6 +247,14 @@ class UploadController extends GetxController {
     }
 
     listProgress.add(rowProgress("Upload data is complete."));
+
+    isLoading.value = false;
+    Get.dialog(
+      const AlertDialog(
+        title: Text("Information"),
+        content: Text("Upload is completed."),
+      ),
+    );
   }
 
   Widget rowProgress(String text) {

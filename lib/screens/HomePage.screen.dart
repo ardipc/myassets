@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
 import 'package:myasset/controllers/Home.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/widgets/NavDrawer.widget.dart';
@@ -77,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // ignore: avoid_print
     print("Length : ${soRows.length}");
-    print("Rows : $soRows");
+    // print("Rows : $soRows");
 
     // List<Map<String, dynamic>> so = await db.query(
     //   'fatransitem',

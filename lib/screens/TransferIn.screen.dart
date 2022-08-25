@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:myasset/helpers/db.helper.dart';
+import 'package:myasset/services/FATrans.service.dart';
+import 'package:myasset/services/FATransItem.service.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class TransferInScreen extends StatefulWidget {
@@ -142,7 +144,7 @@ class _TransferInScreen extends State<TransferInScreen> {
     Get.dialog(
       AlertDialog(
         title: const Text("Confirmation"),
-        content: const Text("Are you sure to sync data period now ?"),
+        content: const Text("Are you sure to sync data now ?"),
         actions: [
           TextButton(
             onPressed: () {
@@ -165,35 +167,113 @@ class _TransferInScreen extends State<TransferInScreen> {
   void actionDownload() async {
     Database db = await dbHelper.initDb();
 
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+    // DateTime now = DateTime.now();
+    // String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
 
-    Map<String, dynamic> map = {};
-    map['transId'] = 1;
-    map['plantId'] = 1;
-    map['transTypeCode'] = "T";
-    map['transDate'] = "2022-04-04";
-    map['transNo'] = "TR02";
-    map['manualRef'] = "MR002";
-    map['otherRef'] = "";
-    map['transferTypeCode'] = "TI";
-    map['oldLocId'] = 0;
-    map['newLocId'] = 0;
-    map['isApproved'] = 0;
-    map['isVoid'] = 0;
-    map['saveDate'] = formattedDate;
-    map['savedBy'] = box.read('userId');
-    map['uploadDate'] = "";
-    map['uploadBy'] = "";
-    map['uploadMessage'] = "";
-    map['syncDate'] = "";
-    map['syncBy'] = 0;
+    var transService = FATransService();
+    var transItemService = FATransItemService();
+    // var response = await transItemService.getAll();
+    // var responseBody = response.body;
+    // await db.delete("fatrans", where: null);
+    await transService.getAll().then((value) async {
+      List periods = value.body['fatrans'];
+      for (var i = 0; i < periods.length; i++) {
+        List<Map<String, dynamic>> sFa = await db.query(
+          'fatrans',
+          where: "transId = ?",
+          whereArgs: [periods[i]['transId']],
+        );
 
-    int insertId = await db.insert("fatrans", map,
-        conflictAlgorithm: ConflictAlgorithm.replace);
-    Get.snackbar("Information", insertId.toString());
+        Map<String, dynamic> map = {
+          "transId": periods[i]['transId'],
+          "plantId": periods[i]['plantId'],
+          "transTypeCode": periods[i]['transTypeCode'],
+          "transDate": periods[i]['transDate'].toString().replaceAll('T', ' '),
+          "transNo": periods[i]['transNo'],
+          "manualRef": periods[i]['manualRef'],
+          "otherRef": periods[i]['otherRef'],
+          "transferTypeCode": periods[i]['transferTypeCode'],
+          "oldLocId": periods[i]['oldLocId'],
+          "oldLocCode": "",
+          "oldLocName": "",
+          "newLocId": periods[i]['newLocId'],
+          "newLocCode": "",
+          "newLocName": "",
+          "isApproved": periods[i]['isApproved'] ? 1 : 0,
+          "isVoid": periods[i]['isVoid'] ? 1 : 0,
+          "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+          "syncBy": box.read('userId')
+        };
 
-    fetchData(selectedMap);
+        if (sFa.isNotEmpty) {
+          // action update
+          // var getTransId = sFa.first['transId'];
+          await db.update(
+            'fatrans',
+            map,
+            where: 'transId = ?',
+            whereArgs: [periods[i]['transId']],
+          );
+        } else {
+          // var getTransId =
+          await db.insert(
+            "fatrans",
+            map,
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
+    });
+    // await db.delete("fatransitem", where: null);
+    await transItemService.getAll().then((value) async {
+      List periods = value.body['transitems'];
+      for (var i = 0; i < periods.length; i++) {
+        List<Map<String, dynamic>> lenRows = await db.query(
+          'fatransitem',
+          where: "transItemId = ?",
+          whereArgs: [periods[i]['transItemId']],
+        );
+
+        Map<String, dynamic> map = {
+          "transItemId": periods[i]['transItemId'],
+          "transId": periods[i]['transId'],
+          "qty": periods[i]['qty'],
+          // "faItemId": INTEGER,
+          "faId": periods[i]['faId'],
+          // "faNo": INTEGER,
+          // "description": TEXT,
+          "remarks": periods[i]['remarks'],
+          "conStatCode": periods[i]['conStatCode'],
+          "tagNo": periods[i]['oldTagNo'],
+          "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+          "syncBy": box.read('userId')
+        };
+
+        if (lenRows.isNotEmpty) {
+          await db.update(
+            "fatransitem",
+            map,
+            where: "transItemId = ?",
+            whereArgs: [periods[i]['transItemId']],
+          );
+        } else {
+          await db.insert(
+            "fatransitem",
+            map,
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
+    });
+
+    fetchPeriod();
+
+    Get.dialog(
+      const AlertDialog(
+        title: Text("Information"),
+        content: Text("Download is completed."),
+      ),
+    );
   }
 
   void setPeriodAndFind(var value) async {

@@ -18,6 +18,7 @@ class StockOpnameScreen extends StatefulWidget {
 
 class _StockOpnameScreenState extends State<StockOpnameScreen> {
   DbHelper dbHelper = DbHelper();
+  final box = GetStorage();
 
   int? selectedValue;
   String? selectedName;
@@ -179,7 +180,6 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
   }
 
   void actionDownload() async {
-    final periodService = PeriodService();
     Database db = await dbHelper.initDb();
 
     // List<Map<String, dynamic>> maps = await db.query(
@@ -187,42 +187,150 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
     //   columns: ["periodId", "periodName"],
     // );
 
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
+    // DateTime now = DateTime.now();
+    // String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
 
-    periodService.getAll().then((value) async {
-      if (value.body != null) {
-        var rows = value.body['periods'];
-        if (rows.length > 0) {
-          for (var row in rows) {
-            await db.insert(
-              "periods",
-              {
-                "periodId": row['periodId'],
-                "periodName": row['periodName'],
-                "startDate": row['startDate'].toString().substring(0, 10),
-                "endDate": row['endDate'].toString().substring(0, 10),
-                "closeActualDate":
-                    row['closeActualDate'].toString().substring(0, 10),
-                "soStartDate": row['soStartDate'].toString().substring(0, 10),
-                "soEndDate": row['soEndDate'],
-                "syncDate": formattedDate,
-                "syncBy": 0
-              },
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
-          }
-          fetchPeriod();
+    final periodService = PeriodService();
+    await db.delete("periods", where: null);
+    await periodService.getAll().then((value) async {
+      List periods = value.body['periods'];
+      for (var i = 0; i < periods.length; i++) {
+        Map<String, dynamic> map = {
+          "periodId": periods[i]['periodId'],
+          "periodName": periods[i]['periodName'],
+          "startDate": periods[i]['startDate'],
+          "endDate": periods[i]['endDate'],
+          "closeActualDate": periods[i]['closeActualDate'],
+          "soStartDate": periods[i]['soStartDate'],
+          "soEndDate": periods[i]['soEndDate'],
+          "syncDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
+          "syncBy": box.read('userId')
+        };
+        await db.insert("periods", map);
+      }
+    });
+
+    var soService = StockopnameService();
+    await soService.getAll().then((value) async {
+      List lists = value.body['list'];
+      for (var row in lists) {
+        List<Map<String, dynamic>> rows = await db.query(
+          'stockopnames',
+          where: "stockOpnameId = ?",
+          whereArgs: [
+            row['stockOpnameId'],
+          ],
+        );
+
+        Map<String, dynamic> map = {};
+        if (rows.isNotEmpty) {
+          // action update
+          map['faId'] = row['faId'];
+          map['periodId'] = row['periodId'];
+          map['stockOpnameId'] = row['stockOpnameId'];
+          map['tagNo'] = row['tagNo'];
+          map['description'] = row['itemName'];
+          map['locationId'] = box.read('locationId');
+          map['qty'] = row['qty'];
+          map['periodId'] = row['periodId'];
+          map['baseQty'] = row['baseQty'];
+          map['baseConStatCode'] = row['baseConStat'];
+          map['existStatCode'] = row['existStat'];
+          map['tagStatCode'] = row['tagStat'];
+          map['usageStatCode'] = row['usageStat'];
+          map['conStatCode'] = row['conStat'];
+          map['ownStatCode'] = row['ownStat'];
+          map['rejectNote'] = row['rejectNote'];
+          map['syncDate'] =
+              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+          map['syncBy'] = box.read('userId');
+          await db.update(
+            "stockopnames",
+            map,
+            where: "stockOpnameId = ?",
+            whereArgs: [
+              row['stockOpnameId'],
+            ],
+          );
+        } else {
+          // action insert
+          map['faId'] = row['faId'];
+          map['periodId'] = row['periodId'];
+          map['stockOpnameId'] = row['stockOpnameId'];
+          map['tagNo'] = row['tagNo'];
+          map['description'] = row['itemName'];
+          map['locationId'] = box.read('locationId');
+          map['qty'] = row['qty'];
+          map['baseQty'] = row['baseQty'];
+          map['baseConStatCode'] = row['baseConStat'];
+          map['existStatCode'] = row['existStat'];
+          map['tagStatCode'] = row['tagStat'];
+          map['usageStatCode'] = row['usageStat'];
+          map['conStatCode'] = row['conStat'];
+          map['ownStatCode'] = row['ownStat'];
+          map['rejectNote'] = row['rejectNote'];
+          map['syncDate'] =
+              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+          map['syncBy'] = box.read('userId');
+          var id = await db.insert(
+            "stockopnames",
+            map,
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
         }
       }
     });
+
+    var fasoheadService = FASOHeadService();
+    await fasoheadService.getAll().then((value) async {
+      List periods = value.body['list'];
+      for (var i = 0; i < periods.length; i++) {
+        Map<String, dynamic> map = {
+          "soHeadId": periods[i]['soHeadId'],
+          "periodId": periods[i]['periodId'],
+          "locationId": periods[i]['locationId'],
+          "soStatusCode": periods[i]['soStatusCode'],
+          "rejectNote": periods[i]['rejectNote'],
+          "syncDate": DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now()),
+          "syncBy": box.read('userId')
+        };
+
+        List<Map<String, dynamic>> lenRows = await db.query(
+          'fasohead',
+          where: "soHeadId = ?",
+          whereArgs: [periods[i]['soHeadId']],
+        );
+        if (lenRows.isNotEmpty) {
+          await db.update(
+            "fasohead",
+            map,
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        } else {
+          await db.insert(
+            "fasohead",
+            map,
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
+    });
+
+    fetchPeriod();
+
+    Get.dialog(
+      const AlertDialog(
+        title: Text("Information"),
+        content: Text("Download is completed."),
+      ),
+    );
   }
 
   void confirmDownload() {
     Get.dialog(
       AlertDialog(
         title: const Text("Confirmation"),
-        content: const Text("Are you sure to sync data period now ?"),
+        content: const Text("Are you sure to sync data now ?"),
         actions: [
           TextButton(
             onPressed: () {

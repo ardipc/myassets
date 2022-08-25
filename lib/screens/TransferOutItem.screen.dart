@@ -80,6 +80,9 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     Database db = await dbHelper.initDb();
     Map<String, dynamic> map = {};
     map['isApproved'] = 1;
+    map['saveDate'] = DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
+    map['savedBy'] = box.read('username');
+
     int exec = await db.update(
       "fatrans",
       map,
@@ -157,9 +160,34 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       map['newLocId'] = box.read('locationId');
       map['newLocCode'] = box.read('locationCode');
       map['newLocName'] = box.read('locationName');
+      map['saveDate'] = formattedDate;
+      map['savedBy'] = box.read('username');
 
       if (isExistManualRef) {
-        findAndCheckManualRef(manualRef.text);
+        if (transId == transaction['transId']) {
+          int exec = await db
+              .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
+
+          if (exec != 0) {
+            Get.dialog(AlertDialog(
+              title: const Text("Information"),
+              content: const Text("Data has been updated."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                    Get.back();
+                  },
+                  child: const Text("Close"),
+                ),
+              ],
+            ));
+          }
+        } else {
+          Get.snackbar("Information", "Manual Ref sudah pernah ada.");
+          manualRef.text = "";
+          _focusNode.requestFocus();
+        }
       } else {
         int exec = await db
             .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);

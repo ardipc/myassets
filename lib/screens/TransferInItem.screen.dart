@@ -79,6 +79,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     Database db = await dbHelper.initDb();
     Map<String, dynamic> map = {};
     map['isApproved'] = 1;
+    map['saveDate'] = DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
+    map['savedBy'] = box.read('username');
     int exec = await db.update(
       "fatrans",
       map,
@@ -160,7 +162,30 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       map['savedBy'] = box.read('userId');
 
       if (isExistManualRef) {
-        findAndCheckManualRef(manualRef.text);
+        if (transId == transaction['transId']) {
+          int exec = await db
+              .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
+
+          if (exec != 0) {
+            Get.dialog(AlertDialog(
+              title: const Text("Information"),
+              content: const Text("Data has been updated."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                    Get.back();
+                  },
+                  child: const Text("Close"),
+                ),
+              ],
+            ));
+          }
+        } else {
+          Get.snackbar("Information", "Manual Ref sudah pernah ada.");
+          manualRef.text = "";
+          _focusNode.requestFocus();
+        }
       } else {
         int exec = await db
             .update("fatrans", map, where: "id = ?", whereArgs: [idFaTrans]);
@@ -500,8 +525,6 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     bool isExist = await isFindAndCheckManualRef(value);
     // print("isExist : $isExist");
     // print("idFaTrans : $idFaTrans");
-    // print(transId);
-    // print(oldManRef);
     if (isExist) {
       if (idFaTrans != 0) {
         if (transId == transaction['transId']) {
