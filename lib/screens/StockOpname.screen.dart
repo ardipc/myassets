@@ -272,7 +272,7 @@ class _StockOpnameScreenState extends State<StockOpnameScreen> {
           map['syncDate'] =
               DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
           map['syncBy'] = box.read('userId');
-          var id = await db.insert(
+          await db.insert(
             "stockopnames",
             map,
             conflictAlgorithm: ConflictAlgorithm.replace,
