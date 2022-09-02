@@ -344,14 +344,14 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       // looping fa trans item
       List<Map<String, dynamic>> rows = await db.query(
         "fatransitem",
-        where: "transLocalId = ?",
-        whereArgs: [idFaTrans],
+        where: "transLocalId = ? OR transId = ?",
+        whereArgs: [idFaTrans, res['transId']],
       );
 
       for (var row in rows) {
         Map<String, dynamic> mRow = {};
         mRow['transLocalId'] = row['transLocalId'];
-        mRow['transItemId'] = 0;
+        mRow['transItemId'] = row['transItemId'] == 0 ? '' : row['transItemId'];
         mRow['transId'] = row['transId'];
         mRow['faId'] = row['faId'];
         mRow['remarks'] = row['remarks'];
@@ -364,12 +364,14 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         serviceFATransItem.create(mRow).then((value) async {
           // print("FATransItem ${value.body.toString()}");
           var res = value.body;
-          Get.dialog(
-            AlertDialog(
-              title: const Text("Information"),
-              content: Text(res['message']),
-            ),
-          );
+          if (res['message'] != "") {
+            Get.dialog(
+              AlertDialog(
+                title: const Text("Information"),
+                content: Text(res['message']),
+              ),
+            );
+          }
           if (res['message'] != "") {
             Map<String, dynamic> mItem = {};
             mItem['transItemId'] = res['transItemId'] ?? 0;

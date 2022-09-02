@@ -25,6 +25,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
   String barcode = "";
 
   int? faIdValue = 0;
+  int transId = 0;
 
   int idTransItem = 0;
   final transNo = TextEditingController();
@@ -123,6 +124,13 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
         map['saveDate'] = formattedDate;
         map['saveBy'] = box.read('userId');
 
+        await db.update(
+          'fatrans',
+          {"saveDate": formattedDate},
+          where: "id = ? OR transId = ?",
+          whereArgs: [Get.arguments[0], transId == 0 ? '' : transId],
+        );
+
         int exec = await db.insert("fatransitem", map,
             conflictAlgorithm: ConflictAlgorithm.replace);
 
@@ -153,6 +161,13 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
         map['saveDate'] = formattedDate;
         map['saveBy'] = box.read('userId');
 
+        await db.update(
+          'fatrans',
+          {"saveDate": formattedDate},
+          where: "id = ? OR transId = ?",
+          whereArgs: [Get.arguments[0], transId == 0 ? '' : transId],
+        );
+
         await db.update("fatransitem", map,
             where: "id = ?", whereArgs: [idTransItem]);
 
@@ -182,6 +197,7 @@ class _TransferOutItemFormScreenState extends State<TransferOutItemFormScreen> {
     );
     if (maps.isNotEmpty) {
       setState(() {
+        transId = maps[0]['transId'];
         faIdValue = maps[0]['faId'];
         tagNo.text = maps[0]['tagNo'];
         faNo.text = maps[0]['faNo'].toString();

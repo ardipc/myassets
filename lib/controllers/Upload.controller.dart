@@ -18,15 +18,6 @@ class UploadController extends GetxController {
   var isLoading = false.obs;
 
   @override
-  void onInit() {
-    // ignore: todo
-    // TODO: implement onInit
-    super.onInit();
-    // ignore: avoid_print
-    print("init download ${box.read('userId')}");
-  }
-
-  @override
   void onClose() {
     // ignore: todo
     // TODO: implement onClose
@@ -168,6 +159,8 @@ class UploadController extends GetxController {
     var faTransService = FATransService();
     var faTransItemService = FATransItemService();
     for (var data in transRows) {
+      // print(data);
+      // print("=====");
       List<Map<String, dynamic>> transItemRows = await db.query(
         'fatransitem',
         where:
@@ -175,28 +168,36 @@ class UploadController extends GetxController {
         whereArgs: [data['id'], data['transId']],
       );
       for (var r in transItemRows) {
-        listProgress
-            .add(rowProgress("Uploading Item Transaction ID ${data['id']}..."));
+        // print(r);
+        // print("=====");
+
+        listProgress.add(rowProgress(
+            "Uploading Item Transaction ID ${data['id'].toString()}..."));
+
         Map<String, dynamic> m = {};
+        m['transLocalId'] = r['transLocalId'] ?? '';
+        m['transItemId'] = r['transItemId'] == 0 ? '' : r['transItemId'];
         m['transId'] = data['id'];
         m['faId'] = r['faId'];
         m['remarks'] = r['remarks'];
-        m['conStat'] = r['conStat'];
-        m['oldTag'] = r['oldTag'];
-        m['newTag'] = r['newTag'];
+        m['conStat'] = r['conStatCode'];
+        m['oldTag'] = r['oldTag'] ?? '';
+        m['newTag'] = r['newTag'] ?? '';
         m['userId'] = box.read('userId');
 
         // print(m);
+        // print("=====");
 
         await faTransItemService.create(m).then((value) async {
           var res = value.body;
-          if (res['message'].toString().isNotEmpty) {
+          // print(res);
+          if (res['message'] != "") {
             Map<String, dynamic> mu = {};
-            m['transItemId'] = res['transItemId'];
-            m['uploadDate'] =
+            mu['transItemId'] = res['transItemId'];
+            mu['uploadDate'] =
                 DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-            m['uploadBy'] = box.read('userId').toString();
-            m['uploadMessage'] = res['message'];
+            mu['uploadBy'] = box.read('userId').toString();
+            mu['uploadMessage'] = res['message'] ?? '';
             await db.update(
               'fatransitem',
               mu,

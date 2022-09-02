@@ -115,9 +115,9 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       map['oldLocId'] = oldLocId;
       map['oldLocCode'] = oldLocFrom.text;
       map['oldLocName'] = detailOldLocFrom.text;
-      map['newLocId'] = box.read('locationId');
-      map['newLocCode'] = box.read('locationCode');
-      map['newLocName'] = box.read('locationName');
+      map['newLocId'] = box.read('plantIntransitId');
+      map['newLocCode'] = box.read('plantIntransitCode');
+      map['newLocName'] = box.read('plantIntransitName');
       map['isApproved'] = 0;
       map['isVoid'] = 0;
       map['saveDate'] = formattedDate;
@@ -157,9 +157,9 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       map['oldLocId'] = oldLocId;
       map['oldLocCode'] = oldLocFrom.text;
       map['oldLocName'] = detailOldLocFrom.text;
-      map['newLocId'] = box.read('locationId');
-      map['newLocCode'] = box.read('locationCode');
-      map['newLocName'] = box.read('locationName');
+      map['newLocId'] = box.read('plantIntransitId');
+      map['newLocCode'] = box.read('plantIntransitCode');
+      map['newLocName'] = box.read('plantIntransitName');
       map['saveDate'] = formattedDate;
       map['savedBy'] = box.read('username');
 
@@ -239,7 +239,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         // oldLocFrom.text = maps[0]['oldLocCode'].toString();
         // detailOldLocFrom.text = maps[0]['oldLocName'].toString();
 
-        oldLocId = box.read('plantIntransitId');
+        oldLocId = box.read('locationId');
         oldLocFrom.text = box.read('locationCode');
         detailOldLocFrom.text = box.read('locationName');
 
@@ -291,8 +291,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     map['manualRef'] = manualRef.text;
     map['otherRef'] = otherRef.text;
     map['transferType'] = transferTypeCode;
-    map['oldLocId'] = box.read('intransitId');
-    map['newLocId'] = box.read('locationId');
+    map['oldLocId'] = box.read('locationId');
+    map['newLocId'] = box.read('plantIntransitId');
     map['isApproved'] = false;
     map['isVoid'] = false;
     // development purpose use 0
@@ -344,14 +344,14 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       // looping fa trans item
       List<Map<String, dynamic>> rows = await db.query(
         "fatransitem",
-        where: "transLocalId = ?",
-        whereArgs: [idFaTrans],
+        where: "transLocalId = ? OR transId = ?",
+        whereArgs: [idFaTrans, res['transId']],
       );
 
       for (var row in rows) {
         Map<String, dynamic> mRow = {};
         mRow['transLocalId'] = row['transLocalId'];
-        mRow['transItemId'] = 0;
+        mRow['transItemId'] = row['transItemId'] == 0 ? '' : row['transItemId'];
         mRow['transId'] = row['transId'];
         mRow['faId'] = row['faId'];
         mRow['remarks'] = row['remarks'];
@@ -364,12 +364,20 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
         serviceFATransItem.create(mRow).then((value) async {
           // print("FATransItem ${value.body.toString()}");
           var res = value.body;
-          Get.dialog(
-            AlertDialog(
-              title: const Text("Information"),
-              content: Text(res['message']),
-            ),
-          );
+          if (res['message'] != "") {
+            Get.dialog(
+              AlertDialog(
+                title: const Text("Infomation"),
+                content: Text(res['message']),
+              ),
+            );
+          }
+          // Get.dialog(
+          //   AlertDialog(
+          //     title: const Text("Information"),
+          //     content: Text(res['message']),
+          //   ),
+          // );
           if (res['message'] != "") {
             Map<String, dynamic> mItem = {};
             mItem['transItemId'] = res['transItemId'] ?? 0;
@@ -535,7 +543,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     newLocFrom.text = box.read('plantIntransitCode');
     detailNewLocFrom.text = box.read('plantIntransitName');
 
-    oldLocId = box.read('plantIntransitId');
+    oldLocId = box.read('locationId');
     oldLocFrom.text = box.read('locationCode');
     detailOldLocFrom.text = box.read('locationName');
   }

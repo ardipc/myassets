@@ -67,16 +67,16 @@ class _MyHomePageState extends State<MyHomePage> {
     //   whereArgs: [1],
     // );
 
-    List<Map<String, dynamic>> soRows = await db.query(
-      'stockopnames',
-      columns: ['id', 'uploadDate', 'saveDate'],
-      where:
-          "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
-      // where: 'id in (1,2)',
-    );
+    // List<Map<String, dynamic>> soRows = await db.query(
+    //   'stockopnames',
+    //   columns: ['id', 'uploadDate', 'saveDate'],
+    //   where:
+    //       "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
+    //   // where: 'id in (1,2)',
+    // );
 
     // ignore: avoid_print
-    print("Length : ${soRows.length}");
+    // print("Length : ${soRows.length}");
     // print("Rows : $soRows");
 
     // List<Map<String, dynamic>> so = await db.query(
@@ -89,22 +89,26 @@ class _MyHomePageState extends State<MyHomePage> {
     // // ignore: avoid_print
     // print("====================================================");
 
-    // List<Map<String, dynamic>> maps = await db.query(
-    //   'fatrans',
-    //   columns: ['id', 'manualRef', 'transferTypeCode', 'transId', 'transNo'],
-    // );
-    // // ignore: avoid_print
-    // print(maps);
-    // // ignore: avoid_print
+    List<Map<String, dynamic>> maps = await db.query(
+      'fatrans',
+      columns: ['id', 'manualRef', 'transferTypeCode', 'transId', 'transNo'],
+      where:
+          "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
+    );
+    // ignore: avoid_print
+    print(maps);
+    // ignore: avoid_print
     // print("====================================================");
 
-    // List<Map<String, dynamic>> rows = await db.query(
-    //   'fatransitem',
-    //   columns: ['id', 'tagNo', 'transLocalId', 'transId'],
-    // );
-    // // ignore: avoid_print
-    // print(rows);
-    // // ignore: avoid_print
+    List<Map<String, dynamic>> rows = await db.query(
+      'fatransitem',
+      columns: ['id', 'tagNo', 'transLocalId', 'transId', 'transItemId'],
+      where:
+          "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
+    );
+    // ignore: avoid_print
+    print(rows);
+    // ignore: avoid_print`
     // print("====================================================");
   }
 
