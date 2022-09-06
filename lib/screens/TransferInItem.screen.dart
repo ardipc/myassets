@@ -21,6 +21,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
   TimeOfDay selectedTime = const TimeOfDay(hour: 00, minute: 00);
 
+  bool isUploadStart = false;
+
   int? idFaTrans = 0;
   int? plantId = 0;
   String? transTypeCode = "T";
@@ -80,7 +82,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     Map<String, dynamic> map = {};
     map['isApproved'] = 1;
     map['saveDate'] = DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
-    map['savedBy'] = box.read('username');
+    map['savedBy'] = box.read('userId');
+
     int exec = await db.update(
       "fatrans",
       map,
@@ -279,34 +282,44 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
   }
 
   void actionUploadToServer() async {
+    setState(() => isUploadStart = true);
     Database db = await dbHelper.initDb();
 
+    List<Map<String, dynamic>> getRow = await db.query(
+      'fatrans',
+      where: 'id = ?',
+      whereArgs: [idFaTrans],
+    );
+
+    var getFirst = getRow.first;
+
     Map<String, dynamic> map = {};
-    map['idFaTrans'] = idFaTrans;
-    map['transId'] = transId == 0 ? "" : transId;
-    map['plantId'] = box.read('plantId');
-    map['transDate'] = dateTime.text;
-    map['manualRef'] = manualRef.text;
-    map['otherRef'] = otherRef.text;
+    map['idFaTrans'] = getFirst['id'];
+    map['transId'] = getFirst['transId'] == 0 ? "" : getFirst['transId'];
+    map['plantId'] = getFirst['plantId'];
+    map['transDate'] = getFirst['transDate'];
+    map['manualRef'] = getFirst['manualRef'];
+    map['otherRef'] = getFirst['otherRef'];
     map['transferType'] = transferTypeCode;
-    map['oldLocId'] = box.read('intransitId');
-    map['newLocId'] = box.read('locationId');
-    map['isApproved'] = false;
-    map['isVoid'] = false;
-    // development purpose use 0
+    map['oldLocId'] = getFirst['oldLocId'];
+    map['newLocId'] = getFirst['newLocId'];
+    map['isApproved'] = getFirst['isApproved'] == 0 ? false : true;
+    map['isVoid'] = getFirst['isVoid'] == 0 ? false : true;
     map['userId'] = box.read('userId');
 
     final serviceFATrans = FATransService();
     final serviceFATransItem = FATransItemService();
 
+    // print(map);
+
     // ignore: avoid_print
-    print(map);
+    // print("Before FATrans : $map");
 
     serviceFATrans.create(map).then((value) async {
-      // print("FATrans ${value.body}");
+      // print("After FATrans ${value.body}");
       var res = value.body;
       // ignore: avoid_print
-      print(res);
+      // print(res);
       // if (res['message'].toString().isNotEmpty) {
       Map<String, dynamic> m = {};
       m['transId'] = res['transId'];
@@ -317,6 +330,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
       if (res['transNo'] != null) {
         await db.update("fatrans", m, where: "id = ?", whereArgs: [idFaTrans]);
+        setState(() {
+          transId = res['transId'];
+        });
       }
 
       await db.update(
@@ -345,7 +361,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       List<Map<String, dynamic>> rows = await db.query(
         "fatransitem",
         where: "transLocalId = ? OR transId = ?",
-        whereArgs: [idFaTrans, res['transId']],
+        whereArgs: [idFaTrans, res['transId'] ?? ''],
       );
 
       for (var row in rows) {
@@ -358,8 +374,9 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
         mRow['conStat'] = row['conStatCode'];
         mRow['oldTag'] = '-';
         mRow['newTag'] = '-';
-        // development purpose use 0
         mRow['userId'] = box.read('userId');
+
+        // print(mRow);
 
         serviceFATransItem.create(mRow).then((value) async {
           // print("FATransItem ${value.body.toString()}");
@@ -371,8 +388,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                 content: Text(res['message']),
               ),
             );
-          }
-          if (res['message'] != "") {
+          } else {
             Map<String, dynamic> mItem = {};
             mItem['transItemId'] = res['transItemId'] ?? 0;
             mItem['uploadDate'] =
@@ -391,6 +407,14 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
           }
         });
       }
+
+      setState(() => isUploadStart = false);
+      Get.dialog(
+        const AlertDialog(
+          title: Text("Information"),
+          content: Text("Upload is completed."),
+        ),
+      );
       // }
     });
   }
@@ -501,7 +525,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     newLocFrom.text = box.read('locationCode');
     detailNewLocFrom.text = box.read('locationName');
 
-    oldLocId = box.read('instransitId');
+    oldLocId = box.read('intransitId');
     oldLocFrom.text = box.read('intransitCode');
     detailOldLocFrom.text = box.read('intransitName');
   }

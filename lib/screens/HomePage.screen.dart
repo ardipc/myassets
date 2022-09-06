@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-// import 'package:intl/intl.dart';
 import 'package:myasset/controllers/Home.controller.dart';
 import 'package:myasset/helpers/db.helper.dart';
 import 'package:myasset/widgets/NavDrawer.widget.dart';
@@ -55,25 +54,21 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void showIsiTabel() async {
-    Database db = await dbHelper.initDb();
+    // Database db = await dbHelper.initDb();
     // await db.update(
-    //   "stockopnames",
+    //   "fatrans",
     //   {
-    //     "uploadDate": null,
-    //     "saveDate": null,
-    //     "savedBy": null,
+    //     "saveDate": DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()),
+    //     "savedBy": box.read('userId'),
     //   },
-    //   where: "id = ?",
-    //   whereArgs: [1],
+    //   where: "manualRef = ?",
+    //   whereArgs: ['020/FAMAT'],
     // );
 
-    // List<Map<String, dynamic>> soRows = await db.query(
-    //   'stockopnames',
-    //   columns: ['id', 'uploadDate', 'saveDate'],
-    //   where:
-    //       "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
-    //   // where: 'id in (1,2)',
-    // );
+    // List<Map<String, dynamic>> soRows = await db
+    //     .query('fatrans', where: "manualRef = ?", whereArgs: ['020/FAMAT']
+    //         // where: 'id in (1,2)',
+    //         );
 
     // ignore: avoid_print
     // print("Length : ${soRows.length}");
@@ -89,25 +84,25 @@ class _MyHomePageState extends State<MyHomePage> {
     // // ignore: avoid_print
     // print("====================================================");
 
-    List<Map<String, dynamic>> maps = await db.query(
-      'fatrans',
-      columns: ['id', 'manualRef', 'transferTypeCode', 'transId', 'transNo'],
-      where:
-          "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
-    );
+    // List<Map<String, dynamic>> maps = await db.query(
+    //   'fatrans',
+    //   columns: ['id', 'manualRef', 'transferTypeCode', 'transId', 'transNo'],
+    //   // where:
+    //   //     "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
+    // );
     // ignore: avoid_print
-    print(maps);
+    // print(maps);
     // ignore: avoid_print
     // print("====================================================");
 
-    List<Map<String, dynamic>> rows = await db.query(
-      'fatransitem',
-      columns: ['id', 'tagNo', 'transLocalId', 'transId', 'transItemId'],
-      where:
-          "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
-    );
+    // List<Map<String, dynamic>> rows = await db.query(
+    //   'fatransitem',
+    //   columns: ['id', 'tagNo', 'transLocalId', 'transId', 'transItemId'],
+    //   // where:
+    //   //     "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
+    // );
     // ignore: avoid_print
-    print(rows);
+    // print(rows);
     // ignore: avoid_print`
     // print("====================================================");
   }

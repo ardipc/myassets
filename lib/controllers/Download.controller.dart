@@ -326,7 +326,7 @@ class DownloadController extends GetxController {
           "transDate": periods[i]['transDate'].toString().replaceAll('T', ' '),
           "transNo": periods[i]['transNo'],
           "manualRef": periods[i]['manualRef'],
-          "otherRef": periods[i]['otherRef'],
+          "otherRef": periods[i]['otherRef'] ?? '',
           "transferTypeCode": periods[i]['transferTypeCode'],
           "oldLocId": periods[i]['oldLocId'],
           "oldLocCode": "",

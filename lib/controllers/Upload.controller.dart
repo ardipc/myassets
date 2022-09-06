@@ -154,7 +154,6 @@ class UploadController extends GetxController {
       where:
           "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
     );
-    // print(transRows);
 
     var faTransService = FATransService();
     var faTransItemService = FATransItemService();
@@ -165,7 +164,7 @@ class UploadController extends GetxController {
         'fatransitem',
         where:
             "(transLocalId = ? OR transId = ?) AND (uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
-        whereArgs: [data['id'], data['transId']],
+        whereArgs: [data['id'], data['transId'] ?? ''],
       );
       for (var r in transItemRows) {
         // print(r);
@@ -192,6 +191,13 @@ class UploadController extends GetxController {
           var res = value.body;
           // print(res);
           if (res['message'] != "") {
+            Get.dialog(
+              AlertDialog(
+                title: const Text("Infomation"),
+                content: Text(res['message']),
+              ),
+            );
+          } else {
             Map<String, dynamic> mu = {};
             mu['transItemId'] = res['transItemId'];
             mu['uploadDate'] =
@@ -209,7 +215,7 @@ class UploadController extends GetxController {
       }
 
       Map<String, dynamic> map = {};
-      map['transId'] = data['transId'] == 0 ? "" : data['transId'];
+      map['transId'] = data['transId'] == 0 ? "" : (data['transId'] ?? '');
       map['plantId'] = data['plantId'];
       map['transDate'] = data['transDate'];
       map['manualRef'] = data['manualRef'];
@@ -226,9 +232,10 @@ class UploadController extends GetxController {
       await faTransService.create(map).then((value) async {
         var res = value.body;
         // print(res);
-        if (res['message'] != "") {
+        if (res['message'] == "") {
           Map<String, dynamic> m = {};
           m['transId'] = res['transId'];
+          m['transNo'] = res['transNo'];
           m['uploadDate'] =
               DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
           m['uploadBy'] = box.read('userId').toString();
