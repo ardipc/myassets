@@ -82,7 +82,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     Database db = await dbHelper.initDb();
     Map<String, dynamic> map = {};
     map['isApproved'] = 1;
-    map['saveDate'] = DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
+    map['saveDate'] = DateFormat('yyyy-MM-dd kk:mm:ss').format(DateTime.now());
     map['savedBy'] = box.read('username');
 
     int exec = await db.update(
@@ -100,7 +100,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
     Database db = await dbHelper.initDb();
 
     DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
+    String formattedDate = DateFormat('yyyy-MM-dd kk:mm:ss').format(now);
 
     bool isExistManualRef = await isFindAndCheckManualRef(manualRef.text);
 
@@ -143,7 +143,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
               TextButton(
                 onPressed: () {
                   Get.back();
-                  Get.back();
+                  // Get.back();
                 },
                 child: const Text("Close"),
               ),
@@ -178,7 +178,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                 TextButton(
                   onPressed: () {
                     Get.back();
-                    Get.back();
+                    // Get.back();
                   },
                   child: const Text("Close"),
                 ),
@@ -202,7 +202,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
               TextButton(
                 onPressed: () {
                   Get.back();
-                  Get.back();
+                  // Get.back();
                 },
                 child: const Text("Close"),
               ),
@@ -277,7 +277,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
             " " +
             now.hour.toString().padLeft(2, "0") +
             ":" +
-            now.minute.toString().padLeft(2, "0");
+            now.minute.toString().padLeft(2, "0") +
+            ":00";
       });
     }
   }
@@ -321,7 +322,8 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       Map<String, dynamic> m = {};
       m['transId'] = res['transId'];
       m['transNo'] = res['transNo'];
-      m['uploadDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+      m['uploadDate'] =
+          DateFormat("yyyy-MM-dd kk:mm:ss").format(DateTime.now());
       m['uploadBy'] = box.read('userId');
       m['uploadMessage'] = res['message'];
 
@@ -388,7 +390,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
             Map<String, dynamic> mItem = {};
             mItem['transItemId'] = res['transItemId'] ?? 0;
             mItem['uploadDate'] =
-                DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+                DateFormat("yyyy-MM-dd kk:mm:ss").format(DateTime.now());
             mItem['uploadBy'] = box.read('userId');
             mItem['uploadMessage'] = res['message'];
 
@@ -400,17 +402,18 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
                 row['id'],
               ],
             );
+
+            setState(() => isUploadStart = false);
+            Get.dialog(
+              const AlertDialog(
+                title: Text("Information"),
+                content: Text("Upload is completed."),
+              ),
+            );
           }
         });
       }
       // }
-      setState(() => isUploadStart = false);
-      Get.dialog(
-        const AlertDialog(
-          title: Text("Information"),
-          content: Text("Upload is completed."),
-        ),
-      );
     });
   }
 
@@ -550,7 +553,7 @@ class _TransferOutItemScreenState extends State<TransferOutItemScreen> {
       fetchData(Get.arguments[0]);
     } else {
       DateTime now = DateTime.now();
-      String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
+      String formattedDate = DateFormat('yyyy-MM-dd kk:mm:ss').format(now);
       dateTime.text = formattedDate;
     }
     newLocFrom.text = box.read('plantIntransitCode');

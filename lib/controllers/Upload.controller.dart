@@ -91,7 +91,7 @@ class UploadController extends GetxController {
           Map<String, dynamic> m = {};
           m['stockOpnameId'] = res['stockOpnameId'];
           m['uploadDate'] =
-              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+              DateFormat("yyyy-MM-dd kk:mm:ss").format(DateTime.now());
           m['uploadBy'] = box.read('userId').toString();
           m['uploadMessage'] = res['message'];
           await db.update(
@@ -129,7 +129,7 @@ class UploadController extends GetxController {
         if (res['status'] == true) {
           Map<String, dynamic> m = {};
           m['uploadDate'] =
-              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+              DateFormat("yyyy-MM-dd kk:mm:ss").format(DateTime.now());
           m['uploadBy'] = box.read('userId').toString();
           m['uploadMessage'] = res['message'];
           await db.update(
@@ -149,70 +149,21 @@ class UploadController extends GetxController {
     }
 
     listProgress.add(rowProgress("Uploading Transaction data..."));
+    // List<Map<String, dynamic>> trans =
+    //     await db.query('fatrans', where: "isApproved = 1");
     List<Map<String, dynamic>> transRows = await db.query(
       'fatrans',
       where:
           "(uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
     );
 
+    // print(transRows);
+
     var faTransService = FATransService();
     var faTransItemService = FATransItemService();
     for (var data in transRows) {
       // print(data);
       // print("=====");
-      List<Map<String, dynamic>> transItemRows = await db.query(
-        'fatransitem',
-        where:
-            "(transLocalId = ? OR transId = ?) AND (uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
-        whereArgs: [data['id'], data['transId'] ?? ''],
-      );
-      for (var r in transItemRows) {
-        // print(r);
-        // print("=====");
-
-        listProgress.add(rowProgress(
-            "Uploading Item Transaction ID ${data['id'].toString()}..."));
-
-        Map<String, dynamic> m = {};
-        m['transLocalId'] = r['transLocalId'] ?? '';
-        m['transItemId'] = r['transItemId'] == 0 ? '' : r['transItemId'];
-        m['transId'] = data['id'];
-        m['faId'] = r['faId'];
-        m['remarks'] = r['remarks'];
-        m['conStat'] = r['conStatCode'];
-        m['oldTag'] = r['oldTag'] ?? '';
-        m['newTag'] = r['newTag'] ?? '';
-        m['userId'] = box.read('userId');
-
-        // print(m);
-        // print("=====");
-
-        await faTransItemService.create(m).then((value) async {
-          var res = value.body;
-          // print(res);
-          if (res['message'] != "") {
-            Get.dialog(
-              AlertDialog(
-                title: const Text("Infomation"),
-                content: Text(res['message']),
-              ),
-            );
-          } else {
-            Map<String, dynamic> mu = {};
-            mu['transItemId'] = res['transItemId'];
-            mu['uploadDate'] =
-                DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
-            mu['uploadBy'] = box.read('userId').toString();
-            mu['uploadMessage'] = res['message'] ?? '';
-            await db.update(
-              'fatransitem',
-              mu,
-              where: "id = ?",
-              whereArgs: [r['id']],
-            );
-          }
-        });
-      }
 
       Map<String, dynamic> map = {};
       map['transId'] = data['transId'] == 0 ? "" : (data['transId'] ?? '');
@@ -231,13 +182,13 @@ class UploadController extends GetxController {
 
       await faTransService.create(map).then((value) async {
         var res = value.body;
-        // print(res);
+        print("FATrans: $res");
         if (res['message'] == "") {
           Map<String, dynamic> m = {};
           m['transId'] = res['transId'];
           m['transNo'] = res['transNo'];
           m['uploadDate'] =
-              DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+              DateFormat("yyyy-MM-dd kk:mm:ss").format(DateTime.now());
           m['uploadBy'] = box.read('userId').toString();
           m['uploadMessage'] = res['message'];
           await db.update(
@@ -248,8 +199,75 @@ class UploadController extends GetxController {
               data['id'],
             ],
           );
+
+          await db.update(
+            'fatransitem',
+            {"transId": res['transId']},
+            where:
+                "transLocalId = ? AND (uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
+            whereArgs: [data['id']],
+          );
+
+          List<Map<String, dynamic>> transItemRows = await db.query(
+            'fatransitem',
+            where:
+                "(transLocalId = ? OR transId = ?) AND (uploadDate < saveDate OR uploadDate is NULL) AND saveDate is NOT NULL",
+            whereArgs: [
+              data['id'],
+              data['transId'] == 0 ? '' : (data['transId'] ?? '')
+            ],
+          );
+          // print("transItemRows: $transItemRows");
+
+          for (var r in transItemRows) {
+            // print(r);
+            // print("=====");
+
+            listProgress.add(rowProgress(
+                "Uploading Item Transaction ID ${data['id'].toString()}..."));
+
+            Map<String, dynamic> m = {};
+            m['transLocalId'] = r['transLocalId'] ?? '';
+            m['transItemId'] = r['transItemId'] == 0 ? '' : r['transItemId'];
+            m['transId'] = r['transId'];
+            m['faId'] = r['faId'];
+            m['remarks'] = r['remarks'];
+            m['conStat'] = r['conStatCode'];
+            m['oldTag'] = r['oldTag'] ?? '';
+            m['newTag'] = r['newTag'] ?? '';
+            m['userId'] = box.read('userId');
+
+            // print("mapItem: $m");
+            // print("=====");
+
+            await faTransItemService.create(m).then((value) async {
+              var res = value.body;
+              // print(res);
+              if (res['message'] != "") {
+                listProgress.add(rowProgress(
+                    "Item Transaction ID ${data['id'].toString()} : ${res['message']}."));
+              } else {
+                Map<String, dynamic> mu = {};
+                mu['transItemId'] = res['transItemId'];
+                mu['uploadDate'] =
+                    DateFormat("yyyy-MM-dd kk:mm:ss").format(DateTime.now());
+                mu['uploadBy'] = box.read('userId').toString();
+                mu['uploadMessage'] = res['message'] ?? '';
+                await db.update(
+                  'fatransitem',
+                  mu,
+                  where: "id = ?",
+                  whereArgs: [r['id']],
+                );
+              }
+            });
+          }
+
           listProgress.add(
               rowProgress("Transaction ID ${data['id'].toString()} uploaded."));
+        } else {
+          listProgress.add(rowProgress(
+              "Transaction ID ${data['id'].toString()} : ${res['message']}."));
         }
       });
     }

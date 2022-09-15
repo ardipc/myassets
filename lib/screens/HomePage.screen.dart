@@ -54,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void showIsiTabel() async {
-    // Database db = await dbHelper.initDb();
+    Database db = await dbHelper.initDb();
     // await db.update(
     //   "fatrans",
     //   {
@@ -65,14 +65,26 @@ class _MyHomePageState extends State<MyHomePage> {
     //   whereArgs: ['020/FAMAT'],
     // );
 
-    // List<Map<String, dynamic>> soRows = await db
-    //     .query('fatrans', where: "manualRef = ?", whereArgs: ['020/FAMAT']
-    //         // where: 'id in (1,2)',
-    //         );
+    List<Map<String, dynamic>> soRows = await db.query(
+      'fatrans',
+      columns: ['id', 'transId', 'transferTypeCode'],
+      where: "manualRef = ? OR manualRef = ?",
+      whereArgs: ['005/FAMAT', '021/FAMAT'],
+    );
 
     // ignore: avoid_print
-    // print("Length : ${soRows.length}");
-    // print("Rows : $soRows");
+    print("Length : ${soRows.length}");
+    print("Rows : $soRows");
+
+    print("-===============-");
+
+    List<Map<String, dynamic>> soItemRows = await db.query(
+      'fatransitem',
+      columns: ['id', 'transLocalId', 'transId'],
+    );
+    print("Length : ${soItemRows.length}");
+    print("Rows : $soItemRows");
+    print("-===============-");
 
     // List<Map<String, dynamic>> so = await db.query(
     //   'fatransitem',

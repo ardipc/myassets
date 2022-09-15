@@ -81,8 +81,10 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
     Database db = await dbHelper.initDb();
     Map<String, dynamic> map = {};
     map['isApproved'] = 1;
-    map['saveDate'] = DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
+    map['saveDate'] = DateFormat('yyyy-MM-dd kk:mm:ss').format(DateTime.now());
     map['savedBy'] = box.read('userId');
+
+    print(map);
 
     int exec = await db.update(
       "fatrans",
@@ -90,6 +92,10 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       where: "id = ?",
       whereArgs: [idFaTrans],
     );
+
+    print(idFaTrans);
+    print(exec);
+
     if (exec > 0) {
       Get.back();
     }
@@ -97,7 +103,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
 
   Future<void> actionSave() async {
     DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
+    String formattedDate = DateFormat('yyyy-MM-dd kk:mm:ss').format(now);
 
     bool isExistManualRef = await isFindAndCheckManualRef(manualRef.text);
 
@@ -142,7 +148,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
               TextButton(
                 onPressed: () {
                   Get.back();
-                  Get.back();
+                  // Get.back();
                 },
                 child: const Text("Close"),
               ),
@@ -177,7 +183,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                 TextButton(
                   onPressed: () {
                     Get.back();
-                    Get.back();
+                    // Get.back();
                   },
                   child: const Text("Close"),
                 ),
@@ -201,7 +207,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
               TextButton(
                 onPressed: () {
                   Get.back();
-                  Get.back();
+                  // Get.back();
                 },
                 child: const Text("Close"),
               ),
@@ -276,7 +282,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
             " " +
             now.hour.toString().padLeft(2, "0") +
             ":" +
-            now.minute.toString().padLeft(2, "0");
+            now.minute.toString().padLeft(2, "0") +
+            ":00";
       });
     }
   }
@@ -324,7 +331,8 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       Map<String, dynamic> m = {};
       m['transId'] = res['transId'];
       m['transNo'] = res['transNo'];
-      m['uploadDate'] = DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+      m['uploadDate'] =
+          DateFormat("yyyy-MM-dd kk:mm:ss").format(DateTime.now());
       m['uploadBy'] = box.read('userId');
       m['uploadMessage'] = res['message'];
 
@@ -392,7 +400,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
             Map<String, dynamic> mItem = {};
             mItem['transItemId'] = res['transItemId'] ?? 0;
             mItem['uploadDate'] =
-                DateFormat("yyyy-MM-dd kk:mm").format(DateTime.now());
+                DateFormat("yyyy-MM-dd kk:mm:ss").format(DateTime.now());
             mItem['uploadBy'] = box.read('userId');
             mItem['uploadMessage'] = res['message'];
 
@@ -404,17 +412,17 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
                 row['id'],
               ],
             );
+
+            setState(() => isUploadStart = false);
+            Get.dialog(
+              const AlertDialog(
+                title: Text("Information"),
+                content: Text("Upload is completed."),
+              ),
+            );
           }
         });
       }
-
-      setState(() => isUploadStart = false);
-      Get.dialog(
-        const AlertDialog(
-          title: Text("Information"),
-          content: Text("Upload is completed."),
-        ),
-      );
       // }
     });
   }
@@ -519,7 +527,7 @@ class _TransferInItemScreenState extends State<TransferInItemScreen> {
       fetchData(Get.arguments[0]);
     } else {
       DateTime now = DateTime.now();
-      String formattedDate = DateFormat('yyyy-MM-dd kk:mm').format(now);
+      String formattedDate = DateFormat('yyyy-MM-dd kk:mm:ss').format(now);
       dateTime.text = formattedDate;
     }
     newLocFrom.text = box.read('locationCode');
